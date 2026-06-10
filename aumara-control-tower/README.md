@@ -65,3 +65,21 @@ No magic. No waiting. No chaos.
 
 ## Review Notes
 ```
+
+---
+
+## Action Log
+
+### Tesla mobility pilot outreach
+
+Status: sent.
+
+Channel: Gmail to Tesla Bilbao Sales.
+
+Purpose: open a commercial route for AUMARA / EL CID Tesla vehicle pilot in Costa Blanca.
+
+Requested route: business purchase, company leasing, fleet terms, hospitality-use structure, and charging / Wall Connector coordination.
+
+Initial target: 2 to 4 Tesla Model Y vehicles, with possible expansion to 6.
+
+Next step: wait for reply; if no response, call Tesla Bilbao sales and ask for the correct business / fleet contact.
