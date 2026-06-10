@@ -84,6 +84,8 @@ Initial target: 2 to 4 Tesla Model Y vehicles, with possible expansion to 6.
 
 Follow-up rule: no outbound calls for now. Continue only by written materials and inbound Tesla reply.
 
-Prepared support material: AUMARA Tesla Mobility Pilot Deck v0.1, 9-slide discussion deck.
+Support material sent: AUMARA Tesla Mobility Pilot Deck v0.1, 9-slide discussion deck.
 
-Next step: if Tesla replies, send the deck or adapt it into a shorter PDF / one-pager depending on the recipient.
+Current state: written outreach sent; deck sent as attachment; waiting for inbound Tesla reply.
+
+Next step: if Tesla replies, route the conversation to the correct Tesla Spain fleet / business contact and adapt the deck into a shorter one-pager if requested.
