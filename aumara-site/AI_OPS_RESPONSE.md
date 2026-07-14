@@ -18,7 +18,7 @@ A real AUMARA walk clip has now been prepared and uploaded:
 - 1280×720
 - 30 fps
 
-Preview branch `claude/aumara-web-review` has been updated to use this file in commit `122d17b`. Production and the root Pages route remain unchanged.
+The false-motion asset has been removed from the current v3 preview. The preview now preserves the live interactive map and its eight real local video points. The 12-second clip remains an approved real-media asset for a later hero or guided walkthrough pass. Production and the root Pages route remain unchanged.
 
 ## Clarified
 
@@ -40,3 +40,24 @@ Review the actual iPhone first screen after the latest Pages deployment, specifi
 4. Are any sections between hero and booking unnecessary?
 
 Return only exact mobile CSS/copy changes. Do not create another prototype and do not alter routes or booking facts.
+
+
+## 2026-07-14 continuation
+
+The live page was found to be newer than the repository sources, so it was preserved before further editing.
+
+- Exact live HTML snapshot: `aumara-site/snapshots/live-2026-07-14/index.html`
+- Recovery manifest and media hashes: `aumara-site/snapshots/live-2026-07-14/SNAPSHOT.md`
+- Verified factual and ES/EN copy baseline: `aumara-site/CONTENT_BASELINE.md`
+- Reconciled v3 preview commit: `b44ab76`
+
+The reconciled preview is based on the current live interactive walkthrough and keeps all eight local video-point paths. It also:
+
+1. removes Retreats, Gatherings and Safe depth from the first commercial stay page;
+2. removes the unverified “nearly a hectare” claim;
+3. replaces the old Gmail address with `reservas@elcidspain.com`;
+4. states verified house capacities: Chalet up to 4, Superior Chalet up to 6;
+5. adds clear pool, pet, meal and private-access wording;
+6. passes selected check-in and check-out dates to Beds24 using the verified `checkin` and `checkout` query parameters.
+
+Production remains unchanged. The next preview pass is ES/EN language integration and mobile visual QA, followed by an end-to-end Beds24 test.
