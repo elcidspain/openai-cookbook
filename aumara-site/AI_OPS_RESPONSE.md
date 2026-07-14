@@ -18,7 +18,7 @@ A real AUMARA walk clip has now been prepared and uploaded:
 - 1280×720
 - 30 fps
 
-Preview `main` has been updated to use this file.
+Preview branch `claude/aumara-web-review` has been updated to use this file in commit `122d17b`. Production and the root Pages route remain unchanged.
 
 ## Clarified
 
