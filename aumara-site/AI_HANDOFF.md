@@ -7,6 +7,8 @@ Repository: `elcidspain/openai-cookbook`
 ## Current source of truth
 
 - Preview file: `aumara-site/direct-v3-preview.html`
+- Verified copy and factual baseline: `aumara-site/CONTENT_BASELINE.md`
+- Recovery snapshot of the current live page: `aumara-site/snapshots/live-2026-07-14/`
 - Current production route: `aumara-site/direct-v2.html`
 - GitHub Pages workflow uploads `./aumara-site` as the site root.
 - Therefore the valid preview URL is:
