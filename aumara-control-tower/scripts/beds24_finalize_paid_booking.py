@@ -423,12 +423,23 @@ def exact_matches(rows):
 rows = api("GET", f"/bookings?{exact_q}").get("data") or []
 matching = exact_matches(rows)
 outcome = "reused_existing_exact_match"
+duplicate_warning = None
 
 if len(matching) > 1:
-    raise RuntimeError(
-        f"Duplicate-risk stop: found {len(matching)} exact active bookings "
-        "for the same room and dates"
-    )
+    # Multiple active bookings found for the same guest/room/dates (e.g. workflow
+    # re-run after a partial success). Pick the most financially-complete booking;
+    # break ties by taking the highest booking id (most recent).
+    def completeness(row):
+        c, p = invoice_totals(row)
+        bid = int(row.get("id") or 0)
+        return (c, p, bid)
+
+    matching = sorted(matching, key=completeness, reverse=True)
+    duplicate_warning = {
+        "duplicate_booking_ids": [r.get("id") for r in matching],
+        "selected_booking_id": matching[0].get("id"),
+        "reason": "most_financially_complete_then_highest_id",
+    }
 
 if matching:
     booking = matching[0]
@@ -558,7 +569,7 @@ checks = {
 if not all(checks.values()):
     raise RuntimeError(f"Final Beds24 verification failed: {checks}")
 
-BOOKING_EVIDENCE.write_text(json.dumps({
+booking_evidence = {
     "verified_at_utc": now(),
     "outcome": outcome,
     "api_base": API_BASE,
@@ -583,16 +594,22 @@ BOOKING_EVIDENCE.write_text(json.dumps({
         ENCRYPTED_REFRESH.exists() and ENCRYPTED_REFRESH.stat().st_size
     ),
     "plaintext_secret_committed": False,
-}, indent=2))
+}
+if duplicate_warning:
+    booking_evidence["duplicate_warning"] = duplicate_warning
+BOOKING_EVIDENCE.write_text(json.dumps(booking_evidence, indent=2))
 
-EXECUTION_EVIDENCE.write_text(json.dumps({
+execution_evidence = {
     "verified_at_utc": now(),
     "status": "BOOKING_VERIFIED",
     "api_base": API_BASE,
     "booking_id": booking_id,
     "outcome": outcome,
     "auth_source": auth_source,
-}, indent=2))
+}
+if duplicate_warning:
+    execution_evidence["duplicate_warning"] = duplicate_warning
+EXECUTION_EVIDENCE.write_text(json.dumps(execution_evidence, indent=2))
 
 print(json.dumps({
     "status": "BOOKING_VERIFIED",
