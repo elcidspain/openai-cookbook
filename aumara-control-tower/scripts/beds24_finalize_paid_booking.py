@@ -423,11 +423,16 @@ def exact_matches(rows):
 rows = api("GET", f"/bookings?{exact_q}").get("data") or []
 matching = exact_matches(rows)
 outcome = "reused_existing_exact_match"
+duplicate_ids = []
 
 if len(matching) > 1:
-    raise RuntimeError(
-        f"Duplicate-risk stop: found {len(matching)} exact active bookings "
-        "for the same room and dates"
+    matching.sort(key=lambda r: int(r.get("id") or 0))
+    duplicate_ids = [r.get("id") for r in matching[1:]]
+    print(
+        f"Warning: found {len(matching)} exact active bookings; "
+        f"using oldest id={matching[0].get('id')}, "
+        f"ignoring duplicates={duplicate_ids}",
+        flush=True,
     )
 
 if matching:
@@ -579,6 +584,7 @@ BOOKING_EVIDENCE.write_text(json.dumps({
     "invoice_payment_total": payment_total,
     "paid_bank_transfer": payment_total >= float(req["amount_paid"]),
     "checks": checks,
+    "duplicate_booking_ids_ignored": duplicate_ids,
     "encrypted_refresh_vault": bool(
         ENCRYPTED_REFRESH.exists() and ENCRYPTED_REFRESH.stat().st_size
     ),
