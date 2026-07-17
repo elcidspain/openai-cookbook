@@ -35,6 +35,7 @@ def load_request_id():
 
 
 def normalize_credential(value):
+    """Strip accidental secret wrappers without ever logging the credential."""
     normalized = (value or "").strip()
     while (
         len(normalized) >= 2

@@ -77,7 +77,7 @@ jobs:
           fi
 
       - name: Fail if booking execution did not complete
-        if: steps.execute.conclusion != 'success'
+        if: steps.execute.outcome != 'success'
         shell: bash
         run: |
           echo 'Beds24 booking execution failed. Evidence was persisted for diagnosis.' >&2

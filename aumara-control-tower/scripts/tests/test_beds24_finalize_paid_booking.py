@@ -16,6 +16,10 @@ class FinalizePaidBookingTests(unittest.TestCase):
         value = '  "  refresh-123\n\t\u200b  "  '
         self.assertEqual(MODULE.normalize_credential(value), "refresh-123")
 
+    def test_normalize_credential_strips_nested_quote_wrappers(self):
+        value = "  '\"refresh-123\"'  "
+        self.assertEqual(MODULE.normalize_credential(value), "refresh-123")
+
     def test_resolve_refresh_token_requires_secret(self):
         with self.assertRaisesRegex(
             SystemExit, "Missing GitHub Actions secret B24_TOKEN_CREDENTIAL"
