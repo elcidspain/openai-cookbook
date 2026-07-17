@@ -58,6 +58,16 @@ def resolve_refresh_token(env=None):
     return refresh_token
 
 
+def parse_json_response(raw, status, path):
+    try:
+        return json.loads(raw) if raw else {}
+    except json.JSONDecodeError:
+        return {
+            "error": f"Beds24 returned non-JSON response for {path} (HTTP {status})",
+            "raw": raw[:500],
+        }
+
+
 def request_json(method, path, headers=None):
     request = urllib.request.Request(
         f"{API_BASE}{path}",
@@ -67,14 +77,10 @@ def request_json(method, path, headers=None):
     try:
         with urllib.request.urlopen(request, timeout=45) as response:
             raw = response.read().decode("utf-8", "replace")
-            return response.status, json.loads(raw) if raw else {}
+            return response.status, parse_json_response(raw, response.status, path)
     except urllib.error.HTTPError as exc:
         raw = exc.read().decode("utf-8", "replace")
-        try:
-            parsed = json.loads(raw) if raw else {}
-        except Exception:
-            parsed = {"raw": raw[:500]}
-        return exc.code, parsed
+        return exc.code, parse_json_response(raw, exc.code, path)
 
 
 def safe(obj):
@@ -119,6 +125,7 @@ def fetch_properties(access_token):
     data = payload.get("data") if isinstance(payload, dict) else None
     if isinstance(data, list):
         return data
+    # Beds24 collection endpoints can also return a top-level array.
     if isinstance(payload, list):
         return payload
     return []

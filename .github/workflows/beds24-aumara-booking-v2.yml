@@ -30,9 +30,13 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p aumara-control-tower/evidence
+          set +e
           python aumara-control-tower/scripts/beds24_finalize_paid_booking.py --auth-probe-only \
             > aumara-control-tower/evidence/beds24-auth-probe-log.txt 2>&1
+          RC=$?
+          set -e
           cat aumara-control-tower/evidence/beds24-auth-probe-log.txt
+          exit "$RC"
 
       - name: Finalize and verify paid AUMARA booking
         id: execute
