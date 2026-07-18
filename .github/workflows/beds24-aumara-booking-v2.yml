@@ -1,21 +1,16 @@
-name: Beds24 AUMARA credential check
+name: Beds24 AUMARA booking bridge v2 (retired)
 
 on:
   workflow_dispatch:
-  pull_request:
-    branches: [main]
-    paths:
-      - '.github/workflows/beds24-aumara-booking-v2.yml'
-      - 'aumara-control-tower/scripts/beds24_auth_check.py'
 
 permissions:
   contents: read
 
-concurrency:
-  group: beds24-aumara-credential-check-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
-  validate:
-    name: Validate existing B24 credential safely
-    runs-on
+  retired:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Retired execution path
+        run: |
+          echo 'This workflow is retired.'
+          echo 'Use .github/workflows/beds24-auth-check.yml for the read-only B24 credential check.'

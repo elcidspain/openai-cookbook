@@ -11,6 +11,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: beds24-auth-check-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -18,4 +22,30 @@ jobs:
       B24_TOKEN_CREDENTIAL: ${{ secrets.B24_TOKEN_CREDENTIAL }}
       BEDS24_ACCESS_TOKEN_FILE: /tmp/beds24-access-token
     steps:
-      - uses: actions/checkout@v
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Validate secret presence
+        run: python aumara-control-tower/scripts/beds24_auth_check.py validate
+
+      - name: Exchange refresh credential for access token
+        run: python aumara-control-tower/scripts/beds24_auth_check.py exchange
+
+      - name: Run read-only authentication probe
+        run: python aumara-control-tower/scripts/beds24_auth_check.py probe
+
+      - name: Upload authentication evidence artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: beds24-authentication-evidence
+          path: aumara-control-tower/evidence/beds24-auth-check.json
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Cleanup temporary access token
+        if: always()
+        run: rm -f "$BEDS24_ACCESS_TOKEN_FILE"
