@@ -1,22 +1,13 @@
 name: Beds24 credential check
-
 on:
   workflow_dispatch:
   pull_request:
-    branches: [main]
-    paths:
-      - '.github/workflows/beds24-auth-check.yml'
-
-permissions:
-  contents: read
-
 jobs:
   validate:
     runs-on: ubuntu-latest
     env:
       B24_TOKEN_CREDENTIAL: ${{ secrets.B24_TOKEN_CREDENTIAL }}
+      BEDS24_ACCESS_TOKEN_FILE: /tmp/beds24-access-token
     steps:
-      - name: Validate existing Beds24 credential
-        shell: bash
-        run: |
-          set -
+      - uses: actions/checkout@v4
+      - run: python aumara-control-tower/scripts/beds24_auth_check.py validate && python aumara-control-tower
