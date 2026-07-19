@@ -1,4 +1,7 @@
 const API_BASE = 'https://api.beds24.com/v2';
+export const DEFAULT_MESSAGE_MAX_AGE = 999;
+const ERROR_SNIPPET_LIMIT = 300;
+const MAX_MESSAGE_LENGTH = 5000;
 
 export class Beds24ApiError extends Error {
   constructor(message, status, details = null) {
@@ -10,7 +13,7 @@ export class Beds24ApiError extends Error {
 }
 
 function normalizeCredential(value) {
-  return String(value || '').trim().replace(/\s+/g, '');
+  return String(value || '').trim();
 }
 
 function credential(name) {
@@ -52,7 +55,8 @@ async function requestBeds24({ method, path, headers = {}, body }) {
     try {
       parsed = JSON.parse(raw);
     } catch {
-      parsed = { raw: raw.slice(0, 300) };
+      // Keep error payload small to avoid echoing large upstream responses.
+      parsed = { raw: raw.slice(0, ERROR_SNIPPET_LIMIT) };
     }
   }
 
@@ -98,7 +102,7 @@ export async function listBookings(params = {}) {
   return rows(response, 'Booking');
 }
 
-export async function listBookingMessages({ bookingId, maxAge = 999 }) {
+export async function listBookingMessages({ bookingId, maxAge = DEFAULT_MESSAGE_MAX_AGE }) {
   const id = Number(bookingId);
   if (!Number.isFinite(id) || id <= 0) throw new Error('bookingId must be a positive number');
   const response = await requestBeds24({
@@ -129,10 +133,12 @@ export async function sendGuestMessage({ bookingId, message, dedupe = true }) {
   if (!Number.isFinite(id) || id <= 0) throw new Error('bookingId must be a positive number');
   const text = String(message || '').trim();
   if (!text) throw new Error('message is required');
-  if (text.length > 5000) throw new Error('message must be 5000 characters or less');
+  if (text.length > MAX_MESSAGE_LENGTH) {
+    throw new Error(`message must be ${MAX_MESSAGE_LENGTH} characters or less`);
+  }
 
   if (dedupe) {
-    const messages = await listBookingMessages({ bookingId: id, maxAge: 999 });
+    const messages = await listBookingMessages({ bookingId: id, maxAge: DEFAULT_MESSAGE_MAX_AGE });
     if (hasDuplicateHostMessage(messages, text)) {
       return {
         sent: false,
@@ -147,6 +153,7 @@ export async function sendGuestMessage({ bookingId, message, dedupe = true }) {
     method: 'POST',
     path: '/bookings/messages',
     headers: { token },
+    // Beds24 expects an array of message objects, even for one message.
     body: [{ bookingId: id, message: text }]
   });
   return {

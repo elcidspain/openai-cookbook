@@ -1,7 +1,13 @@
 import 'dotenv/config';
 import http from 'node:http';
 import { sendMail, guestAccessEmail } from './mailer.mjs';
-import { Beds24ApiError, listBookingMessages, listBookings, sendGuestMessage } from './beds24.mjs';
+import {
+  Beds24ApiError,
+  DEFAULT_MESSAGE_MAX_AGE,
+  listBookingMessages,
+  listBookings,
+  sendGuestMessage
+} from './beds24.mjs';
 
 const PORT = Number(process.env.PORT || 8787);
 const TOKEN = process.env.AUMARA_WEBHOOK_TOKEN || '';
@@ -56,7 +62,7 @@ const server = http.createServer(async (req, res) => {
       if (!Number.isFinite(bookingId) || bookingId <= 0) {
         return json(res, 400, { ok: false, error: 'bookingId must be a positive number' });
       }
-      const maxAge = Number(url.searchParams.get('maxAge') || 999);
+      const maxAge = Number(url.searchParams.get('maxAge') || DEFAULT_MESSAGE_MAX_AGE);
       const messages = await listBookingMessages({ bookingId, maxAge });
       return json(res, 200, { ok: true, provider: 'beds24', count: messages.length, data: messages });
     }
