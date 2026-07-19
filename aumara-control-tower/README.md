@@ -45,10 +45,12 @@ Beds24-style webhook receiver. It accepts flexible fields: `email`, `guestEmail`
 ### GET /beds24/bookings
 
 Reads bookings from Beds24 API V2 (`https://api.beds24.com/v2`) with `BEDS24_TOKEN_CREDENTIAL` only.
+Auth required: `Authorization: ******`.
 
 ### GET /beds24/messages?bookingId=123456
 
 Reads message history for one booking using `BEDS24_TOKEN_CREDENTIAL`.
+Auth required: `Authorization: ******`.
 
 ### POST /beds24/messages
 
@@ -56,6 +58,7 @@ Safely sends a host message with write access:
 - checks duplicates first through read token;
 - exchanges `BEDS24_REFRESH_TOKEN` via `GET /authentication/token`;
 - sends message through `POST /bookings/messages` using short-lived access token.
+Auth required: `Authorization: ******`.
 
 Request body:
 

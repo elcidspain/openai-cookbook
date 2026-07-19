@@ -122,10 +122,14 @@ function hasDuplicateHostMessage(messages, message) {
   if (!expected) return false;
   for (const item of messages) {
     const source = String(item?.source || '').toLowerCase();
-    const text = item?.message || item?.text || item?.body;
+    const text = extractMessageText(item);
     if (source === 'host' && normalizeTextForComparison(text) === expected) return true;
   }
   return false;
+}
+
+export function extractMessageText(payload = {}) {
+  return payload?.message || payload?.text || payload?.body || '';
 }
 
 export async function sendGuestMessage({ bookingId, message, dedupe = true }) {

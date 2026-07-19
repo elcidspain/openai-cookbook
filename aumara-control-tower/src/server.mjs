@@ -4,6 +4,7 @@ import { sendMail, guestAccessEmail } from './mailer.mjs';
 import {
   Beds24ApiError,
   DEFAULT_MESSAGE_MAX_AGE_DAYS,
+  extractMessageText,
   listBookingMessages,
   listBookings,
   sendGuestMessage
@@ -59,8 +60,8 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'GET' && url.pathname === '/beds24/messages') {
       if (!authorised(req)) return json(res, 401, { ok: false, error: 'unauthorised' });
       const bookingId = Number(url.searchParams.get('bookingId'));
-      if (!Number.isFinite(bookingId) || bookingId <= 0) {
-        return json(res, 400, { ok: false, error: 'bookingId must be a positive number' });
+      if (!Number.isInteger(bookingId) || bookingId <= 0) {
+        return json(res, 400, { ok: false, error: 'bookingId must be a positive integer' });
       }
       const maxAge = Number(url.searchParams.get('maxAge') || DEFAULT_MESSAGE_MAX_AGE_DAYS);
       const messages = await listBookingMessages({ bookingId, maxAge });
@@ -71,7 +72,7 @@ const server = http.createServer(async (req, res) => {
       if (!authorised(req)) return json(res, 401, { ok: false, error: 'unauthorised' });
       const body = await readJson(req);
       const bookingId = Number(body.bookingId || body.id);
-      const message = body.message || body.text || body.body;
+      const message = extractMessageText(body);
       if (!Number.isInteger(bookingId) || bookingId <= 0) {
         return json(res, 400, { ok: false, error: 'missing or invalid bookingId' });
       }
@@ -133,7 +134,7 @@ const server = http.createServer(async (req, res) => {
       return json(res, 502, {
         ok: false,
         error: 'beds24_request_failed',
-        upstream_status: error.status
+        upstreamStatus: error.status
       });
     }
     return json(res, 500, { ok: false, error: error.message });
