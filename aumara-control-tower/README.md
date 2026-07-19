@@ -42,6 +42,31 @@ curl -X POST http://localhost:8787/send \
 
 Beds24-style webhook receiver. It accepts flexible fields: `email`, `guestEmail`, `guest_email`, `mail`, `guestName`, `property`, `checkIn`, `checkOut`, `accessCode`, `pin`, `code`, `bookingRef`.
 
+### GET /beds24/bookings
+
+Reads bookings from Beds24 API V2 (`https://api.beds24.com/v2`) with `BEDS24_TOKEN_CREDENTIAL` only.
+
+### GET /beds24/messages?bookingId=123456
+
+Reads message history for one booking using `BEDS24_TOKEN_CREDENTIAL`.
+
+### POST /beds24/messages
+
+Safely sends a host message with write access:
+- checks duplicates first through read token;
+- exchanges `BEDS24_REFRESH_TOKEN` via `GET /authentication/token`;
+- sends message through `POST /bookings/messages` using short-lived access token.
+
+Request body:
+
+```json
+{
+  "bookingId": 123456,
+  "message": "Hello from AUMARA",
+  "dedupe": true
+}
+```
+
 ## Current mail routing
 
 - Provider: Resend

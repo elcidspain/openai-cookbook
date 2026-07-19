@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import http from 'node:http';
 import { sendMail, guestAccessEmail } from './mailer.mjs';
+import { Beds24ApiError, listBookingMessages, listBookings, sendGuestMessage } from './beds24.mjs';
 
 const PORT = Number(process.env.PORT || 8787);
 const TOKEN = process.env.AUMARA_WEBHOOK_TOKEN || '';
@@ -41,6 +42,33 @@ const server = http.createServer(async (req, res) => {
         mail_from: process.env.AUMARA_MAIL_FROM || null,
         reply_to: process.env.AUMARA_MAIL_REPLY_TO || null
       });
+    }
+
+    if (req.method === 'GET' && url.pathname === '/beds24/bookings') {
+      if (!authorised(req)) return json(res, 401, { ok: false, error: 'unauthorised' });
+      const bookings = await listBookings(Object.fromEntries(url.searchParams.entries()));
+      return json(res, 200, { ok: true, provider: 'beds24', count: bookings.length, data: bookings });
+    }
+
+    if (req.method === 'GET' && url.pathname === '/beds24/messages') {
+      if (!authorised(req)) return json(res, 401, { ok: false, error: 'unauthorised' });
+      const bookingId = Number(url.searchParams.get('bookingId'));
+      if (!Number.isFinite(bookingId) || bookingId <= 0) {
+        return json(res, 400, { ok: false, error: 'bookingId must be a positive number' });
+      }
+      const maxAge = Number(url.searchParams.get('maxAge') || 999);
+      const messages = await listBookingMessages({ bookingId, maxAge });
+      return json(res, 200, { ok: true, provider: 'beds24', count: messages.length, data: messages });
+    }
+
+    if (req.method === 'POST' && url.pathname === '/beds24/messages') {
+      if (!authorised(req)) return json(res, 401, { ok: false, error: 'unauthorised' });
+      const body = await readJson(req);
+      const bookingId = Number(body.bookingId || body.id);
+      const message = body.message || body.text || body.body;
+      const dedupe = body.dedupe !== false;
+      const result = await sendGuestMessage({ bookingId, message, dedupe });
+      return json(res, 200, { ok: true, provider: 'beds24', ...result });
     }
 
     if (req.method === 'POST' && url.pathname === '/send') {
@@ -89,6 +117,13 @@ const server = http.createServer(async (req, res) => {
 
     return json(res, 404, { ok: false, error: 'not found' });
   } catch (error) {
+    if (error instanceof Beds24ApiError) {
+      return json(res, 502, {
+        ok: false,
+        error: 'beds24_request_failed',
+        upstream_status: error.status
+      });
+    }
     return json(res, 500, { ok: false, error: error.message });
   }
 });
