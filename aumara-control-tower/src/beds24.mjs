@@ -1,5 +1,5 @@
 const API_BASE = 'https://api.beds24.com/v2';
-export const DEFAULT_MESSAGE_MAX_AGE = 999;
+export const DEFAULT_MESSAGE_MAX_AGE_DAYS = 999;
 const ERROR_SNIPPET_LIMIT = 300;
 const MAX_MESSAGE_LENGTH = 5000;
 
@@ -102,9 +102,9 @@ export async function listBookings(params = {}) {
   return rows(response, 'Booking');
 }
 
-export async function listBookingMessages({ bookingId, maxAge = DEFAULT_MESSAGE_MAX_AGE }) {
+export async function listBookingMessages({ bookingId, maxAge = DEFAULT_MESSAGE_MAX_AGE_DAYS }) {
   const id = Number(bookingId);
-  if (!Number.isFinite(id) || id <= 0) throw new Error('bookingId must be a positive number');
+  if (!Number.isInteger(id) || id <= 0) throw new Error('bookingId must be a positive integer');
   const response = await requestBeds24({
     method: 'GET',
     path: buildPath('/bookings/messages', { bookingId: id, maxAge }),
@@ -113,24 +113,24 @@ export async function listBookingMessages({ bookingId, maxAge = DEFAULT_MESSAGE_
   return rows(response, 'Message');
 }
 
-function normalizeText(value) {
+function normalizeTextForComparison(value) {
   return String(value || '').replace(/\s+/g, ' ').trim().toLowerCase();
 }
 
 function hasDuplicateHostMessage(messages, message) {
-  const expected = normalizeText(message);
+  const expected = normalizeTextForComparison(message);
   if (!expected) return false;
   for (const item of messages) {
     const source = String(item?.source || '').toLowerCase();
     const text = item?.message || item?.text || item?.body;
-    if (source === 'host' && normalizeText(text) === expected) return true;
+    if (source === 'host' && normalizeTextForComparison(text) === expected) return true;
   }
   return false;
 }
 
 export async function sendGuestMessage({ bookingId, message, dedupe = true }) {
   const id = Number(bookingId);
-  if (!Number.isFinite(id) || id <= 0) throw new Error('bookingId must be a positive number');
+  if (!Number.isInteger(id) || id <= 0) throw new Error('bookingId must be a positive integer');
   const text = String(message || '').trim();
   if (!text) throw new Error('message is required');
   if (text.length > MAX_MESSAGE_LENGTH) {
@@ -138,7 +138,7 @@ export async function sendGuestMessage({ bookingId, message, dedupe = true }) {
   }
 
   if (dedupe) {
-    const messages = await listBookingMessages({ bookingId: id, maxAge: DEFAULT_MESSAGE_MAX_AGE });
+    const messages = await listBookingMessages({ bookingId: id, maxAge: DEFAULT_MESSAGE_MAX_AGE_DAYS });
     if (hasDuplicateHostMessage(messages, text)) {
       return {
         sent: false,

@@ -3,7 +3,7 @@ import http from 'node:http';
 import { sendMail, guestAccessEmail } from './mailer.mjs';
 import {
   Beds24ApiError,
-  DEFAULT_MESSAGE_MAX_AGE,
+  DEFAULT_MESSAGE_MAX_AGE_DAYS,
   listBookingMessages,
   listBookings,
   sendGuestMessage
@@ -62,7 +62,7 @@ const server = http.createServer(async (req, res) => {
       if (!Number.isFinite(bookingId) || bookingId <= 0) {
         return json(res, 400, { ok: false, error: 'bookingId must be a positive number' });
       }
-      const maxAge = Number(url.searchParams.get('maxAge') || DEFAULT_MESSAGE_MAX_AGE);
+      const maxAge = Number(url.searchParams.get('maxAge') || DEFAULT_MESSAGE_MAX_AGE_DAYS);
       const messages = await listBookingMessages({ bookingId, maxAge });
       return json(res, 200, { ok: true, provider: 'beds24', count: messages.length, data: messages });
     }
@@ -72,6 +72,12 @@ const server = http.createServer(async (req, res) => {
       const body = await readJson(req);
       const bookingId = Number(body.bookingId || body.id);
       const message = body.message || body.text || body.body;
+      if (!Number.isInteger(bookingId) || bookingId <= 0) {
+        return json(res, 400, { ok: false, error: 'missing or invalid bookingId' });
+      }
+      if (!String(message || '').trim()) {
+        return json(res, 400, { ok: false, error: 'missing message' });
+      }
       const dedupe = body.dedupe !== false;
       const result = await sendGuestMessage({ bookingId, message, dedupe });
       return json(res, 200, { ok: true, provider: 'beds24', ...result });
