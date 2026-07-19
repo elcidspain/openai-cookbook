@@ -56,7 +56,8 @@ async function requestBeds24({ method, path, headers = {}, body }) {
       parsed = JSON.parse(raw);
     } catch {
       // Keep error payload small to avoid echoing large upstream responses.
-      parsed = { raw: raw.slice(0, ERROR_SNIPPET_LIMIT) };
+      const chunk = raw.slice(0, ERROR_SNIPPET_LIMIT);
+      parsed = { raw: raw.length > ERROR_SNIPPET_LIMIT ? `${chunk}...` : chunk };
     }
   }
 
@@ -157,7 +158,8 @@ export async function sendGuestMessage({ bookingId, message, dedupe = true }) {
     method: 'POST',
     path: '/bookings/messages',
     headers: { token },
-    // Beds24 expects an array of message objects, even for one message.
+    // Beds24 expects an array of message objects; this integration sends one
+    // booking message per request to keep dedupe behavior simple and explicit.
     body: [{ bookingId: id, message: text }]
   });
   return {

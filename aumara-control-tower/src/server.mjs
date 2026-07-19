@@ -134,7 +134,7 @@ const server = http.createServer(async (req, res) => {
       return json(res, 502, {
         ok: false,
         error: 'beds24_request_failed',
-        upstreamStatus: error.status
+        upstream_status: error.status
       });
     }
     return json(res, 500, { ok: false, error: error.message });
