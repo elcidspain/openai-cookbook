@@ -1,0 +1,87 @@
+name: AUMARA Beds24 guest-note audit
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '27 * * * *'
+  pull_request:
+    paths:
+      - '.github/workflows/aumara-beds24-note-audit.yml'
+      - 'aumara-control-tower/scripts/beds24_guest_note_sync.py'
+      - 'aumara-control-tower/scripts/guest_request_dry_run.py'
+      - 'aumara-control-tower/tests/test_beds24_guest_note_sync.py'
+      - 'aumara-control-tower/tests/test_guest_request_dry_run.py'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aumara-beds24-note-audit
+  cancel-in-progress: true
+
+jobs:
+  test:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test note planner without credentials or network
+        run: |
+          python -m unittest \
+            aumara-control-tower/tests/test_beds24_guest_note_sync.py \
+            aumara-control-tower/tests/test_guest_request_dry_run.py
+
+  audit:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      BEDS24_TOKEN_CREDENTIAL: ${{ secrets.BEDS24_TOKEN_CREDENTIAL }}
+      BEDS24_BOOTSTRAP_CREDENTIAL: ${{ secrets.BEDS24_BOOTSTRAP_CREDENTIAL }}
+      BEDS24_REFRESH_TOKEN: ${{ secrets.BEDS24_REFRESH_TOKEN }}
+      BEDS24_NOTE_MODE: audit
+      BEDS24_NOTE_CODE: GUESTREQUEST
+      BEDS24_NOTE_MAX_AGE_DAYS: '3'
+      AUMARA_DISABLE_BOOKING_MUTATIONS: 'true'
+      BEDS24_NOTE_AUDIT_OUTPUT: /tmp/aumara-beds24-note-audit/report.json
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Test note planner
+        run: |
+          python -m unittest \
+            aumara-control-tower/tests/test_beds24_guest_note_sync.py \
+            aumara-control-tower/tests/test_guest_request_dry_run.py
+
+      - name: Audit recent guest requests
+        run: python aumara-control-tower/scripts/beds24_guest_note_sync.py
+
+      - name: Verify zero writes and zero persisted guest content
+        run: |
+          python - <<'PY'
+          import json
+          import pathlib
+
+          report = json.loads(
+              pathlib.Path(
+                  "/tmp/aumara-beds24-note-audit/report.json"
+              ).read_text(encoding="utf-8")
+          )
+          assert report["mode"] == "audit"
+          assert report["summary"]["notesWritten"] == 0
+          assert report["safety"]["postRequests"] == 0
+          assert report["safety"]["guestMessagesSent"] == 0
+          assert report["safety"]["bookingFieldsChanged"] == []
+          assert report["safety"]["rawGuestMessagePersisted"] is False
+          assert report["safety"]["guestContactDataPersisted"] is False
+          PY
+
+      - name: Upload sanitized audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aumara-beds24-guest-note-audit
+          path: /tmp/aumara-beds24-note-audit/report.json
+          if-no-files-found: warn
+          retention-days: 7
