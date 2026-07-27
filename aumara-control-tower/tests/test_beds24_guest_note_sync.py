@@ -12,16 +12,21 @@ sys.path.insert(0, str(SCRIPTS))
 import beds24_guest_note_sync as worker  # noqa: E402
 
 
+TEST_PROPERTY_ID = 324903
 AUDIT_ENV = {
     "BEDS24_NOTE_MODE": "audit",
     "AUMARA_DISABLE_BOOKING_MUTATIONS": "true",
+    "BEDS24_PROPERTY_ID": str(TEST_PROPERTY_ID),
     "BEDS24_NOTE_CODE": "GUESTREQUEST",
 }
 LIVE_ENV = {
     "BEDS24_NOTE_MODE": "live",
     "AUMARA_DISABLE_BOOKING_MUTATIONS": "false",
     "AUMARA_LIVE_BOOKING_WRITES_CONFIRMED": "true",
-    "AUMARA_BEDS24_NOTE_WRITE_CONFIRMATION": worker.LIVE_CONFIRMATION,
+    "AUMARA_BEDS24_NOTE_WRITE_CONFIRMATION": worker.live_confirmation(
+        TEST_PROPERTY_ID
+    ),
+    "BEDS24_PROPERTY_ID": str(TEST_PROPERTY_ID),
     "BEDS24_NOTE_CODE": "GUESTREQUEST",
 }
 
@@ -48,6 +53,11 @@ class FakeClient:
             response = self.post_response
             if response is None:
                 response = [{"success": True} for _ in body]
+            if all(item.get("success") is True for item in response):
+                by_id = {int(item["id"]): item for item in self.bookings}
+                for update in body:
+                    target = by_id[int(update["id"])]
+                    target.setdefault("infoItems", []).extend(update["infoItems"])
             return 201, response
         raise AssertionError(f"Unexpected request: {method} {path}")
 
@@ -56,7 +66,7 @@ def message(message_id=10, booking_id=20, text="large double bed"):
     return {
         "id": message_id,
         "bookingId": booking_id,
-        "propertyId": worker.PROPERTY_ID,
+        "propertyId": TEST_PROPERTY_ID,
         "source": "guest",
         "message": text,
         "time": "2026-07-27T10:00:00Z",
@@ -66,7 +76,7 @@ def message(message_id=10, booking_id=20, text="large double bed"):
 def booking(booking_id=20, status="confirmed", info_items=None):
     return {
         "id": booking_id,
-        "propertyId": worker.PROPERTY_ID,
+        "propertyId": TEST_PROPERTY_ID,
         "status": status,
         "infoItems": info_items or [],
     }
@@ -88,16 +98,26 @@ class NoteSyncTests(unittest.TestCase):
 
     def test_audit_mode_requires_booking_kill_switch(self):
         with self.assertRaisesRegex(worker.NoteSyncError, "requires"):
-            worker.operating_mode({"BEDS24_NOTE_MODE": "audit"})
+            worker.operating_mode({
+                "BEDS24_NOTE_MODE": "audit",
+                "BEDS24_PROPERTY_ID": str(TEST_PROPERTY_ID),
+            })
 
     def test_live_mode_requires_both_exact_guards(self):
         with self.assertRaisesRegex(worker.NoteSyncError, "requires"):
             worker.operating_mode({
                 "BEDS24_NOTE_MODE": "live",
                 "AUMARA_DISABLE_BOOKING_MUTATIONS": "false",
+                "BEDS24_PROPERTY_ID": str(TEST_PROPERTY_ID),
                 "BEDS24_NOTE_CODE": "GUESTREQUEST",
             })
         self.assertEqual(worker.operating_mode(LIVE_ENV), "live")
+
+    def test_audit_requires_explicit_property_scope(self):
+        env = dict(AUDIT_ENV)
+        env.pop("BEDS24_PROPERTY_ID")
+        with self.assertRaisesRegex(worker.NoteSyncError, "PROPERTY_ID"):
+            worker.operating_mode(env)
 
     def test_supported_requests_are_classified_for_notes(self):
         examples = {
@@ -112,10 +132,48 @@ class NoteSyncTests(unittest.TestCase):
         for text, expected in examples.items():
             with self.subTest(text=text):
                 self.assertEqual(
-                    worker.classify_event({"body": text}),
-                    expected,
+                    worker.classify_events({"body": text}),
+                    [expected],
                 )
                 self.assertIsNotNone(worker.proposed_booking_note(expected))
+
+    def test_negated_request_is_manual_review_not_a_candidate(self):
+        client = FakeClient(
+            [message(text="We do not need parking.")],
+            [booking()],
+        )
+        report = worker.run(
+            client,
+            mode="audit",
+            code="GUESTREQUEST",
+            max_age_days=3,
+            env=AUDIT_ENV,
+        )
+        self.assertEqual(report["summary"]["noteCandidates"], 0)
+        self.assertEqual(report["summary"]["manualReview"], 1)
+        self.assertEqual(
+            report["events"][0]["reason"],
+            "negated_or_ambiguous_request",
+        )
+
+    def test_multi_intent_message_preserves_every_request(self):
+        client = FakeClient(
+            [message(text="Can we have parking and arrive early?")],
+            [booking()],
+        )
+        report = worker.run(
+            client,
+            mode="audit",
+            code="GUESTREQUEST",
+            max_age_days=3,
+            env=AUDIT_ENV,
+        )
+        self.assertEqual(report["summary"]["noteCandidates"], 2)
+        self.assertEqual(report["summary"]["multiIntentMessages"], 1)
+        self.assertEqual(
+            {item["eventType"] for item in report["events"]},
+            {"parking_request", "early_checkin"},
+        )
 
     def test_audit_builds_redacted_candidate_without_post(self):
         client = FakeClient(
@@ -188,6 +246,7 @@ class NoteSyncTests(unittest.TestCase):
         )
         self.assertEqual(report["summary"]["notesWritten"], 1)
         self.assertEqual(client.post_requests, 1)
+        self.assertGreaterEqual(client.get_requests, 3)
         path, payload = client.payloads[0]
         self.assertEqual(path, "/bookings")
         self.assertEqual(set(payload[0]), {"id", "infoItems"})
