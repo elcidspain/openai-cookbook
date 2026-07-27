@@ -27,6 +27,12 @@ SAFE_ENVIRONMENT = {
 }
 
 BOOKING_REFERENCE_RE = re.compile(r"\b(?:booking\s*ref(?:erence)?[:\s]*)?(\d{8})\b", re.I)
+NEGATION_RE = re.compile(
+    r"(?:\b(?:do\s+not|don't|dont|not|no|without|sin|pas)\b|"
+    r"\bno\s+(?:necesit|quier)|\bne\s+.*\bpas\b|"
+    r"\bне\s+(?:нуж|хот|буд)|\b(?:не\s+нужна|не\s+нужно)\b)",
+    re.I,
+)
 
 EVENT_PATTERNS: tuple[tuple[str, tuple[str, ...]], ...] = (
     (
@@ -70,10 +76,15 @@ EVENT_PATTERNS: tuple[tuple[str, tuple[str, ...]], ...] = (
             "bed preference",
             "extra-large double",
             "large double bed",
+            "two separate beds",
+            "separate beds",
+            "twin beds",
             "matrimonial",
             "cama doble",
+            "camas separadas",
             "grand lit",
             "двуспальн",
+            "раздельные кроват",
         ),
     ),
     (
@@ -145,6 +156,10 @@ SUPPORTED_AUTO_PROPOSALS = {
     "late_checkout",
     "cancellation",
 }
+EXPLICIT_EVENT_TYPES = SUPPORTED_AUTO_PROPOSALS | {
+    "pricing_or_availability",
+    "booking_notification",
+}
 
 
 def now_utc() -> str:
@@ -195,32 +210,77 @@ def booking_reference(event: dict[str, Any], text: str) -> str | None:
     return match.group(1) if match else None
 
 
-def classify_event(event: dict[str, Any]) -> str:
-    explicit = str(event.get("event_type") or "").strip().lower()
-    if explicit in {
-        "bed_request",
-        "cot_request",
-        "pet_request",
-        "cancellation",
-        "pricing_or_availability",
-        "booking_notification",
-        "parking_request",
-        "early_checkin",
-        "late_checkin",
-        "late_checkout",
-    }:
-        return explicit
-
-    text = " ".join(
+def event_text(event: dict[str, Any]) -> str:
+    return " ".join(
         str(event.get(key) or "")
         for key in ("subject", "body", "snippet")
     ).casefold()
+
+
+def explicit_event_types(event: dict[str, Any]) -> list[str]:
+    explicit = str(event.get("event_type") or "").strip().lower()
+    return [explicit] if explicit in EXPLICIT_EVENT_TYPES else []
+
+
+def pattern_is_negated(text: str, start: int, end: int) -> bool:
+    """Conservatively reject a request phrase near a negation token."""
+    window = text[max(0, start - 48):min(len(text), end + 48)]
+    return NEGATION_RE.search(window) is not None
+
+
+def classified_event_types(
+    event: dict[str, Any],
+) -> tuple[list[str], list[str]]:
+    explicit = explicit_event_types(event)
+    if explicit:
+        return explicit, []
+
+    text = event_text(event)
+    matched: list[str] = []
+    ambiguous: list[str] = []
     for event_type, patterns in EVENT_PATTERNS:
-        if any(pattern in text for pattern in patterns):
-            return event_type
-    if "new booking" in text or "booking:" in text:
-        return "booking_notification"
-    return "other"
+        for pattern in patterns:
+            for occurrence in re.finditer(re.escape(pattern), text):
+                target = (
+                    ambiguous
+                    if pattern_is_negated(text, occurrence.start(), occurrence.end())
+                    else matched
+                )
+                if event_type not in target:
+                    target.append(event_type)
+
+    # Cancellation is a terminal event. Embedded room preferences in a
+    # cancellation notification are historical context, not active requests.
+    if "cancellation" in matched:
+        return ["cancellation"], ambiguous
+    # "Is parking available?" is an amenity request, not a room-price or
+    # inventory question. Prefer the specific operational type whenever one
+    # exists and keep the broad pricing/availability class as a fallback.
+    if any(item in SUPPORTED_AUTO_PROPOSALS for item in matched):
+        matched = [
+            item for item in matched if item != "pricing_or_availability"
+        ]
+    if not matched and not ambiguous and (
+        "new booking" in text or "booking:" in text
+    ):
+        return ["booking_notification"], []
+    return matched, ambiguous
+
+
+def classify_events(event: dict[str, Any]) -> list[str]:
+    matched, _ = classified_event_types(event)
+    return matched
+
+
+def ambiguous_event_types(event: dict[str, Any]) -> list[str]:
+    _, ambiguous = classified_event_types(event)
+    return ambiguous
+
+
+def classify_event(event: dict[str, Any]) -> str:
+    """Compatibility wrapper returning the highest-priority positive match."""
+    matched = classify_events(event)
+    return matched[0] if matched else "other"
 
 
 def normalized_language(event: dict[str, Any]) -> str:
@@ -410,7 +470,12 @@ def decision_for(event: dict[str, Any]) -> dict[str, Any]:
         str(event.get(key) or "")
         for key in ("subject", "body", "snippet")
     )
-    event_type = classify_event(event)
+    event_types = classify_events(event)
+    ambiguous_types = ambiguous_event_types(event)
+    if len(event_types) > 1:
+        event_type = "multi_intent_request"
+    else:
+        event_type = event_types[0] if event_types else "other"
     language = normalized_language(event)
     reply = proposed_reply(event_type, language, guest_first_name(event))
     already_sent = input_flag(event.get("reply_already_sent"))
@@ -422,6 +487,12 @@ def decision_for(event: dict[str, Any]) -> dict[str, Any]:
     elif existing_draft:
         outcome = "manual_review"
         reason = "An unsent draft already exists; no competing draft was created."
+    elif ambiguous_types:
+        outcome = "manual_review"
+        reason = "A request phrase is negated or ambiguous and requires confirmation."
+    elif len(event_types) > 1:
+        outcome = "manual_review"
+        reason = "Multiple operational requests require one complete reviewed reply."
     elif event_type == "pricing_or_availability":
         outcome = "manual_review"
         reason = "Prices and availability require a current source-of-truth check."
@@ -438,6 +509,8 @@ def decision_for(event: dict[str, Any]) -> dict[str, Any]:
         "source": str(event.get("source") or "snapshot"),
         "booking_ref": booking_reference(event, combined_text),
         "event_type": event_type,
+        "event_types": event_types,
+        "ambiguous_event_types": ambiguous_types,
         "language": language,
         "outcome": outcome,
         "reason": reason,
