@@ -51,9 +51,10 @@ live guest-reply path, preventing duplicate replies.
 `scripts/beds24_guest_note_sync.py` reads recent guest-side Beds24 messages,
 classifies approved operational requests, resolves the existing booking with
 `includeInfoItems=true`, and proposes a single `GUESTREQUEST` info item per
-booking/request type. The hourly GitHub workflow is fixed in `audit`: it makes
-GET requests only and stores a sanitized artifact with hashed message/booking
-identifiers and no raw guest content.
+booking/request type. CI uses synthetic data only, receives no Beds24
+credentials, makes no network call, and uploads no guest-data artifact. A
+runtime that processes private Beds24 data is deliberately not scheduled until
+that destination is explicitly approved.
 
 The future write payload is deliberately limited to:
 
