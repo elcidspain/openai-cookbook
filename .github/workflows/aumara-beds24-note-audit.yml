@@ -9,6 +9,9 @@ on:
       - 'aumara-control-tower/scripts/guest_request_dry_run.py'
       - 'aumara-control-tower/tests/test_beds24_guest_note_sync.py'
       - 'aumara-control-tower/tests/test_guest_request_dry_run.py'
+      - 'aumara-control-tower/README.md'
+      - 'aumara-control-tower/.env.example'
+      - 'registry.yaml'
   push:
     branches: [main]
     paths:
@@ -17,6 +20,9 @@ on:
       - 'aumara-control-tower/scripts/guest_request_dry_run.py'
       - 'aumara-control-tower/tests/test_beds24_guest_note_sync.py'
       - 'aumara-control-tower/tests/test_guest_request_dry_run.py'
+      - 'aumara-control-tower/README.md'
+      - 'aumara-control-tower/.env.example'
+      - 'registry.yaml'
 
 permissions:
   contents: read
