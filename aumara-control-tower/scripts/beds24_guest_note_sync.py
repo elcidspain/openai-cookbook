@@ -23,10 +23,13 @@ from collections import defaultdict
 from typing import Any
 
 from beds24_elcid_studio_audit import AuditError, data_rows, get_access_token
-from guest_request_dry_run import classify_event, proposed_booking_note
+from guest_request_dry_run import (
+    ambiguous_event_types,
+    classify_events,
+    proposed_booking_note,
+)
 
 
-PROPERTY_ID = 324903
 DEFAULT_NOTE_CODE = "GUESTREQUEST"
 ACTIVE_STATUSES = {"confirmed", "new", "request"}
 SUPPORTED_EVENT_TYPES = {
@@ -39,7 +42,6 @@ SUPPORTED_EVENT_TYPES = {
     "late_checkout",
 }
 TRUE_VALUES = {"1", "true", "yes", "on"}
-LIVE_CONFIRMATION = "INFOITEMS_ONLY_PROPERTY_324903"
 NOTE_CODE_RE = re.compile(r"^[A-Z0-9]{1,20}$")
 OUTPUT = pathlib.Path(
     os.environ.get(
@@ -57,11 +59,25 @@ def enabled(env: dict[str, str], name: str) -> bool:
     return str(env.get(name) or "").strip().lower() in TRUE_VALUES
 
 
+def property_id(env: dict[str, str] | None = None) -> int:
+    values = env if env is not None else os.environ
+    raw = str(values.get("BEDS24_PROPERTY_ID") or "").strip()
+    if not raw.isdigit() or int(raw) <= 0:
+        raise NoteSyncError("BEDS24_PROPERTY_ID must be an explicit positive integer")
+    return int(raw)
+
+
+def live_confirmation(property_value: int) -> str:
+    return f"INFOITEMS_ONLY_PROPERTY_{property_value}"
+
+
 def operating_mode(env: dict[str, str] | None = None) -> str:
     values = env if env is not None else os.environ
     mode = str(values.get("BEDS24_NOTE_MODE") or "off").strip().lower()
     if mode not in {"off", "audit", "live"}:
         raise NoteSyncError("BEDS24_NOTE_MODE must be off, audit, or live")
+    if mode != "off":
+        scoped_property_id = property_id(values)
     if mode == "audit" and not enabled(values, "AUMARA_DISABLE_BOOKING_MUTATIONS"):
         raise NoteSyncError("Audit mode requires AUMARA_DISABLE_BOOKING_MUTATIONS=true")
     if mode == "live":
@@ -69,7 +85,10 @@ def operating_mode(env: dict[str, str] | None = None) -> str:
             raise NoteSyncError("Live mode conflicts with the booking mutation kill switch")
         if not enabled(values, "AUMARA_LIVE_BOOKING_WRITES_CONFIRMED"):
             raise NoteSyncError("Live mode requires AUMARA_LIVE_BOOKING_WRITES_CONFIRMED=true")
-        if values.get("AUMARA_BEDS24_NOTE_WRITE_CONFIRMATION") != LIVE_CONFIRMATION:
+        if (
+            values.get("AUMARA_BEDS24_NOTE_WRITE_CONFIRMATION")
+            != live_confirmation(scoped_property_id)
+        ):
             raise NoteSyncError("Live mode requires the exact infoItems-only confirmation")
         if not str(values.get("BEDS24_NOTE_CODE") or "").strip():
             raise NoteSyncError("Live mode requires an explicit BEDS24_NOTE_CODE")
@@ -165,12 +184,13 @@ class Beds24Client:
 def fetch_guest_messages(
     client: Beds24Client,
     *,
+    property_value: int,
     max_age_days: int,
 ) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for page in range(1, 21):
         params = {
-            "propertyId": PROPERTY_ID,
+            "propertyId": property_value,
             "maxAge": max_age_days,
             "source": "guest",
         }
@@ -190,12 +210,14 @@ def fetch_guest_messages(
 def fetch_bookings(
     client: Beds24Client,
     booking_ids: list[int],
+    *,
+    property_value: int,
 ) -> dict[int, dict[str, Any]]:
     bookings: dict[int, dict[str, Any]] = {}
     for start in range(0, len(booking_ids), 100):
         chunk = booking_ids[start:start + 100]
         params: list[tuple[str, object]] = [
-            ("propertyId", PROPERTY_ID),
+            ("propertyId", property_value),
             ("includeInfoItems", "true"),
         ]
         params.extend(("id", booking_id) for booking_id in chunk)
@@ -218,6 +240,7 @@ def plan_notes(
     *,
     code: str,
     mode: str,
+    property_value: int,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     candidates: list[dict[str, Any]] = []
     audit: list[dict[str, Any]] = []
@@ -229,66 +252,83 @@ def plan_notes(
     ):
         message_id = int(message.get("id") or 0)
         booking_id = int(message.get("bookingId") or 0)
-        event_type = classify_event({"body": str(message.get("message") or "")})
-        record = {
-            "messageHash": stable_hash(message_id),
-            "bookingHash": stable_hash(booking_id),
-            "eventType": event_type,
-            "action": "no_action",
-            "reason": "unsupported_guest_message",
-            "noteCode": code,
-        }
+        event = {"body": str(message.get("message") or "")}
+        matched_types = classify_events(event)
+        ambiguous_types = ambiguous_event_types(event)
+        event_types = list(dict.fromkeys(matched_types + ambiguous_types))
+        if not event_types:
+            event_types = ["other"]
 
-        if str(message.get("source") or "").lower() != "guest":
-            record["reason"] = "not_guest_source"
-        elif int(message.get("propertyId") or 0) != PROPERTY_ID:
-            record["reason"] = "outside_property_scope"
-        elif event_type not in SUPPORTED_EVENT_TYPES:
-            record["reason"] = "unsupported_guest_message"
-        elif not message_id:
-            record.update(action="manual_review", reason="message_id_missing")
-        elif not booking_id or booking_id not in bookings:
-            record.update(action="manual_review", reason="booking_not_resolved")
-        else:
-            booking = bookings[booking_id]
-            status = str(booking.get("status") or "").lower()
-            info_items = booking.get("infoItems") or []
-            if int(booking.get("propertyId") or 0) != PROPERTY_ID:
-                record["reason"] = "booking_outside_property_scope"
-            elif status not in ACTIVE_STATUSES:
-                record["reason"] = "booking_not_active"
-            elif (booking_id, event_type) in seen_types:
-                record.update(action="duplicate", reason="same_type_in_current_batch")
-            elif info_item_exists(
-                info_items if isinstance(info_items, list) else [],
-                code=code,
-                event_type=event_type,
-            ):
-                record.update(action="duplicate", reason="info_item_already_exists")
-            else:
-                seen_types.add((booking_id, event_type))
-                text = f"{marker(event_type, message_id)} {proposed_booking_note(event_type)}"
+        for event_type in event_types:
+            record = {
+                "messageHash": stable_hash(message_id),
+                "bookingHash": stable_hash(booking_id),
+                "eventType": event_type,
+                "action": "no_action",
+                "reason": "unsupported_guest_message",
+                "noteCode": code,
+            }
+
+            if str(message.get("source") or "").lower() != "guest":
+                record["reason"] = "not_guest_source"
+            elif int(message.get("propertyId") or 0) != property_value:
+                record["reason"] = "outside_property_scope"
+            elif event_type in ambiguous_types:
                 record.update(
-                    action="would_write" if mode == "audit" else "pending_write",
-                    reason="approved_request_type",
-                    noteText=text,
+                    action="manual_review",
+                    reason="negated_or_ambiguous_request",
                 )
-                candidates.append(
-                    {
-                        "bookingId": booking_id,
-                        "messageId": message_id,
-                        "eventType": event_type,
-                        "code": code,
-                        "text": text,
-                    }
-                )
-        audit.append(record)
+            elif event_type not in SUPPORTED_EVENT_TYPES:
+                record["reason"] = "unsupported_guest_message"
+            elif not message_id:
+                record.update(action="manual_review", reason="message_id_missing")
+            elif not booking_id or booking_id not in bookings:
+                record.update(action="manual_review", reason="booking_not_resolved")
+            else:
+                booking = bookings[booking_id]
+                status = str(booking.get("status") or "").lower()
+                info_items = booking.get("infoItems") or []
+                if int(booking.get("propertyId") or 0) != property_value:
+                    record["reason"] = "booking_outside_property_scope"
+                elif status not in ACTIVE_STATUSES:
+                    record["reason"] = "booking_not_active"
+                elif (booking_id, event_type) in seen_types:
+                    record.update(action="duplicate", reason="same_type_in_current_batch")
+                elif info_item_exists(
+                    info_items if isinstance(info_items, list) else [],
+                    code=code,
+                    event_type=event_type,
+                ):
+                    record.update(action="duplicate", reason="info_item_already_exists")
+                else:
+                    seen_types.add((booking_id, event_type))
+                    text = (
+                        f"{marker(event_type, message_id)} "
+                        f"{proposed_booking_note(event_type)}"
+                    )
+                    record.update(
+                        action="would_write" if mode == "audit" else "pending_write",
+                        reason="approved_request_type",
+                        noteText=text,
+                    )
+                    candidates.append(
+                        {
+                            "bookingId": booking_id,
+                            "messageId": message_id,
+                            "eventType": event_type,
+                            "code": code,
+                            "text": text,
+                        }
+                    )
+            audit.append(record)
     return candidates, audit
 
 
 def write_notes(
     client: Beds24Client,
     candidates: list[dict[str, Any]],
+    *,
+    property_value: int,
 ) -> int:
     grouped: dict[int, list[dict[str, str]]] = defaultdict(list)
     for item in candidates:
@@ -309,6 +349,23 @@ def write_notes(
         for item in response
     ):
         raise NoteSyncError("Beds24 returned an incomplete infoItem write result")
+
+    verified = fetch_bookings(
+        client,
+        sorted(grouped),
+        property_value=property_value,
+    )
+    for item in candidates:
+        booking = verified.get(int(item["bookingId"])) or {}
+        info_items = booking.get("infoItems") or []
+        if not any(
+            str(existing.get("code") or "").strip().upper()
+            == str(item["code"]).strip().upper()
+            and str(existing.get("text") or "") == str(item["text"])
+            for existing in info_items
+            if isinstance(existing, dict)
+        ):
+            raise NoteSyncError("Beds24 infoItem write could not be verified")
     return len(candidates)
 
 
@@ -328,10 +385,15 @@ def run(
         raise NoteSyncError("Requested mode does not match the guarded environment")
     if note_code(values) != code:
         raise NoteSyncError("Requested note code does not match the guarded environment")
+    scoped_property_id = property_id(values)
     if not 1 <= max_age_days <= 7:
         raise NoteSyncError("BEDS24_NOTE_MAX_AGE_DAYS must be between 1 and 7")
 
-    messages = fetch_guest_messages(client, max_age_days=max_age_days)
+    messages = fetch_guest_messages(
+        client,
+        property_value=scoped_property_id,
+        max_age_days=max_age_days,
+    )
     booking_ids = sorted(
         {
             int(message.get("bookingId") or 0)
@@ -339,12 +401,30 @@ def run(
             if int(message.get("bookingId") or 0)
         }
     )
-    bookings = fetch_bookings(client, booking_ids) if booking_ids else {}
-    candidates, audit = plan_notes(messages, bookings, code=code, mode=mode)
+    bookings = (
+        fetch_bookings(
+            client,
+            booking_ids,
+            property_value=scoped_property_id,
+        )
+        if booking_ids
+        else {}
+    )
+    candidates, audit = plan_notes(
+        messages,
+        bookings,
+        code=code,
+        mode=mode,
+        property_value=scoped_property_id,
+    )
 
     notes_written = 0
     if mode == "live":
-        notes_written = write_notes(client, candidates)
+        notes_written = write_notes(
+            client,
+            candidates,
+            property_value=scoped_property_id,
+        )
         for item in audit:
             if item["action"] == "pending_write":
                 item["action"] = "written"
@@ -353,7 +433,7 @@ def run(
         "schema": "aumara-beds24-guest-note-sync-v1",
         "generatedAtUtc": dt.datetime.now(dt.timezone.utc).isoformat(),
         "mode": mode,
-        "propertyId": PROPERTY_ID,
+        "propertyId": scoped_property_id,
         "summary": {
             "messagesScanned": len(messages),
             "bookingsResolved": len(bookings),
@@ -361,6 +441,11 @@ def run(
             "notesWritten": notes_written,
             "manualReview": sum(item["action"] == "manual_review" for item in audit),
             "duplicates": sum(item["action"] == "duplicate" for item in audit),
+            "multiIntentMessages": sum(
+                1
+                for message in messages
+                if len(classify_events({"body": str(message.get("message") or "")})) > 1
+            ),
         },
         "safety": {
             "guestMessagesSent": 0,
