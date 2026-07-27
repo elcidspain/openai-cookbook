@@ -37,6 +37,26 @@ class GuestRequestDryRunTests(unittest.TestCase):
         }
         self.assertEqual(worker.classify_event(event), "cancellation")
 
+    def test_negated_parking_request_requires_manual_review(self) -> None:
+        result = worker.decision_for({"body": "We do not need parking."})
+        self.assertEqual(result["outcome"], "manual_review")
+        self.assertEqual(
+            result["ambiguous_event_types"],
+            ["parking_request"],
+        )
+        self.assertIsNone(result["proposed_booking_note"])
+
+    def test_multi_intent_request_requires_complete_manual_reply(self) -> None:
+        result = worker.decision_for(
+            {"body": "Can we have parking and arrive early?"}
+        )
+        self.assertEqual(result["outcome"], "manual_review")
+        self.assertEqual(
+            result["event_types"],
+            ["parking_request", "early_checkin"],
+        )
+        self.assertEqual(result["event_type"], "multi_intent_request")
+
     def test_sent_thread_is_deduplicated_without_writes(self) -> None:
         event = {
             "message_id": "message-1",
