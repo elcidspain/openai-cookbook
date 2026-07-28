@@ -23,7 +23,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       BEDS24_TOKEN_CREDENTIAL: ${{ secrets.BEDS24_TOKEN_CREDENTIAL }}
-      BEDS24_ACCESS_TOKEN_FILE: /tmp/beds24-access-token
 
     steps:
       - uses: actions/checkout@v4
@@ -31,26 +30,16 @@ jobs:
       - name: Run deterministic Beds24 auth tests
         run: python -m unittest aumara-control-tower/scripts/tests/test_beds24_auth_check.py -v
 
-      - name: Validate existing Beds24 refresh credential
+      - name: Validate existing Beds24 credential
         id: validate
         continue-on-error: true
         run: python aumara-control-tower/scripts/beds24_auth_check.py validate
 
-      - name: Exchange refresh credential for temporary access token
-        id: exchange
+      - name: Detect credential mode and run read-only probe
+        id: authenticate
         if: steps.validate.outcome == 'success'
         continue-on-error: true
-        run: python aumara-control-tower/scripts/beds24_auth_check.py exchange
-
-      - name: Probe Beds24 with the temporary access token
-        id: probe
-        if: steps.exchange.outcome == 'success'
-        continue-on-error: true
-        run: python aumara-control-tower/scripts/beds24_auth_check.py probe
-
-      - name: Remove temporary access token
-        if: always()
-        run: rm -f "$BEDS24_ACCESS_TOKEN_FILE"
+        run: python aumara-control-tower/scripts/beds24_auth_check.py authenticate
 
       - name: Upload redacted authentication evidence
         if: always()
@@ -63,5 +52,4 @@ jobs:
 
       - name: Report Beds24 authentication result
         if: always()
-        continue-on-error: ${{ github.event_name == 'pull_request' }}
         run: python aumara-control-tower/scripts/beds24_auth_check.py report
