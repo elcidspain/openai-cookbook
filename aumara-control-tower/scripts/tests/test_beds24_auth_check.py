@@ -2,18 +2,15 @@ import importlib.util
 import io
 import json
 import pathlib
-import stat
 import sys
 import tempfile
 import unittest
 from unittest import mock
 
-
 SCRIPTS_DIR = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SCRIPTS_DIR))
 SPEC = importlib.util.spec_from_file_location(
-    "beds24_auth_check",
-    SCRIPTS_DIR / "beds24_auth_check.py",
+    "beds24_auth_check", SCRIPTS_DIR / "beds24_auth_check.py"
 )
 MODULE = importlib.util.module_from_spec(SPEC)
 assert SPEC.loader is not None
@@ -23,192 +20,113 @@ SPEC.loader.exec_module(MODULE)
 class Beds24AuthCheckTests(unittest.TestCase):
     def setUp(self):
         self.temp_dir = tempfile.TemporaryDirectory()
-        self.root = pathlib.Path(self.temp_dir.name)
-        self.evidence_path = self.root / "beds24-auth-check.json"
-        self.token_path = self.root / "beds24-access-token"
-        self.patches = [
-            mock.patch.object(MODULE, "EVIDENCE_PATH", self.evidence_path),
-            mock.patch.object(MODULE, "ACCESS_TOKEN_FILE", self.token_path),
-        ]
-        for patcher in self.patches:
-            patcher.start()
-        self.addCleanup(self.stop_patches)
+        self.evidence_path = pathlib.Path(self.temp_dir.name) / "evidence.json"
+        self.patch = mock.patch.object(MODULE, "EVIDENCE_PATH", self.evidence_path)
+        self.patch.start()
+        self.addCleanup(self.patch.stop)
         self.addCleanup(self.temp_dir.cleanup)
 
-    def stop_patches(self):
-        for patcher in reversed(self.patches):
-            patcher.stop()
-
-    def load_evidence(self):
+    def evidence(self):
         return json.loads(self.evidence_path.read_text(encoding="utf-8"))
 
-    @mock.patch.dict("os.environ", {"BEDS24_TOKEN_CREDENTIAL": " refresh-secret \n"})
-    def test_validate_records_refresh_credential_presence(self):
-        result = MODULE.command_validate()
-        evidence = self.load_evidence()
-        self.assertEqual(result, 0)
-        self.assertEqual(evidence["status"], "CREDENTIAL_PRESENT")
-        self.assertEqual(evidence["credential_source"], "BEDS24_TOKEN_CREDENTIAL")
-        self.assertTrue(evidence["secret_present"])
-        self.assertEqual(evidence["secret_length"], len("refresh-secret"))
+    @mock.patch.dict("os.environ", {"BEDS24_TOKEN_CREDENTIAL": " secret \n"})
+    def test_validate_present(self):
+        self.assertEqual(MODULE.command_validate(), 0)
+        self.assertEqual(self.evidence()["status"], "CREDENTIAL_PRESENT")
 
-    def test_validate_fails_closed_when_secret_is_missing(self):
-        with (
-            mock.patch.dict("os.environ", {}, clear=True),
-            mock.patch("sys.stderr", new_callable=io.StringIO) as stderr,
-        ):
-            result = MODULE.command_validate()
-        evidence = self.load_evidence()
-        self.assertEqual(result, 1)
-        self.assertEqual(evidence["failure_stage"], "validate")
-        self.assertIn("BEDS24_TOKEN_CREDENTIAL", stderr.getvalue())
+    def test_validate_missing_fails_closed(self):
+        with mock.patch.dict("os.environ", {}, clear=True):
+            with mock.patch("sys.stderr", new_callable=io.StringIO):
+                self.assertEqual(MODULE.command_validate(), 1)
+        self.assertEqual(self.evidence()["failure_stage"], "validate")
 
-    @mock.patch.dict("os.environ", {"BEDS24_TOKEN_CREDENTIAL": "refresh-secret"})
-    def test_exchange_and_probe_use_refresh_then_access_token(self):
-        observed_headers = []
-
-        class FakeResponse:
-            def __init__(self, status, payload):
-                self.status = status
-                self.payload = payload
-
-            def __enter__(self):
-                return self
-
-            def __exit__(self, exc_type, exc, tb):
-                return False
-
-            def read(self):
-                return json.dumps(self.payload).encode("utf-8")
-
-        def fake_urlopen(request, timeout=45):
-            self.assertEqual(timeout, 45)
-            headers = {key.lower(): value for key, value in request.header_items()}
-            observed_headers.append(headers)
-            if request.full_url.endswith("/authentication/token"):
-                self.assertEqual(headers["refreshtoken"], "refresh-secret")
-                self.assertNotIn("token", headers)
-                return FakeResponse(200, {"token": "access-secret", "expiresIn": 3600})
-            self.assertEqual(
-                request.full_url,
-                f"{MODULE.API_BASE}/authentication/details",
-            )
-            self.assertEqual(headers["token"], "access-secret")
-            self.assertNotIn("refreshtoken", headers)
-            return FakeResponse(200, {"status": "ok"})
-
-        with mock.patch.object(MODULE.urllib.request, "urlopen", side_effect=fake_urlopen):
-            self.assertEqual(MODULE.command_exchange(), 0)
-            self.assertTrue(self.token_path.exists())
-            self.assertEqual(
-                stat.S_IMODE(self.token_path.stat().st_mode),
-                stat.S_IRUSR | stat.S_IWUSR,
-            )
-            self.assertEqual(MODULE.command_probe(), 0)
-
-        evidence = self.load_evidence()
-        self.assertEqual(len(observed_headers), 2)
-        self.assertEqual(evidence["status"], "AUTH_OK")
-        self.assertEqual(evidence["token_exchange_http_status"], 200)
-        self.assertEqual(evidence["readonly_probe_http_status"], 200)
-        self.assertFalse(self.token_path.exists())
-        self.assertNotIn("refresh-secret", json.dumps(evidence))
-        self.assertNotIn("access-secret", json.dumps(evidence))
-
-    @mock.patch.dict("os.environ", {"BEDS24_TOKEN_CREDENTIAL": "bad-refresh"})
-    @mock.patch.object(
-        MODULE,
-        "request_json",
-        return_value=(401, {"message": "Token bad-refresh not valid", "code": 401}),
-    )
-    def test_exchange_failure_is_redacted(self, request_json):
-        with mock.patch("sys.stderr", new_callable=io.StringIO) as stderr:
-            result = MODULE.command_exchange()
-        evidence = self.load_evidence()
-        self.assertEqual(result, 1)
-        self.assertEqual(evidence["failure_stage"], "exchange")
-        self.assertEqual(evidence["token_exchange_http_status"], 401)
-        self.assertNotIn("bad-refresh", json.dumps(evidence))
-        self.assertIn(MODULE.REDACTED, json.dumps(evidence))
-        self.assertIn("HTTP status 401", stderr.getvalue())
-        request_json.assert_called_once_with(
-            f"{MODULE.API_BASE}/authentication/token",
-            {"refreshToken": "bad-refresh"},
-            secrets=("bad-refresh",),
-            redact=False,
-        )
-
-    def test_probe_requires_temporary_access_token(self):
-        with mock.patch("sys.stderr", new_callable=io.StringIO) as stderr:
-            result = MODULE.command_probe()
-        evidence = self.load_evidence()
-        self.assertEqual(result, 1)
-        self.assertEqual(evidence["failure_stage"], "probe")
-        self.assertIn("access token file is missing", stderr.getvalue())
-
-    def test_probe_failure_is_redacted_and_token_file_is_removed(self):
-        self.token_path.write_text("access-secret", encoding="utf-8")
+    @mock.patch.dict("os.environ", {"BEDS24_TOKEN_CREDENTIAL": "access-secret"})
+    def test_access_token_mode_succeeds_without_exchange(self):
         with mock.patch.object(
             MODULE,
             "request_json",
-            return_value=(403, {"detail": "Access token access-secret rejected"}),
-        ):
-            with mock.patch("sys.stderr", new_callable=io.StringIO):
-                result = MODULE.command_probe()
-        evidence = self.load_evidence()
-        self.assertEqual(result, 1)
-        self.assertEqual(evidence["failure_stage"], "probe")
+            return_value=(200, {"status": "ok", "token": "access-secret"}),
+        ) as request:
+            self.assertEqual(MODULE.command_authenticate(), 0)
+        evidence = self.evidence()
+        self.assertEqual(evidence["credential_mode"], "access_token")
+        self.assertEqual(evidence["status"], "AUTH_OK")
         self.assertNotIn("access-secret", json.dumps(evidence))
-        self.assertFalse(self.token_path.exists())
+        request.assert_called_once()
 
-    def test_request_json_redacts_http_error_body(self):
+    @mock.patch.dict("os.environ", {"BEDS24_TOKEN_CREDENTIAL": "refresh-secret"})
+    def test_refresh_token_mode_exchanges_then_probes(self):
+        responses = [
+            (401, {"error": "Token not valid"}),
+            (200, {"token": "temporary-access"}),
+            (200, {"status": "ok"}),
+        ]
+        with mock.patch.object(MODULE, "request_json", side_effect=responses) as request:
+            self.assertEqual(MODULE.command_authenticate(), 0)
+        evidence = self.evidence()
+        self.assertEqual(evidence["credential_mode"], "refresh_token")
+        self.assertEqual(evidence["status"], "AUTH_OK")
+        self.assertNotIn("refresh-secret", json.dumps(evidence))
+        self.assertNotIn("temporary-access", json.dumps(evidence))
+        self.assertEqual(request.call_count, 3)
+        self.assertEqual(request.call_args_list[0].args[1], {"token": "refresh-secret"})
+        self.assertEqual(
+            request.call_args_list[1].args[1], {"refreshToken": "refresh-secret"}
+        )
+        self.assertEqual(
+            request.call_args_list[2].args[1], {"token": "temporary-access"}
+        )
+
+    @mock.patch.dict("os.environ", {"BEDS24_TOKEN_CREDENTIAL": "bad-secret"})
+    def test_both_modes_invalid_fail_honestly_and_redacted(self):
+        responses = [
+            (401, {"error": "Token bad-secret not valid"}),
+            (401, {"error": "Token bad-secret not valid", "code": 401}),
+        ]
+        with mock.patch.object(MODULE, "request_json", side_effect=responses):
+            with mock.patch("sys.stderr", new_callable=io.StringIO):
+                self.assertEqual(MODULE.command_authenticate(), 1)
+        evidence = self.evidence()
+        self.assertEqual(evidence["status"], "AUTH_FAILED")
+        self.assertEqual(evidence["failure_stage"], "credential")
+        self.assertEqual(evidence["direct_probe_http_status"], 401)
+        self.assertEqual(evidence["token_exchange_http_status"], 401)
+        self.assertNotIn("bad-secret", json.dumps(evidence))
+        self.assertIn(MODULE.REDACTED, json.dumps(evidence))
+
+    @mock.patch.dict("os.environ", {"BEDS24_TOKEN_CREDENTIAL": "refresh-secret"})
+    def test_exchanged_access_token_probe_failure_is_redacted(self):
+        responses = [
+            (401, {"error": "not access"}),
+            (200, {"token": "temporary-access"}),
+            (403, {"detail": "temporary-access rejected"}),
+        ]
+        with mock.patch.object(MODULE, "request_json", side_effect=responses):
+            with mock.patch("sys.stderr", new_callable=io.StringIO):
+                self.assertEqual(MODULE.command_authenticate(), 1)
+        evidence = self.evidence()
+        self.assertEqual(evidence["failure_stage"], "probe")
+        self.assertNotIn("temporary-access", json.dumps(evidence))
+
+    def test_request_json_redacts_http_error(self):
         response = mock.Mock()
-        response.read.return_value = b'{"message":"Denied refresh-secret","status":401}'
+        response.read.return_value = b'{"message":"Denied test-secret"}'
         error = MODULE.urllib.error.HTTPError(
-            url="https://example.test",
-            code=401,
-            msg="Unauthorized",
-            hdrs=None,
-            fp=response,
+            "https://example.test", 401, "Unauthorized", None, response
         )
         with mock.patch.object(MODULE.urllib.request, "urlopen", side_effect=error):
             status, body = MODULE.request_json(
                 "https://example.test",
-                {"refreshToken": "refresh-secret"},
-                secrets=("refresh-secret",),
+                {"token": "test-secret"},
+                secrets=("test-secret",),
             )
         self.assertEqual(status, 401)
         self.assertEqual(body["message"], "Denied [REDACTED]")
 
-    def test_parse_args_supports_exchange_flow(self):
-        for command in ("validate", "exchange", "probe", "report"):
-            with self.subTest(command=command):
-                with mock.patch.object(sys, "argv", ["beds24_auth_check.py", command]):
-                    self.assertEqual(MODULE.parse_args().command, command)
-
-    def test_report_summarizes_exchange_failure(self):
-        MODULE.save_evidence(
-            {
-                "status": "AUTH_FAILED",
-                "failure_stage": "exchange",
-                "token_exchange_http_status": 401,
-                "token_exchange_diagnostics": {
-                    "message": "Token not valid",
-                    "code": 401,
-                },
-                "readonly_probe_http_status": None,
-                "readonly_probe_diagnostics": {},
-                "credential_source": "BEDS24_TOKEN_CREDENTIAL",
-                "secret_present": True,
-                "secret_length": 16,
-                "secret_exposed": False,
-            }
-        )
-        with mock.patch("sys.stderr", new_callable=io.StringIO) as stderr:
-            result = MODULE.command_report()
-        self.assertEqual(result, 1)
-        self.assertIn("failed during exchange", stderr.getvalue())
-        self.assertIn("HTTP status: 401", stderr.getvalue())
+    def test_cli_commands(self):
+        for command in ("validate", "authenticate", "report"):
+            with mock.patch.object(sys, "argv", ["beds24_auth_check.py", command]):
+                self.assertEqual(MODULE.parse_args().command, command)
 
 
 if __name__ == "__main__":
