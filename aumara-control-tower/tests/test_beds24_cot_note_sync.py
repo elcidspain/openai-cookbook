@@ -16,7 +16,10 @@ LIVE_ENV = {
     "BEDS24_COT_NOTE_MODE": "live",
     "AUMARA_DISABLE_BOOKING_MUTATIONS": "false",
     "AUMARA_LIVE_BOOKING_WRITES_CONFIRMED": "true",
-    "AUMARA_BEDS24_COT_WRITE_CONFIRMATION": worker.LIVE_CONFIRMATION,
+    "BEDS24_COT_NOTE_TARGET_HASH": worker.stable_hash(89946081),
+    "AUMARA_BEDS24_COT_WRITE_CONFIRMATION": (
+        worker.LIVE_CONFIRMATION_PREFIX + worker.stable_hash(89946081)
+    ),
     "BEDS24_COT_NOTE_MAX_WRITES": "1",
 }
 
@@ -77,7 +80,10 @@ class FakeClient:
 
 class CotNoteSyncTests(unittest.TestCase):
     def test_regression_group_uses_actual_twin_and_ignores_triple_phrase(self):
-        candidates, audit = worker.plan_cot_notes(victor_group())
+        candidates, audit = worker.plan_cot_notes(
+            victor_group(),
+            expected_booking_hash=worker.stable_hash(89946081),
+        )
         self.assertEqual(len(candidates), 1)
         self.assertEqual(candidates[0]["bookingId"], 89946081)
         self.assertEqual(
@@ -90,7 +96,10 @@ class CotNoteSyncTests(unittest.TestCase):
     def test_conflict_is_manual_when_adults_exceed_room_capacity(self):
         rows = victor_group()
         rows[0]["numAdult"] = 3
-        candidates, audit = worker.plan_cot_notes(rows)
+        candidates, audit = worker.plan_cot_notes(
+            rows,
+            expected_booking_hash=worker.stable_hash(89946081),
+        )
         self.assertEqual(candidates, [])
         self.assertEqual(audit[0]["action"], "manual_review")
         self.assertEqual(audit[0]["reason"], "room_or_occupancy_not_proved")
