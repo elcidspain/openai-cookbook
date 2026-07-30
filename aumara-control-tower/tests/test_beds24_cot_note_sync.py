@@ -101,6 +101,14 @@ class CotNoteSyncTests(unittest.TestCase):
         self.assertEqual(audit[0]["action"], "manual_review")
         self.assertEqual(audit[0]["reason"], "room_or_occupancy_not_proved")
 
+    def test_missing_status_is_manual_and_never_written(self):
+        rows = regression_group()
+        rows[0]["status"] = ""
+        candidates, audit = worker.plan_cot_notes(rows)
+        self.assertEqual(candidates, [])
+        self.assertEqual(audit[0]["action"], "manual_review")
+        self.assertEqual(audit[0]["reason"], "room_or_occupancy_not_proved")
+
     def test_live_write_is_read_back_and_changes_only_infoitems(self):
         client = FakeClient(regression_group())
         report = worker.run(
