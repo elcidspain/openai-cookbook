@@ -32,8 +32,22 @@ permissions:
   contents: read
 
 concurrency:
-  group: aumara-beds24-note-audit
-  cancel-in-progress: true
+  group: >-
+    ${{
+      github.event_name == 'issue_comment' &&
+      github.event.issue.number == 16 &&
+      github.event.comment.body == '/execute-beds24-cot-note' &&
+      'aumara-beds24-cot-note-live-write' ||
+      'aumara-beds24-note-audit'
+    }}
+  cancel-in-progress: >-
+    ${{
+      !(
+        github.event_name == 'issue_comment' &&
+        github.event.issue.number == 16 &&
+        github.event.comment.body == '/execute-beds24-cot-note'
+      )
+    }}
 
 jobs:
   test:
