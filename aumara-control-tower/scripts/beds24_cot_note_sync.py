@@ -193,7 +193,7 @@ def target_booking(rows: list[dict[str, Any]]) -> dict[str, Any] | None:
         if integer(row, "roomId") != TWIN_ROOM_ID:
             continue
         status = str(row.get("status") or "").strip().lower()
-        if status and status not in ACTIVE_STATUSES:
+        if status not in ACTIVE_STATUSES:
             continue
         adults = integer(row, "numAdult", "numAdults", "adults")
         children = integer(row, "numChild", "numChildren", "children")
