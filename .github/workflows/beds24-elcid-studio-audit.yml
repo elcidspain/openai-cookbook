@@ -23,6 +23,7 @@ jobs:
       BEDS24_BOOTSTRAP_CREDENTIAL: ${{ secrets.BEDS24_BOOTSTRAP_CREDENTIAL }}
       BEDS24_REFRESH_TOKEN: ${{ secrets.BEDS24_REFRESH_TOKEN }}
       BEDS24_ALLOW_INVITE_BOOTSTRAP: '1'
+      AUDIT_TODAY: '2026-07-16'
       BEDS24_STUDIO_AUDIT_OUTPUT: aumara-control-tower/evidence/elcid-studio-audit.json
 
     steps:
@@ -31,8 +32,22 @@ jobs:
       - name: Test read-only audit logic
         run: python -m unittest aumara-control-tower/scripts/tests/test_beds24_elcid_studio_audit.py
 
-      - name: Audit Studio bookings, alternatives, and website
-        run: python aumara-control-tower/scripts/beds24_elcid_studio_audit.py
+      - name: Bootstrap and verify Beds24 authentication
+        run: |
+          python - <<'PY'
+          import pathlib
+          import sys
+
+          scripts = pathlib.Path("aumara-control-tower/scripts").resolve()
+          sys.path.insert(0, str(scripts))
+          from beds24_elcid_studio_audit import get_access_token
+
+          _, mode, _, _, _ = get_access_token()
+          print(
+              f"Beds24 authentication ready ({mode}); "
+              "credential values were not printed."
+          )
+          PY
 
       - name: Persist only an encrypted refresh-token vault after bootstrap
         if: success()
@@ -44,6 +59,9 @@ jobs:
             git commit -m 'Refresh encrypted Beds24 credential vault [skip ci]'
             git push origin HEAD:main
           fi
+
+      - name: Audit Studio bookings, alternatives, and website
+        run: python aumara-control-tower/scripts/beds24_elcid_studio_audit.py
 
       - name: Upload sanitized audit
         if: always()
