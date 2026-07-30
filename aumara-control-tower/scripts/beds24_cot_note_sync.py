@@ -34,7 +34,7 @@ TWIN_ROOM_ID = 674485
 TWIN_ADULT_CAPACITY = 2
 NOTE_CODE = "GUESTREQUEST"
 ACTIVE_STATUSES = {"confirmed", "new", "request"}
-LIVE_CONFIRMATION = "INFOITEMS_ONLY_PROPERTY_324903_COT"
+LIVE_CONFIRMATION_PREFIX = "INFOITEMS_ONLY_PROPERTY_324903_COT_"
 TRUE_VALUES = {"1", "true", "yes", "on"}
 COT_RE = re.compile(
     r"\b(?:cuna|baby\s+cot|cot|crib|lit\s+b[ée]b[ée]|детск\w*\s+кроват\w*)\b",
@@ -60,17 +60,29 @@ def enabled(values: dict[str, str], name: str) -> bool:
     return str(values.get(name) or "").strip().lower() in TRUE_VALUES
 
 
-def require_live_guards(values: dict[str, str]) -> None:
+def target_hash(values: dict[str, str]) -> str:
+    value = str(values.get("BEDS24_COT_NOTE_TARGET_HASH") or "").strip().lower()
+    if not re.fullmatch(r"[0-9a-f]{16}", value):
+        raise CotNoteError("BEDS24_COT_NOTE_TARGET_HASH must be 16 hex characters")
+    return value
+
+
+def require_live_guards(values: dict[str, str]) -> str:
+    expected_hash = target_hash(values)
     if str(values.get("BEDS24_COT_NOTE_MODE") or "").strip().lower() != "live":
         raise CotNoteError("BEDS24_COT_NOTE_MODE must be live")
     if enabled(values, "AUMARA_DISABLE_BOOKING_MUTATIONS"):
         raise CotNoteError("The booking mutation kill switch is enabled")
     if not enabled(values, "AUMARA_LIVE_BOOKING_WRITES_CONFIRMED"):
         raise CotNoteError("Live booking writes are not confirmed")
-    if values.get("AUMARA_BEDS24_COT_WRITE_CONFIRMATION") != LIVE_CONFIRMATION:
+    confirmation = str(
+        values.get("AUMARA_BEDS24_COT_WRITE_CONFIRMATION") or ""
+    )
+    if confirmation != f"{LIVE_CONFIRMATION_PREFIX}{expected_hash}":
         raise CotNoteError("The exact cot infoItems confirmation is missing")
     if int(values.get("BEDS24_COT_NOTE_MAX_WRITES") or "0") != 1:
         raise CotNoteError("BEDS24_COT_NOTE_MAX_WRITES must be exactly 1")
+    return expected_hash
 
 
 def iter_strings(value: object, *, parent_key: str = "") -> Iterable[str]:
@@ -152,6 +164,8 @@ def target_booking(rows: list[dict[str, Any]]) -> dict[str, Any] | None:
 
 def plan_cot_notes(
     bookings: list[dict[str, Any]],
+    *,
+    expected_booking_hash: str,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     grouped: dict[int, list[dict[str, Any]]] = defaultdict(list)
     for booking in bookings:
@@ -162,11 +176,14 @@ def plan_cot_notes(
     candidates: list[dict[str, Any]] = []
     audit: list[dict[str, Any]] = []
     for group_id, rows in sorted(grouped.items()):
+        booking_hash = stable_hash(group_id)
+        if booking_hash != expected_booking_hash:
+            continue
         text = request_text(rows)
         if not text:
             continue
         record: dict[str, Any] = {
-            "bookingHash": stable_hash(group_id),
+            "bookingHash": booking_hash,
             "action": "manual_review",
             "reason": "safe_cot_rule_not_proved",
         }
@@ -298,9 +315,12 @@ def run(
     today: dt.date,
     values: dict[str, str],
 ) -> dict[str, Any]:
-    require_live_guards(values)
+    expected_booking_hash = require_live_guards(values)
     bookings = fetch_future_bookings(client, today=today)
-    candidates, audit = plan_cot_notes(bookings)
+    candidates, audit = plan_cot_notes(
+        bookings,
+        expected_booking_hash=expected_booking_hash,
+    )
     duplicates = sum(item["action"] == "duplicate" for item in audit)
     if not candidates and not duplicates:
         raise CotNoteError("No safe cot request was resolved")
