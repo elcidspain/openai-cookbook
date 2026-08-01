@@ -57,10 +57,11 @@ jobs:
             -v
 
       - name: Read AUMARA arrival and access evidence
+        if: github.event_name != 'pull_request'
         run: python aumara-control-tower/scripts/beds24_aumara_access_audit.py
 
       - name: Upload sanitized evidence
-        if: always()
+        if: always() && github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
           name: aumara-access-audit
