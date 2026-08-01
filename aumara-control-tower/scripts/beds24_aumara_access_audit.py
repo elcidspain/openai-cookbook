@@ -174,9 +174,27 @@ def audit_booking(booking: dict[str, Any], messages: list[dict[str, Any]]) -> di
 
 
 def main() -> int:
-    token, auth_mode, api_base, auth_source, _ = get_access_token()
     arrival = target_arrival()
     requested_id = target_booking_id()
+    try:
+        token, auth_mode, api_base, auth_source, _ = get_access_token()
+    except AuditError as exc:
+        payload = {
+            "schema": "aumara-access-audit-v1",
+            "checkedAtUtc": dt.datetime.now(dt.timezone.utc).isoformat(),
+            "propertyId": PROPERTY_ID,
+            "arrival": arrival.isoformat(),
+            "mutations": False,
+            "pinValueExposed": False,
+            "messageBodyExposed": False,
+            "status": "AUTH_FAILED",
+            "error": str(exc),
+            "results": [],
+        }
+        OUTPUT.parent.mkdir(parents=True, exist_ok=True)
+        OUTPUT.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        print(json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
+        return 1
     try:
         bookings = fetch_arrivals(token, api_base, arrival)
     except AuditError as exc:
