@@ -74,7 +74,13 @@ def fetch_arrivals(token: str, api_base: str, arrival: dt.date) -> list[dict[str
         api_base=api_base,
     )
     if not 200 <= status < 300:
-        raise AuditError(f"AUMARA booking lookup failed with HTTP {status}")
+        details = {
+            key: response.get(key)
+            for key in ("diagnostics", "message", "error", "detail", "code")
+            if isinstance(response, dict) and response.get(key) not in (None, "", [], {})
+        }
+        suffix = f"; diagnostics={json.dumps(details, ensure_ascii=False)}" if details else ""
+        raise AuditError(f"AUMARA booking lookup failed with HTTP {status}{suffix}")
     rows = data_rows(response, "AUMARA booking")
     return [row for row in rows if int(row.get("propertyId") or PROPERTY_ID) == PROPERTY_ID]
 
@@ -171,7 +177,28 @@ def main() -> int:
     token, auth_mode, api_base, auth_source, _ = get_access_token()
     arrival = target_arrival()
     requested_id = target_booking_id()
-    bookings = fetch_arrivals(token, api_base, arrival)
+    try:
+        bookings = fetch_arrivals(token, api_base, arrival)
+    except AuditError as exc:
+        payload = {
+            "schema": "aumara-access-audit-v1",
+            "checkedAtUtc": dt.datetime.now(dt.timezone.utc).isoformat(),
+            "propertyId": PROPERTY_ID,
+            "arrival": arrival.isoformat(),
+            "authMode": auth_mode,
+            "authSource": auth_source,
+            "apiHost": urllib.parse.urlparse(api_base).netloc,
+            "mutations": False,
+            "pinValueExposed": False,
+            "messageBodyExposed": False,
+            "status": "BOOKINGS_READ_FAILED",
+            "error": str(exc),
+            "results": [],
+        }
+        OUTPUT.parent.mkdir(parents=True, exist_ok=True)
+        OUTPUT.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        print(json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
+        return 1
     if requested_id is not None:
         bookings = [row for row in bookings if int(row.get("id") or 0) == requested_id]
     if not bookings:
