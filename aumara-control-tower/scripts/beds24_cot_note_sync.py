@@ -255,6 +255,8 @@ def fetch_future_bookings(
 ) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for page in range(1, 21):
+        # guestComments is part of the base booking payload; requesting the
+        # separate guests block would add an unnecessary personal-data scope.
         params: list[tuple[str, object]] = [
             ("propertyId", PROPERTY_ID),
             ("arrivalFrom", today.isoformat()),
