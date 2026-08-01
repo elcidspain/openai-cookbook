@@ -135,8 +135,10 @@ def load_evidence() -> dict[str, Any]:
         "credential_source": CREDENTIAL_SOURCE,
         "credential_mode": None,
         "direct_probe_http_status": None,
+        "direct_probe_valid_token": None,
         "token_exchange_http_status": None,
         "readonly_probe_http_status": None,
+        "readonly_probe_valid_token": None,
         "direct_probe_diagnostics": {},
         "token_exchange_diagnostics": {},
         "readonly_probe_diagnostics": {},
@@ -197,8 +199,10 @@ def command_validate() -> int:
             "credential_source": CREDENTIAL_SOURCE,
             "credential_mode": None,
             "direct_probe_http_status": None,
+            "direct_probe_valid_token": None,
             "token_exchange_http_status": None,
             "readonly_probe_http_status": None,
+            "readonly_probe_valid_token": None,
             "direct_probe_diagnostics": {},
             "token_exchange_diagnostics": {},
             "readonly_probe_diagnostics": {},
@@ -223,8 +227,10 @@ def command_authenticate() -> int:
             "credential_source": CREDENTIAL_SOURCE,
             "credential_mode": None,
             "direct_probe_http_status": None,
+            "direct_probe_valid_token": None,
             "token_exchange_http_status": None,
             "readonly_probe_http_status": None,
+            "readonly_probe_valid_token": None,
             "direct_probe_diagnostics": {},
             "token_exchange_diagnostics": {},
             "readonly_probe_diagnostics": {},
@@ -246,10 +252,16 @@ def command_authenticate() -> int:
         secrets=(credential,),
     )
     evidence["direct_probe_http_status"] = direct_status
+    direct_valid = (
+        direct_body.get("validToken")
+        if isinstance(direct_body.get("validToken"), bool)
+        else None
+    )
+    evidence["direct_probe_valid_token"] = direct_valid
     evidence["direct_probe_diagnostics"] = extract_diagnostics(
         sanitize_response_body(direct_body, (credential,))
     )
-    if 200 <= direct_status < 300:
+    if 200 <= direct_status < 300 and direct_valid is True:
         evidence["status"] = "AUTH_OK"
         evidence["credential_mode"] = "access_token"
         evidence["readonly_probe_http_status"] = direct_status
@@ -295,10 +307,16 @@ def command_authenticate() -> int:
         secrets=secrets,
     )
     evidence["readonly_probe_http_status"] = probe_status
+    probe_valid = (
+        probe_body.get("validToken")
+        if isinstance(probe_body.get("validToken"), bool)
+        else None
+    )
+    evidence["readonly_probe_valid_token"] = probe_valid
     evidence["readonly_probe_diagnostics"] = extract_diagnostics(
         sanitize_response_body(probe_body, secrets)
     )
-    if 200 <= probe_status < 300:
+    if 200 <= probe_status < 300 and probe_valid is True:
         evidence["status"] = "AUTH_OK"
         evidence["credential_mode"] = "refresh_token"
         evidence["failure_stage"] = None
