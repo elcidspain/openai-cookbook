@@ -45,7 +45,7 @@ class Beds24AuthCheckTests(unittest.TestCase):
         with mock.patch.object(
             MODULE,
             "request_json",
-            return_value=(200, {"status": "ok", "token": "access-secret"}),
+            return_value=(200, {"validToken": True, "token": "access-secret"}),
         ) as request:
             self.assertEqual(MODULE.command_authenticate(), 0)
         evidence = self.evidence()
@@ -59,7 +59,7 @@ class Beds24AuthCheckTests(unittest.TestCase):
         responses = [
             (401, {"error": "Token not valid"}),
             (200, {"token": "temporary-access"}),
-            (200, {"status": "ok"}),
+            (200, {"validToken": True}),
         ]
         with mock.patch.object(MODULE, "request_json", side_effect=responses) as request:
             self.assertEqual(MODULE.command_authenticate(), 0)
@@ -76,6 +76,20 @@ class Beds24AuthCheckTests(unittest.TestCase):
         self.assertEqual(
             request.call_args_list[2].args[1], {"token": "temporary-access"}
         )
+
+    @mock.patch.dict("os.environ", {"BEDS24_TOKEN_CREDENTIAL": "invalid-access"})
+    def test_http_200_with_valid_token_false_is_not_auth_ok(self):
+        responses = [
+            (200, {"validToken": False, "diagnostics": {"requestIp": "127.0.0.1"}}),
+            (401, {"error": "Token not valid", "code": 401}),
+        ]
+        with mock.patch.object(MODULE, "request_json", side_effect=responses):
+            with mock.patch("sys.stderr", new_callable=io.StringIO):
+                self.assertEqual(MODULE.command_authenticate(), 1)
+        evidence = self.evidence()
+        self.assertEqual(evidence["status"], "AUTH_FAILED")
+        self.assertFalse(evidence["direct_probe_valid_token"])
+        self.assertEqual(evidence["failure_stage"], "credential")
 
     @mock.patch.dict("os.environ", {"BEDS24_TOKEN_CREDENTIAL": "bad-secret"})
     def test_both_modes_invalid_fail_honestly_and_redacted(self):
