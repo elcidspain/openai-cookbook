@@ -27,6 +27,7 @@ EVIDENCE_PATH = ROOT / "evidence" / "beds24-auth-check.json"
 CREDENTIAL_SOURCE = "BEDS24_TOKEN_CREDENTIAL"
 REDACTED = "[REDACTED]"
 DIAGNOSTIC_FIELDS = (
+    "diagnostics",
     "message",
     "error",
     "detail",
