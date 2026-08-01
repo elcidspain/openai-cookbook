@@ -25,7 +25,7 @@ import urllib.parse
 from collections import defaultdict
 from typing import Any, Iterable
 
-from beds24_elcid_studio_audit import data_rows, get_access_token
+from beds24_elcid_studio_audit import AuditError, data_rows, get_access_token
 from beds24_guest_note_sync import Beds24Client, NoteSyncError
 
 
@@ -258,7 +258,6 @@ def fetch_future_bookings(
         params: list[tuple[str, object]] = [
             ("propertyId", PROPERTY_ID),
             ("arrivalFrom", today.isoformat()),
-            ("includeGuests", "true"),
             ("includeBookingGroup", "true"),
             ("includeInfoItems", "true"),
         ]
@@ -410,7 +409,7 @@ def main() -> int:
         )
         print(json.dumps(report["summary"], sort_keys=True))
         return 0
-    except (CotNoteError, NoteSyncError, OSError, ValueError) as exc:
+    except (AuditError, CotNoteError, NoteSyncError, OSError, ValueError) as exc:
         print(f"Beds24 cot note sync failed safely: {exc}", file=os.sys.stderr)
         return 1
 
