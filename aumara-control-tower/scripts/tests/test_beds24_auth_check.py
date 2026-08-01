@@ -123,6 +123,12 @@ class Beds24AuthCheckTests(unittest.TestCase):
         self.assertEqual(status, 401)
         self.assertEqual(body["message"], "Denied [REDACTED]")
 
+    def test_extracts_beds24_diagnostics(self):
+        self.assertEqual(
+            MODULE.extract_diagnostics({"diagnostics": ["bookingsRead missing"]}),
+            {"diagnostics": ["bookingsRead missing"]},
+        )
+
     def test_cli_commands(self):
         for command in ("validate", "authenticate", "report"):
             with mock.patch.object(sys, "argv", ["beds24_auth_check.py", command]):
