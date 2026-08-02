@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "policy_version": "2026.07.27.1",
+  "policy_version": "2026.08.02.1",
   "property": "shared",
   "policies": [
     {
@@ -19,7 +19,7 @@
         "property_conflict"
       ],
       "response_template_ids": [],
-      "policy_version": "2026.07.27.1"
+      "policy_version": "2026.08.02.1"
     },
     {
       "policy_id": "shared.private-values-boundary",
@@ -37,7 +37,7 @@
         "source_reference_missing"
       ],
       "response_template_ids": [],
-      "policy_version": "2026.07.27.1"
+      "policy_version": "2026.08.02.1"
     }
   ]
 }
