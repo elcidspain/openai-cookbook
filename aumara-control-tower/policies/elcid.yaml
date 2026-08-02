@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "policy_version": "2026.08.02.1",
+  "policy_version": "2026.07.27.1",
   "property": "elcid",
   "policies": [
     {
@@ -19,7 +19,7 @@
         "value_conflict"
       ],
       "response_template_ids": [],
-      "policy_version": "2026.08.02.1"
+      "policy_version": "2026.07.27.1"
     },
     {
       "policy_id": "elcid.guest-template-placeholder",
@@ -37,7 +37,7 @@
         "cross_property_template"
       ],
       "response_template_ids": [],
-      "policy_version": "2026.08.02.1"
+      "policy_version": "2026.07.27.1"
     },
     {
       "policy_id": "elcid.baby-cot-infoitem",
@@ -60,7 +60,7 @@
         "read_back_failed"
       ],
       "response_template_ids": [],
-      "policy_version": "2026.08.02.1"
+      "policy_version": "2026.07.27.1"
     },
     {
       "policy_id": "elcid.bed-request-reply-fragment",
@@ -85,7 +85,7 @@
         "es": "Hemos registrado su solicitud de una cama doble grande.",
         "et": "Oleme märkinud teie soovi ühe suure kaheinimesevoodi kohta."
       },
-      "policy_version": "2026.08.02.1"
+      "policy_version": "2026.07.27.1"
     },
     {
       "policy_id": "elcid.parking-request-reply-fragment",
@@ -110,7 +110,7 @@
         "es": "Hemos registrado su solicitud de aparcamiento.",
         "et": "Oleme märkinud teie parkimissoovi."
       },
-      "policy_version": "2026.08.02.1"
+      "policy_version": "2026.07.27.1"
     },
     {
       "policy_id": "elcid.non-smoking-room-reply-fragment",
@@ -134,7 +134,7 @@
         "es": "Todas las habitaciones de El Cid Country Club son para no fumadores.",
         "et": "Kõik El Cid Country Clubi toad on mittesuitsetajatele."
       },
-      "policy_version": "2026.08.02.1"
+      "policy_version": "2026.07.27.1"
     },
     {
       "policy_id": "elcid.send-failure-content-stability",
@@ -153,7 +153,7 @@
         "connector_failure"
       ],
       "response_template_ids": [],
-      "policy_version": "2026.08.02.1"
+      "policy_version": "2026.07.27.1"
     }
   ]
 }
