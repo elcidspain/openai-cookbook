@@ -9,7 +9,9 @@ import re
 from typing import Any
 
 DEFAULT_POLICY_ROOT = pathlib.Path(__file__).resolve().parents[1] / "policies"
-EXPECTED_POLICY_VERSION = "2026.08.02.1"
+EXPECTED_POLICY_VERSION = "2026.07.27.1"
+EXPECTED_SNAPSHOT_VERSION = "2026.08.02.1"
+SNAPSHOT_FILE = "guest_reply_runtime.json"
 
 
 class GuestReplyPolicyError(ValueError):
@@ -28,6 +30,17 @@ def _load(path: pathlib.Path) -> dict[str, Any]:
 
 def _policy_map(root: pathlib.Path = DEFAULT_POLICY_ROOT) -> dict[str, dict[str, Any]]:
     root = pathlib.Path(root)
+    snapshot = _load(root / SNAPSHOT_FILE)
+    if snapshot.get("snapshot_version") != EXPECTED_SNAPSHOT_VERSION:
+        raise GuestReplyPolicyError("guest reply snapshot version mismatch")
+    if snapshot.get("property") != "elcid":
+        raise GuestReplyPolicyError("guest reply snapshot property mismatch")
+    if snapshot.get("registry_policy_version") != EXPECTED_POLICY_VERSION:
+        raise GuestReplyPolicyError("guest reply registry version mismatch")
+    approved_ids = snapshot.get("policy_ids")
+    if not isinstance(approved_ids, list) or not approved_ids:
+        raise GuestReplyPolicyError("guest reply snapshot has no policies")
+
     index = _load(root / "registry.yaml")
     if index.get("policy_version") != EXPECTED_POLICY_VERSION:
         raise GuestReplyPolicyError("policy version mismatch")
@@ -37,10 +50,16 @@ def _policy_map(root: pathlib.Path = DEFAULT_POLICY_ROOT) -> dict[str, dict[str,
     policies = document.get("policies")
     if not isinstance(policies, list):
         raise GuestReplyPolicyError("EL CID policies are missing")
+
     result: dict[str, dict[str, Any]] = {}
     for policy in policies:
-        if isinstance(policy, dict) and isinstance(policy.get("policy_id"), str):
-            result[policy["policy_id"]] = policy
+        if isinstance(policy, dict) and policy.get("policy_id") in approved_ids:
+            result[str(policy["policy_id"])] = policy
+    missing = sorted(set(approved_ids) - set(result))
+    if missing:
+        raise GuestReplyPolicyError(
+            "guest reply snapshot policies are missing: " + ", ".join(missing)
+        )
     return result
 
 
@@ -63,6 +82,8 @@ def _fragment(policy_id: str, language: str, root: pathlib.Path) -> str:
         raise GuestReplyPolicyError(f"missing policy {policy_id}")
     if policy.get("property") != "elcid":
         raise GuestReplyPolicyError("cross-property policy rejected")
+    if policy.get("policy_version") != EXPECTED_POLICY_VERSION:
+        raise GuestReplyPolicyError(f"policy {policy_id} has version drift")
     if policy.get("status") != "verified" or not policy.get("allowed_auto_reply"):
         raise GuestReplyPolicyError(f"policy {policy_id} is not enabled")
     templates = policy.get("response_templates")
