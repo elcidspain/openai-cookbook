@@ -168,6 +168,23 @@ class BedNonSmokingNoteTests(unittest.TestCase):
             worker.run(client, today=TODAY, values=LIVE_ENV)
         self.assertEqual(client.post_requests, 0)
 
+    def test_resolved_count_above_boundary_still_allows_safe_writes(self):
+        existing = [{"code": "GUESTREQUEST", "text": worker.NOTE_MARKER}]
+        client = FakeClient(
+            [
+                booking(1, include_requests=False),
+                booking(2, include_requests=False),
+                booking(3, include_requests=False),
+                booking(4, include_requests=False),
+                booking(5, include_requests=False, info_items=existing),
+            ],
+            messages=[guest_message(100 + value, value) for value in range(1, 6)],
+        )
+        report = worker.run(client, today=TODAY, values=LIVE_ENV)
+        self.assertEqual(report["summary"]["requestsResolved"], 5)
+        self.assertEqual(report["summary"]["notesWritten"], 4)
+        self.assertEqual(client.post_requests, 1)
+
     def test_incomplete_post_result_fails(self):
         client = FakeClient(
             [booking(value, include_requests=False) for value in range(1, 5)],

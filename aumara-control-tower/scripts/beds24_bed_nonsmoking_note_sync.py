@@ -8,7 +8,7 @@ The worker is deliberately fail-closed:
 * both an extra-large-double-bed request and a non-smoking request must exist;
 * only the Beds24 ``infoItems`` field is changed;
 * no more than four live writes are allowed;
-* exactly four current requests must be resolved by a write or a duplicate;
+* at least four current requests must be resolved by a write or a duplicate;
 * every write is confirmed by an exact GET read-back.
 
 It never sends a guest message or changes booking dates, rooms, occupancy,
@@ -403,9 +403,9 @@ def run(
     )
     duplicates = sum(item["action"] == "duplicate" for item in audit)
     resolved = len(candidates) + duplicates
-    if resolved != expected_resolved(values):
+    if resolved < expected_resolved(values):
         raise BedNonSmokingNoteError(
-            f"Resolved request count {resolved}, expected "
+            f"Resolved request count {resolved} below expected "
             f"{expected_resolved(values)}; refusing all writes"
         )
     notes_written = write_and_verify(
