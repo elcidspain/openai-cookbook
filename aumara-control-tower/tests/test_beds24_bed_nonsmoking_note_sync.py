@@ -160,6 +160,18 @@ class BedNonSmokingNoteTests(unittest.TestCase):
         candidates, _ = worker.plan_notes([booking(1)], today=TODAY)
         self.assertEqual(candidates, [])
 
+    def test_messages_without_source_are_treated_as_guest_scope(self):
+        grouped = worker.messages_by_booking(
+            [{"bookingId": 1, "message": "BED + Non Smoking Requested"}]
+        )
+        self.assertEqual(list(grouped), [1])
+
+    def test_non_guest_sources_are_excluded_from_message_grouping(self):
+        grouped = worker.messages_by_booking(
+            [{"bookingId": 1, "source": "host", "message": "BED + Non Smoking Requested"}]
+        )
+        self.assertEqual(grouped, {})
+
     def test_four_notes_are_written_and_exactly_read_back(self):
         client = FakeClient(
             [booking(value, include_requests=False) for value in range(1, 5)],

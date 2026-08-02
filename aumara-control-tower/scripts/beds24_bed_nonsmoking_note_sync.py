@@ -320,9 +320,12 @@ def messages_by_booking(
 ) -> dict[int, list[dict[str, Any]]]:
     grouped: dict[int, list[dict[str, Any]]] = defaultdict(list)
     for message in messages:
-        if str(message.get("source") or "").strip().lower() != "guest":
+        source = str(
+            message.get("source") or message.get("sender") or ""
+        ).strip().lower()
+        if source and source not in {"guest", "booker"}:
             continue
-        booking_id = integer(message, "bookingId")
+        booking_id = integer(message, "bookingId", "bookingid")
         if booking_id:
             grouped[booking_id].append(message)
     return dict(grouped)
