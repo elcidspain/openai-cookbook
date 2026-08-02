@@ -39,7 +39,7 @@ class PolicyRegistrySchemaTests(unittest.TestCase):
 
     def test_registry_is_valid_and_separate(self) -> None:
         result = validate_registry(self.root)
-        self.assertEqual(result["policy_version"], "2026.08.02.1")
+        self.assertEqual(result["policy_version"], "2026.07.27.1")
         self.assertEqual(result["registry_count"], 3)
 
         index = self._read("registry.yaml")
@@ -61,7 +61,7 @@ class PolicyRegistrySchemaTests(unittest.TestCase):
 
     def test_version_drift_is_rejected(self) -> None:
         document = self._read("aumara.yaml")
-        document["policy_version"] = "2026.08.02.2"
+        document["policy_version"] = "2026.07.27.2"
         self._write("aumara.yaml", document)
         with self.assertRaisesRegex(RegistryValidationError, "version drift"):
             validate_registry(self.root)
