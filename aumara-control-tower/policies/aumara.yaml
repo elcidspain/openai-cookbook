@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "policy_version": "2026.07.27.1",
+  "policy_version": "2026.08.02.1",
   "property": "aumara",
   "policies": [
     {
@@ -19,7 +19,7 @@
         "value_conflict"
       ],
       "response_template_ids": [],
-      "policy_version": "2026.07.27.1"
+      "policy_version": "2026.08.02.1"
     },
     {
       "policy_id": "aumara.guest-template-placeholder",
@@ -37,7 +37,7 @@
         "cross_property_template"
       ],
       "response_template_ids": [],
-      "policy_version": "2026.07.27.1"
+      "policy_version": "2026.08.02.1"
     }
   ]
 }
