@@ -46,6 +46,10 @@ class AumaraPostStayFeedbackTests(unittest.TestCase):
         self.assertNotIn('const token = params.get("t")', self.html)
         self.assertNotRegex(self.html, r"[?&]t=[a-f0-9]{48,128}")
 
+    def test_language_switch_preserves_reward_state(self) -> None:
+        self.assertIn("if(state.reward)renderReward(state.reward)", self.html)
+        self.assertNotIn("renderReward(state.reward.source", self.html)
+
     def test_qr_is_dynamic_and_not_committed(self) -> None:
         self.assertIn("action=qr", self.html)
         self.assertNotIn("assets/vouchers/", self.html)
