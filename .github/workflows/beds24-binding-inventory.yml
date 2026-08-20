@@ -3,7 +3,9 @@ name: Beds24 Binding Inventory
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches:
+      - main
+      - 'agent/**'
     paths:
       - '.github/aumara-beds24-binding-inventory.trigger'
 
