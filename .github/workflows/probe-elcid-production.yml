@@ -160,4 +160,14 @@ jobs:
           git add ops/elcid-production-probe.md
           git diff --cached --quiet && exit 0
           git commit -m 'Record EL CID production probe [skip ci]'
-          git push
+          for attempt in 1 2 3; do
+            if git push; then
+              exit 0
+            fi
+            if [ "$attempt" -lt 3 ]; then
+              git pull --rebase origin main
+              sleep 2
+            fi
+          done
+          echo 'Unable to push probe evidence after 3 attempts.' >&2
+          exit 1
