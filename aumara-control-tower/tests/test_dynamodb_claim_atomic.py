@@ -290,6 +290,7 @@ class DynamoClaimAtomicTests(unittest.TestCase):
             'grep -q "Beds24 authentication failed with HTTP status"',
             workflow,
         )
+        self.assertIn("python - <<'PY'\nimport datetime as dt", workflow)
         self.assertIn('"reasons": {"beds24_auth_unavailable": 1}', workflow)
         self.assertIn('"authStatus": "unavailable"', workflow)
         self.assertIn("/tmp/aumara-guest-journey-shadow/summary.json", workflow)
