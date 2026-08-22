@@ -207,6 +207,13 @@ class DynamoClaimAtomicTests(unittest.TestCase):
         self.assertIn("python -m pip install --upgrade pip boto3", workflow)
         self.assertNotIn("pip install -r requirements.txt", workflow)
 
+    def test_shadow_workflow_heredoc_closing_marker_alignment(self) -> None:
+        workflow = (
+            ROOT.parent / ".github" / "workflows" / "aumara-guest-journey-shadow.yml"
+        ).read_text(encoding="utf-8")
+        self.assertIn("\n          PY\n          else\n", workflow)
+        self.assertNotIn("\n            PY\n          else\n", workflow)
+
     def test_aumara_nominalia_workflow_has_host_and_user_fallbacks(self) -> None:
         workflow = (
             ROOT.parent / ".github" / "workflows" / "deploy-aumara-nominalia-v2.yml"
