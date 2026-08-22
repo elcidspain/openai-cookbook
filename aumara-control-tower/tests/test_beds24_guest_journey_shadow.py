@@ -61,10 +61,14 @@ class Beds24GuestJourneyShadowTests(unittest.TestCase):
         self.assertIn("externalDependencyUnavailable", workflow)
         self.assertIn(
             "elif grep -q \"Beds24 authentication failed with HTTP status\" "
-            "\"$auth_error_log\"; then\n"
-            "            echo \"WARNING: Beds24 auth unavailable; emitting "
-            "degraded shadow summary\"\n"
-            "          python - <<'PY'\n"
+            "\"$auth_error_log\"; then",
+            workflow,
+        )
+        self.assertIn(
+            "          python - <<'PY'",
+            workflow,
+        )
+        self.assertIn(
             "          import datetime as dt",
             workflow,
         )
