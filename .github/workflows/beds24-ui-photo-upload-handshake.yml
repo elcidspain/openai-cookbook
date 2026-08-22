@@ -21,7 +21,8 @@ jobs:
     environment: Production
     env:
       BEDS24_VAULT_KEK: ${{ secrets.BEDS24_REFRESH_CREDENTIAL }}
-      BEDS24_USERNAME: 'EL CID / AUMARA'
+      BEDS24_USERNAME: ${{ secrets.BEDS24_USERNAME }}
+      BEDS24_PASSWORD: ${{ secrets.BEDS24_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -52,9 +53,12 @@ jobs:
           SOURCE=ROOT/'source'
           for p in (EVIDENCE,UPLOAD,SOURCE): p.mkdir(parents=True,exist_ok=True)
           KEK=(os.environ.get('BEDS24_VAULT_KEK') or '').strip()
-          USER=(os.environ.get('BEDS24_USERNAME') or 'EL CID / AUMARA').strip()
+          USER=(os.environ.get('BEDS24_USERNAME') or '').strip()
+          DIRECT_PASSWORD=(os.environ.get('BEDS24_PASSWORD') or '').strip()
           if not KEK: raise SystemExit('Production handshake KEK missing')
+          if not USER: raise SystemExit('Production BEDS24_USERNAME missing')
           print(f'::add-mask::{KEK}',flush=True)
+          if DIRECT_PASSWORD: print(f'::add-mask::{DIRECT_PASSWORD}',flush=True)
 
           def now(): return dt.datetime.now(dt.timezone.utc).isoformat()
           def fkey(value): return base64.urlsafe_b64encode(hashlib.sha256(('AUMARA_BEDS24_UI_HANDSHAKE_V1\0'+value).encode()).digest())
@@ -82,12 +86,13 @@ jobs:
               write_state('FAILED',stage=stage,diagnostic=msg[:500])
               raise SystemExit(1)
 
-          # Decrypt one-time private key and password ciphertext.
+          # Keep the encrypted handshake available for second factor and as password fallback.
           private_pem=Fernet(fkey(KEK)).decrypt((HS/'private.enc').read_text().strip().encode())
           private=serialization.load_pem_private_key(private_pem,password=None)
           pwd_ct=base64.b64decode((HS/'password.enc').read_text().strip())
-          password=private.decrypt(pwd_ct,padding.OAEP(mgf=padding.MGF1(algorithm=hashes.SHA256()),algorithm=hashes.SHA256(),label=None)).decode().strip()
-          if not password: raise SystemExit('Decrypted password empty')
+          encrypted_password=private.decrypt(pwd_ct,padding.OAEP(mgf=padding.MGF1(algorithm=hashes.SHA256()),algorithm=hashes.SHA256(),label=None)).decode().strip()
+          password=DIRECT_PASSWORD or encrypted_password
+          if not password: raise SystemExit('Beds24 password unavailable')
           print(f'::add-mask::{password}',flush=True)
 
           # Exact approved media manifest.
@@ -224,6 +229,6 @@ jobs:
           # Persist only sanitized result/manifest. Never persist credentials/second factor.
           subprocess.run(['git','fetch','origin','main'],check=True)
           subprocess.run(['git','pull','--rebase','origin','main'],check=True)
-          git_push([EVIDENCE/'result.json',EVIDENCE/'manifest.json'],f"Record Beds24 UI photo upload {os.environ.get('GITHUB_RUN_ID','')} [skip ci]")
+          git_push([EVIDENCE/'result.json',EVIDENCE/'manifest.json'],f"Record Beds24 UI photo upload {os.environ.get('GITHUB_RUN_ID','')} [skip ci]')
           print(json.dumps({'status':result['status'],'uploaded':result.get('uploaded',0),'property_id':324882}))
           PY
