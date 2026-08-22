@@ -229,6 +229,6 @@ jobs:
           # Persist only sanitized result/manifest. Never persist credentials/second factor.
           subprocess.run(['git','fetch','origin','main'],check=True)
           subprocess.run(['git','pull','--rebase','origin','main'],check=True)
-          git_push([EVIDENCE/'result.json',EVIDENCE/'manifest.json'],f"Record Beds24 UI photo upload {os.environ.get('GITHUB_RUN_ID','')} [skip ci]')
+          git_push([EVIDENCE/'result.json',EVIDENCE/'manifest.json'],f"Record Beds24 UI photo upload {os.environ.get('GITHUB_RUN_ID','')} [skip ci]")
           print(json.dumps({'status':result['status'],'uploaded':result.get('uploaded',0),'property_id':324882}))
           PY
