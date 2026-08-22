@@ -293,6 +293,7 @@ class DynamoClaimAtomicTests(unittest.TestCase):
         self.assertIn('"reasons": {"beds24_auth_unavailable": 1}', workflow)
         self.assertIn('"authStatus": "unavailable"', workflow)
         self.assertIn("/tmp/aumara-guest-journey-shadow/summary.json", workflow)
+        self.assertIn("python - <<'PY'\n          import datetime as dt", workflow)
 
     def test_documented_module_entrypoint_resolves(self) -> None:
         result = subprocess.run(
