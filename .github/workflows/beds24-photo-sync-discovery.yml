@@ -139,7 +139,7 @@ jobs:
                   receipt['auth_mode']=auth_mode
                   status, body = request_json('https://beds24.com/api/v2/properties', headers={'accept':'application/json','token':access_token})
               else:
-                  receipt['status']='AUTH_FAILED'
+                  receipt['status']='TOKEN_EXCHANGE_FAILED'
           else:
               receipt['status']='MISSING_MATCH'
               exit_code=2
