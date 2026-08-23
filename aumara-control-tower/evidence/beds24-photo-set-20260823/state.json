@@ -1,0 +1,12 @@
+{
+  "expected_by_category": {
+    "chalet": 3,
+    "common": 14,
+    "superior": 1
+  },
+  "expected_total": 18,
+  "property_id": 324882,
+  "secret_exposed": false,
+  "status": "STARTING",
+  "updated_at_utc": "2026-08-23T00:27:05.986794+00:00"
+}
