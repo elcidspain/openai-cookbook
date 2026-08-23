@@ -1,0 +1,106 @@
+name: Beds24 approved AUMARA photo set 2026-08-23
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'aumara-control-tower/triggers/beds24-photo-set-20260823.txt'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: beds24-approved-photo-set-324882
+  cancel-in-progress: false
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    environment: Production
+    env:
+      BEDS24_VAULT_KEK: ${{ secrets.BEDS24_REFRESH_CREDENTIAL }}
+      BEDS24_USERNAME: ${{ secrets.BEDS24_USERNAME }}
+      BEDS24_USER: ${{ secrets.BEDS24_USER }}
+      BEDS24_LOGIN: ${{ secrets.BEDS24_LOGIN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install browser and media dependencies
+        run: |
+          pip install --disable-pip-version-check 'gdown>=5.2,<6' 'pillow>=11,<12' 'playwright>=1.55,<2' cryptography
+          playwright install --with-deps chromium
+      - name: Reuse hardened Beds24 UI uploader with the approved 18-photo set
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import pathlib, re, textwrap
+
+          workflow = pathlib.Path('.github/workflows/beds24-ui-photo-upload-handshake.yml').read_text(encoding='utf-8')
+          match = re.search(r"python3 - <<'PY'\n(?P<body>.*?)\n\s*PY\n", workflow, re.S)
+          if not match:
+              raise SystemExit('Canonical Beds24 UI uploader Python block not found')
+          script = textwrap.dedent(match.group('body'))
+
+          start = script.index('# Exact approved media manifest.')
+          end = script.index('\n\nresult=', start)
+          replacement = r'''# Exact approved media set supplied by owner on 2026-08-23.
+          import shutil, zipfile
+          expected={'common':14,'chalet':3,'superior':1}
+          zip_manifest=[
+              ('common','AUMARA_COMMON_14.zip','1nKYEWf7wt-dKyMSqn7cGBZY1Fsqfnh5j'),
+              ('chalet','AUMARA_CHALET_3.zip','1q2EgyxM0jaGdoIrZMHRFIRmU4Z53CDgg'),
+              ('superior','AUMARA_SUPERIOR_1.zip','1Det-7VAFrXW47F2zO8sh87De3unKRz49'),
+          ]
+          for p in (SOURCE,UPLOAD):
+              if p.exists(): shutil.rmtree(p)
+              p.mkdir(parents=True,exist_ok=True)
+          records=[]; seq=0
+          for category,zip_name,file_id in zip_manifest:
+              archive=SOURCE/zip_name
+              if not gdown.download(id=file_id,output=str(archive),quiet=False):
+                  raise SystemExit(f'Drive ZIP download failed: {zip_name}')
+              out=SOURCE/category; out.mkdir(parents=True,exist_ok=True)
+              with zipfile.ZipFile(archive) as zf:
+                  members=[n for n in zf.namelist() if not n.endswith('/')]
+                  if any(n.startswith('/') or '..' in pathlib.PurePosixPath(n).parts for n in members):
+                      raise SystemExit(f'Unsafe ZIP members: {zip_name}')
+                  if len(members)!=expected[category]:
+                      raise SystemExit(f'{zip_name}: expected {expected[category]} files, got {len(members)}')
+                  zf.extractall(out)
+              photos=sorted(p for p in out.rglob('*') if p.is_file() and p.suffix.lower() in ('.jpg','.jpeg','.png','.webp'))
+              if len(photos)!=expected[category]:
+                  raise SystemExit(f'{category}: expected {expected[category]} images, got {len(photos)}')
+              for src in photos:
+                  seq+=1; raw=src.read_bytes()
+                  if len(raw)<50000: raise SystemExit(f'Image too small: {src.name}')
+                  with Image.open(src) as opened: image=ImageOps.exif_transpose(opened).convert('RGB'); original=image.size
+                  if max(image.size)>2560: image.thumbnail((2560,2560),Image.Resampling.LANCZOS)
+                  safe_stem=re.sub(r'[^A-Za-z0-9._-]+','_',src.stem)[:80]
+                  target=UPLOAD/f'{seq:02d}_{category}_{safe_stem}.png'
+                  while True:
+                      image.save(target,'PNG',optimize=True,compress_level=9)
+                      if target.stat().st_size<=4_800_000: break
+                      if min(image.size)<=900: raise SystemExit(f'PNG too large: {src.name}')
+                      image=image.resize((int(image.width*.9),int(image.height*.9)),Image.Resampling.LANCZOS)
+                  records.append({'category':category,'source':src.name,'upload':target.name,'source_size':original,'upload_size':image.size,'crop':False})
+          if len(list(UPLOAD.glob('*.png')))!=18: raise SystemExit('Expected exactly 18 approved photos')
+          (EVIDENCE/'manifest.json').write_text(json.dumps(records,indent=2)+'\n',encoding='utf-8')'''
+          script = script[:start] + textwrap.dedent(replacement) + script[end:]
+          script = script.replace("EVIDENCE=ROOT/'aumara-control-tower/evidence/beds24-ui-upload'", "EVIDENCE=ROOT/'aumara-control-tower/evidence/beds24-photo-set-20260823'")
+          script = script.replace("'photos':10", "'photos':18")
+          script = script.replace("after>=before+10", "after>=before+18")
+          script = script.replace("len(hits)==10", "len(hits)==18")
+          script = script.replace("len(success_writes)>=10", "len(success_writes)>=18")
+          script = script.replace("uploaded=10", "uploaded=18")
+          script = script.replace("'uploaded':10", "'uploaded':18")
+          script = script.replace("if file_input.get_attribute('multiple') is not None:\n                      file_input.set_input_files([str(x) for x in photos]); button=page.locator(upload_button).first\n                      if button.count() and button.is_visible(): button.click()\n                      page.wait_for_timeout(15000)", "if file_input.get_attribute('multiple') is not None:\n                      for batch_start in range(0,len(photos),10):\n                          batch=photos[batch_start:batch_start+10]\n                          page.locator(\"input[type='file']\").first.set_input_files([str(x) for x in batch]); button=page.locator(upload_button).first\n                          if button.count() and button.is_visible(): button.click()\n                          page.wait_for_timeout(15000)")
+
+          runtime = pathlib.Path('/tmp/beds24-photo-set-runtime.py')
+          runtime.write_text(script,encoding='utf-8')
+          compile(script,str(runtime),'exec')
+          exec(compile(script,str(runtime),'exec'),{'__name__':'__main__','__file__':str(runtime)})
+          PY
