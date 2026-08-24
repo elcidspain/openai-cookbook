@@ -127,7 +127,7 @@ jobs:
                 + "\n",
                 encoding="utf-8",
             )
-            PY
+          PY
           else
             cat "$auth_error_log" >&2
             exit 1
