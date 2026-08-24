@@ -27,12 +27,12 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Read current property and channel content
+      - name: Read current property, channel content and room prices
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          import datetime as dt, json, os, pathlib, subprocess, time, urllib.error, urllib.request
+          import datetime as dt, json, os, pathlib, statistics, subprocess, time, urllib.error, urllib.request
 
           api=(os.environ.get('BEDS24_API_KEY') or '').strip()
           prop=(os.environ.get('BEDS24_PROP_KEY') or '').strip()
@@ -69,12 +69,55 @@ jobs:
               'includeVrbo':False
           })
 
+          today=dt.date.today()
+          date_from=today.strftime('%Y%m%d')
+          date_to=(today+dt.timedelta(days=180)).strftime('%Y%m%d')
+          room_dates={}
+          price_summary={}
+          for rid in (674465,674466):
+              time.sleep(2)
+              data=post('getRoomDates',{
+                  'authentication':auth,
+                  'roomId':rid,
+                  'from':date_from,
+                  'to':date_to,
+                  'incMaxStay':1,
+                  'incMultiplier':1,
+                  'incOverride':1
+              })
+              room_dates[str(rid)]=data
+              vals=[]
+              rows={f'p{i}':[] for i in range(1,17)}
+              if isinstance(data,dict):
+                  for _,day in data.items():
+                      if not isinstance(day,dict):
+                          continue
+                      for key in rows:
+                          try:
+                              v=float(day.get(key) or 0)
+                          except (TypeError,ValueError):
+                              v=0
+                          if v>0:
+                              rows[key].append(v); vals.append(v)
+              price_summary[str(rid)]={
+                  'all_positive_min':min(vals) if vals else None,
+                  'all_positive_median':statistics.median(vals) if vals else None,
+                  'all_positive_max':max(vals) if vals else None,
+                  'price_rows':{
+                      k:{'count':len(v),'min':min(v) if v else None,'median':statistics.median(v) if v else None,'max':max(v) if v else None}
+                      for k,v in rows.items() if v
+                  }
+              }
+
           out={
-              'schema':'aumara.beds24-content-audit.v1',
+              'schema':'aumara.beds24-content-audit.v2',
               'checked_at_utc':dt.datetime.now(dt.timezone.utc).isoformat(),
               'property_id':pid,
               'setup':setup,
               'content':content,
+              'room_dates_window':{'from':date_from,'to':date_to},
+              'room_dates':room_dates,
+              'price_summary':price_summary,
               'secret_exposed':False
           }
           text=json.dumps(out,ensure_ascii=False,indent=2,sort_keys=True)
@@ -88,8 +131,8 @@ jobs:
           subprocess.run(['git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com'],check=True)
           subprocess.run(['git','add',str(path)],check=True)
           if subprocess.run(['git','diff','--cached','--quiet'],check=False).returncode != 0:
-              subprocess.run(['git','commit','-m','Record AUMARA Beds24 content audit [skip ci]'],check=True)
+              subprocess.run(['git','commit','-m','Record AUMARA Beds24 content and rate audit [skip ci]'],check=True)
               subprocess.run(['git','pull','--rebase','origin','main'],check=True)
               subprocess.run(['git','push','origin','HEAD:main'],check=True)
-          print(json.dumps({'status':'SUCCESS','evidence':str(path),'property_id':pid}))
+          print(json.dumps({'status':'SUCCESS','evidence':str(path),'property_id':pid,'price_summary':price_summary},ensure_ascii=False))
           PY
