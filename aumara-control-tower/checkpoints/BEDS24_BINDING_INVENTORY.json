@@ -1,6 +1,6 @@
 {
   "schema": "aumara.beds24-binding-inventory",
-  "checked_at_utc": "2026-08-24T23:29:06Z",
+  "checked_at_utc": "2026-08-24T23:49:50Z",
   "interesting_secret_names": [
     "AWS_ACCESS_KEY_ID",
     "AWS_SECRET_ACCESS_KEY",
