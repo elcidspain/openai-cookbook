@@ -1,0 +1,108 @@
+name: Beds24 Airbnb photo map final cleanup AUMARA 2026-08-25
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/beds24-airbnb-photo-map-final-cleanup-20260825.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: Production
+    env:
+      BEDS24_API_KEY: ${{ secrets.BEDS24_API_KEY }}
+      BEDS24_PROP_KEY: ${{ secrets.BEDS24_PROP_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Clear proven duplicate slots 27-44 and verify exact gallery map
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, time, urllib.error, urllib.request
+
+          api=(os.environ.get('BEDS24_API_KEY') or '').strip()
+          prop=(os.environ.get('BEDS24_PROP_KEY') or '').strip()
+          if not api or not prop: raise SystemExit('Beds24 V1 credentials missing')
+          print(f'::add-mask::{api}'); print(f'::add-mask::{prop}')
+          auth={'apiKey':api,'propKey':prop}
+
+          def post(path,payload):
+              req=urllib.request.Request('https://api.beds24.com/json/'+path,data=json.dumps(payload).encode(),headers={'Content-Type':'application/json','Accept':'application/json','User-Agent':'AUMARA-Control-Tower/1.0'},method='POST')
+              try:
+                  with urllib.request.urlopen(req,timeout=90) as r: raw=r.read(); status=int(r.status)
+              except urllib.error.HTTPError as e: raw=e.read(); status=int(e.code)
+              data=json.loads(raw.decode('utf-8','replace')) if raw else {}
+              if not 200 <= status < 300: raise SystemExit(f'{path} HTTP {status}: {str(data)[:1000]}')
+              return data
+
+          def read_root():
+              data=post('getPropertyContent',{'authentication':auth,'bookingData':False,'images':True,'roomIds':True,'texts':False,'includeAirbnb':True,'includeVrbo':False})
+              return (data.get('getPropertyContent') or [{}])[0]
+
+          before=read_root()
+          room_ids=before.get('roomIds') or {}
+          for rid in ('674465','674466'):
+              airbnb=((room_ids.get(rid) or {}).get('airbnb') or {})
+              if not str(airbnb.get('listingId') or '').strip(): raise SystemExit(f'{rid}: missing Airbnb listingId')
+              if str(airbnb.get('publish') or '').lower()!='no': raise SystemExit(f'{rid}: publish gate is not NO')
+
+          external=((before.get('images') or {}).get('external') or {})
+          duplicate_slots=[]
+          for slot in range(27,45):
+              row=external.get(str(slot)) or {}
+              if str(row.get('url') or '').strip(): duplicate_slots.append(str(slot))
+          if duplicate_slots != [str(i) for i in range(27,45)]:
+              raise SystemExit(f'Expected proven duplicate slots 27-44 active, got {duplicate_slots}')
+
+          clear={str(i):{'url':''} for i in range(27,45)}
+          response=post('setPropertyContent',{'authentication':auth,'setPropertyContent':[{'action':'modify','images':{'external':clear}}]})
+          time.sleep(5)
+          after=read_root()
+          actual=((after.get('images') or {}).get('external') or {})
+
+          uncleared=[slot for slot in clear if str((actual.get(slot) or {}).get('url') or '').strip()]
+          by_room={'674465':[],'674466':[]}
+          active_slots=[]
+          for slot,row in actual.items():
+              if not isinstance(row,dict): continue
+              url=str(row.get('url') or '').strip()
+              if not url: continue
+              mapped=False
+              for m in row.get('map') or []:
+                  if not isinstance(m,dict): continue
+                  rid=str(m.get('roomId') or '')
+                  if rid in by_room:
+                      mapped=True
+                      by_room[rid].append({'slot':str(slot),'position':str(m.get('position') or ''),'url':url})
+              if mapped: active_slots.append(str(slot))
+
+          positions={rid:sorted(int(x['position']) for x in entries if x['position'].isdigit()) for rid,entries in by_room.items()}
+          expected={'674465':list(range(1,18)),'674466':list(range(1,16))}
+          counts={rid:len(entries) for rid,entries in by_room.items()}
+          expected_active=[str(i) for i in range(81,99)]
+          active_slots_sorted=sorted(active_slots,key=lambda x:int(x))
+
+          blockers=[]
+          if uncleared: blockers.append({'uncleared_duplicate_slots':uncleared})
+          if positions!=expected: blockers.append({'positions':positions,'expected':expected})
+          if counts!={'674465':17,'674466':15}: blockers.append({'counts':counts})
+          if active_slots_sorted!=expected_active: blockers.append({'active_slots':active_slots_sorted,'expected':expected_active})
+
+          after_rooms=after.get('roomIds') or {}
+          state={}
+          for rid in ('674465','674466'):
+              a=((after_rooms.get(rid) or {}).get('airbnb') or {})
+              state[rid]={'listingId':a.get('listingId'),'publish':a.get('publish'),'picturesFrom':a.get('picturesFrom')}
+              if str(a.get('publish') or '').lower()!='no': blockers.append({rid:'publish gate changed'})
+
+          result={'status':'SUCCESS' if not blockers else 'FAILED_READBACK','cleared_slots':list(range(27,45)),'active_slots':active_slots_sorted,'counts':counts,'positions':positions,'airbnb_state':state,'blockers':blockers,'write_response':response}
+          print('FINAL_CLEANUP_RESULT='+json.dumps(result,separators=(',',':'),ensure_ascii=False))
+          if blockers: raise SystemExit(1)
+          PY
