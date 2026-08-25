@@ -1,0 +1,63 @@
+name: Beds24 Airbnb operational fast write AUMARA 2026-08-25
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/beds24-airbnb-operational-fast-write-20260825.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  write:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: Production
+    env:
+      BEDS24_API_KEY: ${{ secrets.BEDS24_API_KEY }}
+      BEDS24_PROP_KEY: ${{ secrets.BEDS24_PROP_KEY }}
+    steps:
+      - name: Apply deterministic operational fields and verify
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, re, time, urllib.error, urllib.request
+          api=(os.environ.get('BEDS24_API_KEY') or '').strip(); prop=(os.environ.get('BEDS24_PROP_KEY') or '').strip()
+          if not api or not prop: raise SystemExit('Beds24 credentials missing')
+          print(f'::add-mask::{api}'); print(f'::add-mask::{prop}')
+          auth={'apiKey':api,'propKey':prop}
+          wanted={
+            '674465':{
+              'cleaningFee':'20.00',
+              'checkInText':'El check-in se realiza en Aumara El Cid. El equipo estará disponible para recibirte y ayudarte con el acceso al chalet. El día de llegada recibirás la información final de acceso y contacto. Si tu hora prevista cambia, avísanos por el chat de Airbnb.',
+              'houseManualText':'Bienvenido a Aumara El Cid. El chalet dispone de Wi-Fi, aire acondicionado, baño privado y zona de cocina compacta con nevera, microondas, hervidor, cafetera, fregadero y menaje. La piscina, el jardín y las zonas exteriores son compartidos con otros huéspedes. Respeta las horas de descanso y las zonas comunes. Todos los alojamientos son para no fumadores.'},
+            '674466':{
+              'cleaningFee':'20.00',
+              'checkInText':'El check-in se realiza en Aumara El Cid. El equipo estará disponible para recibirte y ayudarte con el acceso al Chalet Superior. El día de llegada recibirás la información final de acceso y contacto. Si tu hora prevista cambia, avísanos por el chat de Airbnb.',
+              'houseManualText':'Bienvenido a Aumara El Cid. El Chalet Superior dispone de dos dormitorios, dos baños, Wi-Fi, aire acondicionado y zona de cocina con nevera, microondas, hervidor, cafetera, fregadero y menaje. La piscina, el jardín y las zonas exteriores son compartidos con otros huéspedes. Respeta las horas de descanso y las zonas comunes. Todos los alojamientos son para no fumadores.'}}
+          def post(path,payload):
+            req=urllib.request.Request('https://api.beds24.com/json/'+path,data=json.dumps(payload,ensure_ascii=False).encode(),headers={'Content-Type':'application/json','Accept':'application/json'},method='POST')
+            try:
+              with urllib.request.urlopen(req,timeout=60) as r: body=r.read(); status=r.status
+            except urllib.error.HTTPError as e: body=e.read(); status=e.code
+            data=json.loads(body.decode('utf-8','replace')) if body else {}
+            if not 200 <= int(status) < 300: raise SystemExit(f'{path} HTTP {status}: {str(data)[:1000]}')
+            return data
+          def read(): return (post('getPropertyContent',{'authentication':auth,'bookingData':False,'images':False,'roomIds':True,'texts':True,'includeAirbnb':True,'includeVrbo':False}).get('getPropertyContent') or [{}])[0]
+          before=read(); changes={'action':'modify','roomIds':{}}
+          for rid,w in wanted.items():
+            room=(before.get('roomIds') or {}).get(rid) or {}; air=room.get('airbnb') or {}; current=str(air.get('custom') or '')
+            lines=[x for x in current.splitlines() if x.strip() and not re.match(r'^\s*CLEANINGFEE\b',x,re.I)]; lines.append('CLEANINGFEE 20'); custom='\n'.join(lines)
+            w['custom']=custom
+            changes['roomIds'][rid]={'cleaningFee':'20.00','airbnb':{'checkInText':w['checkInText'],'houseManualText':w['houseManualText'],'custom':custom}}
+          wr=post('setPropertyContent',{'authentication':auth,'setPropertyContent':[changes]}); time.sleep(4); after=read(); mismatches=[]; snapshot={}
+          for rid,w in wanted.items():
+            room=(after.get('roomIds') or {}).get(rid) or {}; air=room.get('airbnb') or {}; got={'cleaningFee':str(room.get('cleaningFee') or ''),'checkInText':str(air.get('checkInText') or ''),'houseManualText':str(air.get('houseManualText') or ''),'custom':str(air.get('custom') or '')}; snapshot[rid]=got
+            for k,v in w.items():
+              if got[k]!=v: mismatches.append({'roomId':rid,'field':k,'wanted':v,'got':got[k]})
+          print(json.dumps({'status':'SUCCESS' if not mismatches else 'FAILED_READBACK','write_response':wr,'after':snapshot,'mismatches':mismatches},ensure_ascii=False))
+          if mismatches: raise SystemExit(1)
+          PY
