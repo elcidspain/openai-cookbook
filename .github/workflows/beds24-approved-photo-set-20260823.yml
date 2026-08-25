@@ -1,0 +1,39 @@
+name: Beds24 approved AUMARA photo set 2026-08-23
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/beds24-approved-photo-set-20260823.yml'
+      - 'aumara-control-tower/scripts/beds24_upload_approved_photo_set.py'
+      - 'aumara-control-tower/triggers/beds24-photo-set-20260823.txt'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: beds24-approved-photo-set-324882
+  cancel-in-progress: false
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    environment: Production
+    env:
+      BEDS24_VAULT_KEK: ${{ secrets.BEDS24_REFRESH_CREDENTIAL }}
+      BEDS24_USERNAME: ${{ secrets.BEDS24_USERNAME }}
+      BEDS24_PASSWORD: ${{ secrets.BEDS24_PASSWORD }}
+      BEDS24_USER: ${{ secrets.BEDS24_USER }}
+      BEDS24_LOGIN: ${{ secrets.BEDS24_LOGIN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install browser and media dependencies
+        run: |
+          pip install --disable-pip-version-check 'gdown>=5.2,<6' 'pillow>=11,<12' 'playwright>=1.55,<2' cryptography
+          playwright install --with-deps chromium
+      - name: Upload approved 18-photo set and verify readback
+        run: python3 aumara-control-tower/scripts/beds24_upload_approved_photo_set.py

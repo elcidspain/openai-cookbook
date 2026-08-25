@@ -1,0 +1,917 @@
+{
+  "active_mappings": [
+    {
+      "position": "1",
+      "roomId": "674465",
+      "slot": "1",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/01_01_FULL_no_crop.jpg"
+    },
+    {
+      "position": "1",
+      "roomId": "674466",
+      "slot": "1",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/01_01_FULL_no_crop.jpg"
+    },
+    {
+      "position": "2",
+      "roomId": "674465",
+      "slot": "2",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/02_02_FULL_no_crop.jpg"
+    },
+    {
+      "position": "2",
+      "roomId": "674466",
+      "slot": "2",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/02_02_FULL_no_crop.jpg"
+    },
+    {
+      "position": "3",
+      "roomId": "674465",
+      "slot": "3",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/03_03_FULL_no_crop.jpg"
+    },
+    {
+      "position": "3",
+      "roomId": "674466",
+      "slot": "3",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/03_03_FULL_no_crop.jpg"
+    },
+    {
+      "position": "4",
+      "roomId": "674465",
+      "slot": "4",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/04_04_FULL_no_crop.jpg"
+    },
+    {
+      "position": "4",
+      "roomId": "674466",
+      "slot": "4",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/04_04_FULL_no_crop.jpg"
+    },
+    {
+      "position": "5",
+      "roomId": "674465",
+      "slot": "5",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/05_06_FULL_no_crop.jpg"
+    },
+    {
+      "position": "5",
+      "roomId": "674466",
+      "slot": "5",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/05_06_FULL_no_crop.jpg"
+    },
+    {
+      "position": "6",
+      "roomId": "674465",
+      "slot": "6",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/06_08_FULL_no_crop.jpg"
+    },
+    {
+      "position": "6",
+      "roomId": "674466",
+      "slot": "6",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/06_08_FULL_no_crop.jpg"
+    },
+    {
+      "position": "7",
+      "roomId": "674465",
+      "slot": "7",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/07_IMG_0005.jpg"
+    },
+    {
+      "position": "7",
+      "roomId": "674466",
+      "slot": "7",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/07_IMG_0005.jpg"
+    },
+    {
+      "position": "8",
+      "roomId": "674465",
+      "slot": "8",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/08_IMG_0006.jpg"
+    },
+    {
+      "position": "8",
+      "roomId": "674466",
+      "slot": "8",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/08_IMG_0006.jpg"
+    },
+    {
+      "position": "9",
+      "roomId": "674465",
+      "slot": "9",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/09_IMG_0007.jpg"
+    },
+    {
+      "position": "9",
+      "roomId": "674466",
+      "slot": "9",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/09_IMG_0007.jpg"
+    },
+    {
+      "position": "10",
+      "roomId": "674465",
+      "slot": "10",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/10_IMG_0008.jpg"
+    },
+    {
+      "position": "10",
+      "roomId": "674466",
+      "slot": "10",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/10_IMG_0008.jpg"
+    },
+    {
+      "position": "11",
+      "roomId": "674465",
+      "slot": "11",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/11_IMG_0009.jpg"
+    },
+    {
+      "position": "11",
+      "roomId": "674466",
+      "slot": "11",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/11_IMG_0009.jpg"
+    },
+    {
+      "position": "12",
+      "roomId": "674465",
+      "slot": "12",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/12_IMG_0010.jpg"
+    },
+    {
+      "position": "12",
+      "roomId": "674466",
+      "slot": "12",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/12_IMG_0010.jpg"
+    },
+    {
+      "position": "13",
+      "roomId": "674465",
+      "slot": "13",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/13_IMG_0011.jpg"
+    },
+    {
+      "position": "13",
+      "roomId": "674466",
+      "slot": "13",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/13_IMG_0011.jpg"
+    },
+    {
+      "position": "14",
+      "roomId": "674465",
+      "slot": "14",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/14_IMG_0012.jpg"
+    },
+    {
+      "position": "14",
+      "roomId": "674466",
+      "slot": "14",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/14_IMG_0012.jpg"
+    },
+    {
+      "position": "15",
+      "roomId": "674465",
+      "slot": "15",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/chalet/01_AUMARA_Chalet_Sunset_v01.jpg"
+    },
+    {
+      "position": "16",
+      "roomId": "674465",
+      "slot": "16",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/chalet/02_AUMARA_Night_Forest_Chalets_v01.jpg"
+    },
+    {
+      "position": "9",
+      "roomId": "674466",
+      "slot": "16",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/chalet/02_AUMARA_Night_Forest_Chalets_v01.jpg"
+    },
+    {
+      "position": "17",
+      "roomId": "674465",
+      "slot": "17",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/chalet/03_AUMARA_Night_Moon_Chalets_v01.jpg"
+    },
+    {
+      "position": "15",
+      "roomId": "674466",
+      "slot": "18",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/superior/01_AUMARA_Superior_Chalet_Blue_Hour_v01.jpg"
+    },
+    {
+      "position": "1",
+      "roomId": "674465",
+      "slot": "27",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/01-common-01.jpg"
+    },
+    {
+      "position": "1",
+      "roomId": "674466",
+      "slot": "27",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/01-common-01.jpg"
+    },
+    {
+      "position": "2",
+      "roomId": "674465",
+      "slot": "28",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/02-common-02.jpg"
+    },
+    {
+      "position": "2",
+      "roomId": "674466",
+      "slot": "28",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/02-common-02.jpg"
+    },
+    {
+      "position": "3",
+      "roomId": "674465",
+      "slot": "29",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/03-common-03.jpg"
+    },
+    {
+      "position": "3",
+      "roomId": "674466",
+      "slot": "29",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/03-common-03.jpg"
+    },
+    {
+      "position": "4",
+      "roomId": "674465",
+      "slot": "30",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/04-common-04.jpg"
+    },
+    {
+      "position": "4",
+      "roomId": "674466",
+      "slot": "30",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/04-common-04.jpg"
+    },
+    {
+      "position": "5",
+      "roomId": "674465",
+      "slot": "31",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/05-common-05.jpg"
+    },
+    {
+      "position": "5",
+      "roomId": "674466",
+      "slot": "31",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/05-common-05.jpg"
+    },
+    {
+      "position": "6",
+      "roomId": "674465",
+      "slot": "32",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/06-common-06.jpg"
+    },
+    {
+      "position": "6",
+      "roomId": "674466",
+      "slot": "32",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/06-common-06.jpg"
+    },
+    {
+      "position": "7",
+      "roomId": "674465",
+      "slot": "33",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/07-common-07.jpg"
+    },
+    {
+      "position": "7",
+      "roomId": "674466",
+      "slot": "33",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/07-common-07.jpg"
+    },
+    {
+      "position": "8",
+      "roomId": "674465",
+      "slot": "34",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/08-common-08.jpg"
+    },
+    {
+      "position": "8",
+      "roomId": "674466",
+      "slot": "34",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/08-common-08.jpg"
+    },
+    {
+      "position": "9",
+      "roomId": "674465",
+      "slot": "35",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/09-common-09.jpg"
+    },
+    {
+      "position": "9",
+      "roomId": "674466",
+      "slot": "35",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/09-common-09.jpg"
+    },
+    {
+      "position": "10",
+      "roomId": "674465",
+      "slot": "36",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/10-common-10.jpg"
+    },
+    {
+      "position": "10",
+      "roomId": "674466",
+      "slot": "36",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/10-common-10.jpg"
+    },
+    {
+      "position": "11",
+      "roomId": "674465",
+      "slot": "37",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/11-common-11.jpg"
+    },
+    {
+      "position": "11",
+      "roomId": "674466",
+      "slot": "37",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/11-common-11.jpg"
+    },
+    {
+      "position": "12",
+      "roomId": "674465",
+      "slot": "38",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/12-common-12.jpg"
+    },
+    {
+      "position": "12",
+      "roomId": "674466",
+      "slot": "38",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/12-common-12.jpg"
+    },
+    {
+      "position": "13",
+      "roomId": "674465",
+      "slot": "39",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/13-common-13.jpg"
+    },
+    {
+      "position": "13",
+      "roomId": "674466",
+      "slot": "39",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/13-common-13.jpg"
+    },
+    {
+      "position": "14",
+      "roomId": "674465",
+      "slot": "40",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/14-common-14.jpg"
+    },
+    {
+      "position": "14",
+      "roomId": "674466",
+      "slot": "40",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/14-common-14.jpg"
+    },
+    {
+      "position": "15",
+      "roomId": "674465",
+      "slot": "41",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/15-chalet-01.jpg"
+    },
+    {
+      "position": "16",
+      "roomId": "674465",
+      "slot": "42",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/16-chalet-02.jpg"
+    },
+    {
+      "position": "17",
+      "roomId": "674465",
+      "slot": "43",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/17-chalet-03.jpg"
+    },
+    {
+      "position": "15",
+      "roomId": "674466",
+      "slot": "44",
+      "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/18-superior-01.jpg"
+    }
+  ],
+  "active_room_photo_counts": {
+    "674465": 34,
+    "674466": 31
+  },
+  "airbnb_state": {
+    "674465": {
+      "listingId": "1759764557896676605",
+      "listingType": "entire_home",
+      "picturesFrom": "rop",
+      "propertyTypeGroup": "houses",
+      "publish": "no"
+    },
+    "674466": {
+      "listingId": "1759764847919085354",
+      "listingType": "entire_home",
+      "picturesFrom": "rop",
+      "propertyTypeGroup": "houses",
+      "publish": "no"
+    }
+  },
+  "asset_commit": "3004659e6b77a5a3bec50c41acad7734ce059ea1",
+  "checked_at_utc": "2026-08-25T00:54:00.114940+00:00",
+  "clean_slots": [
+    27,
+    44
+  ],
+  "mismatches": [
+    {
+      "field": "old_url_not_blank",
+      "got": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/01_01_FULL_no_crop.jpg",
+      "slot": "1"
+    },
+    {
+      "field": "old_url_not_blank",
+      "got": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/02_02_FULL_no_crop.jpg",
+      "slot": "2"
+    },
+    {
+      "field": "old_url_not_blank",
+      "got": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/03_03_FULL_no_crop.jpg",
+      "slot": "3"
+    },
+    {
+      "field": "old_url_not_blank",
+      "got": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/04_04_FULL_no_crop.jpg",
+      "slot": "4"
+    },
+    {
+      "field": "old_url_not_blank",
+      "got": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/05_06_FULL_no_crop.jpg",
+      "slot": "5"
+    },
+    {
+      "field": "old_url_not_blank",
+      "got": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/06_08_FULL_no_crop.jpg",
+      "slot": "6"
+    },
+    {
+      "field": "old_url_not_blank",
+      "got": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/07_IMG_0005.jpg",
+      "slot": "7"
+    },
+    {
+      "field": "old_url_not_blank",
+      "got": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/08_IMG_0006.jpg",
+      "slot": "8"
+    },
+    {
+      "field": "old_url_not_blank",
+      "got": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/09_IMG_0007.jpg",
+      "slot": "9"
+    },
+    {
+      "field": "old_url_not_blank",
+      "got": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/10_IMG_0008.jpg",
+      "slot": "10"
+    },
+    {
+      "field": "old_url_not_blank",
+      "got": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/11_IMG_0009.jpg",
+      "slot": "11"
+    },
+    {
+      "field": "old_url_not_blank",
+      "got": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/12_IMG_0010.jpg",
+      "slot": "12"
+    },
+    {
+      "field": "old_url_not_blank",
+      "got": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/13_IMG_0011.jpg",
+      "slot": "13"
+    },
+    {
+      "field": "old_url_not_blank",
+      "got": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/14_IMG_0012.jpg",
+      "slot": "14"
+    },
+    {
+      "field": "old_url_not_blank",
+      "got": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/chalet/01_AUMARA_Chalet_Sunset_v01.jpg",
+      "slot": "15"
+    },
+    {
+      "field": "old_url_not_blank",
+      "got": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/chalet/02_AUMARA_Night_Forest_Chalets_v01.jpg",
+      "slot": "16"
+    },
+    {
+      "field": "old_url_not_blank",
+      "got": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/chalet/03_AUMARA_Night_Moon_Chalets_v01.jpg",
+      "slot": "17"
+    },
+    {
+      "field": "old_url_not_blank",
+      "got": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/superior/01_AUMARA_Superior_Chalet_Blue_Hour_v01.jpg",
+      "slot": "18"
+    },
+    {
+      "field": "active_room_counts",
+      "got": {
+        "674465": 34,
+        "674466": 31
+      },
+      "wanted": {
+        "674465": 17,
+        "674466": 15
+      }
+    }
+  ],
+  "property_id": 324882,
+  "schema": "aumara.beds24-external-photo-remap.v1",
+  "secret_exposed": false,
+  "status": "FAILED_READBACK",
+  "write_response": {
+    "setPropertyContent": [
+      {
+        "images": {
+          "external": {
+            "1": {
+              "url": {
+                "success": true,
+                "val": ""
+              }
+            },
+            "10": {
+              "url": {
+                "success": true,
+                "val": ""
+              }
+            },
+            "11": {
+              "url": {
+                "success": true,
+                "val": ""
+              }
+            },
+            "12": {
+              "url": {
+                "success": true,
+                "val": ""
+              }
+            },
+            "13": {
+              "url": {
+                "success": true,
+                "val": ""
+              }
+            },
+            "14": {
+              "url": {
+                "success": true,
+                "val": ""
+              }
+            },
+            "15": {
+              "url": {
+                "success": true,
+                "val": ""
+              }
+            },
+            "16": {
+              "url": {
+                "success": true,
+                "val": ""
+              }
+            },
+            "17": {
+              "url": {
+                "success": true,
+                "val": ""
+              }
+            },
+            "18": {
+              "url": {
+                "success": true,
+                "val": ""
+              }
+            },
+            "2": {
+              "url": {
+                "success": true,
+                "val": ""
+              }
+            },
+            "27": {
+              "map": [
+                {
+                  "success": true,
+                  "val": 1
+                },
+                {
+                  "success": true,
+                  "val": 1
+                }
+              ],
+              "url": {
+                "success": true,
+                "val": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/01-common-01.jpg"
+              }
+            },
+            "28": {
+              "map": [
+                {
+                  "success": true,
+                  "val": 2
+                },
+                {
+                  "success": true,
+                  "val": 2
+                }
+              ],
+              "url": {
+                "success": true,
+                "val": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/02-common-02.jpg"
+              }
+            },
+            "29": {
+              "map": [
+                {
+                  "success": true,
+                  "val": 3
+                },
+                {
+                  "success": true,
+                  "val": 3
+                }
+              ],
+              "url": {
+                "success": true,
+                "val": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/03-common-03.jpg"
+              }
+            },
+            "3": {
+              "url": {
+                "success": true,
+                "val": ""
+              }
+            },
+            "30": {
+              "map": [
+                {
+                  "success": true,
+                  "val": 4
+                },
+                {
+                  "success": true,
+                  "val": 4
+                }
+              ],
+              "url": {
+                "success": true,
+                "val": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/04-common-04.jpg"
+              }
+            },
+            "31": {
+              "map": [
+                {
+                  "success": true,
+                  "val": 5
+                },
+                {
+                  "success": true,
+                  "val": 5
+                }
+              ],
+              "url": {
+                "success": true,
+                "val": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/05-common-05.jpg"
+              }
+            },
+            "32": {
+              "map": [
+                {
+                  "success": true,
+                  "val": 6
+                },
+                {
+                  "success": true,
+                  "val": 6
+                }
+              ],
+              "url": {
+                "success": true,
+                "val": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/06-common-06.jpg"
+              }
+            },
+            "33": {
+              "map": [
+                {
+                  "success": true,
+                  "val": 7
+                },
+                {
+                  "success": true,
+                  "val": 7
+                }
+              ],
+              "url": {
+                "success": true,
+                "val": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/07-common-07.jpg"
+              }
+            },
+            "34": {
+              "map": [
+                {
+                  "success": true,
+                  "val": 8
+                },
+                {
+                  "success": true,
+                  "val": 8
+                }
+              ],
+              "url": {
+                "success": true,
+                "val": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/08-common-08.jpg"
+              }
+            },
+            "35": {
+              "map": [
+                {
+                  "success": true,
+                  "val": 9
+                },
+                {
+                  "success": true,
+                  "val": 9
+                }
+              ],
+              "url": {
+                "success": true,
+                "val": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/09-common-09.jpg"
+              }
+            },
+            "36": {
+              "map": [
+                {
+                  "success": true,
+                  "val": 10
+                },
+                {
+                  "success": true,
+                  "val": 10
+                }
+              ],
+              "url": {
+                "success": true,
+                "val": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/10-common-10.jpg"
+              }
+            },
+            "37": {
+              "map": [
+                {
+                  "success": true,
+                  "val": 11
+                },
+                {
+                  "success": true,
+                  "val": 11
+                }
+              ],
+              "url": {
+                "success": true,
+                "val": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/11-common-11.jpg"
+              }
+            },
+            "38": {
+              "map": [
+                {
+                  "success": true,
+                  "val": 12
+                },
+                {
+                  "success": true,
+                  "val": 12
+                }
+              ],
+              "url": {
+                "success": true,
+                "val": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/12-common-12.jpg"
+              }
+            },
+            "39": {
+              "map": [
+                {
+                  "success": true,
+                  "val": 13
+                },
+                {
+                  "success": true,
+                  "val": 13
+                }
+              ],
+              "url": {
+                "success": true,
+                "val": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/13-common-13.jpg"
+              }
+            },
+            "4": {
+              "url": {
+                "success": true,
+                "val": ""
+              }
+            },
+            "40": {
+              "map": [
+                {
+                  "success": true,
+                  "val": 14
+                },
+                {
+                  "success": true,
+                  "val": 14
+                }
+              ],
+              "url": {
+                "success": true,
+                "val": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/14-common-14.jpg"
+              }
+            },
+            "41": {
+              "map": [
+                {
+                  "success": true,
+                  "val": 15
+                }
+              ],
+              "url": {
+                "success": true,
+                "val": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/15-chalet-01.jpg"
+              }
+            },
+            "42": {
+              "map": [
+                {
+                  "success": true,
+                  "val": 16
+                }
+              ],
+              "url": {
+                "success": true,
+                "val": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/16-chalet-02.jpg"
+              }
+            },
+            "43": {
+              "map": [
+                {
+                  "success": true,
+                  "val": 17
+                }
+              ],
+              "url": {
+                "success": true,
+                "val": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/17-chalet-03.jpg"
+              }
+            },
+            "44": {
+              "map": [
+                {
+                  "success": true,
+                  "val": 15
+                }
+              ],
+              "url": {
+                "success": true,
+                "val": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/18-superior-01.jpg"
+              }
+            },
+            "5": {
+              "url": {
+                "success": true,
+                "val": ""
+              }
+            },
+            "6": {
+              "url": {
+                "success": true,
+                "val": ""
+              }
+            },
+            "7": {
+              "url": {
+                "success": true,
+                "val": ""
+              }
+            },
+            "8": {
+              "url": {
+                "success": true,
+                "val": ""
+              }
+            },
+            "9": {
+              "url": {
+                "success": true,
+                "val": ""
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}

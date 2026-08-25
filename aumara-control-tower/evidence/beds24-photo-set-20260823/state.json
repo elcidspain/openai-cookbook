@@ -1,0 +1,14 @@
+{
+  "diagnostic": "Beds24 rejected username/password before second factor",
+  "expected_by_category": {
+    "chalet": 3,
+    "common": 14,
+    "superior": 1
+  },
+  "expected_total": 18,
+  "property_id": 324882,
+  "secret_exposed": false,
+  "stage": "login",
+  "status": "FAILED",
+  "updated_at_utc": "2026-08-25T01:05:24.738733+00:00"
+}

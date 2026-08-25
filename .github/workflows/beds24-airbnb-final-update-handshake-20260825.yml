@@ -1,0 +1,118 @@
+name: Beds24 Airbnb final update via encrypted handshake 2026-08-25
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/beds24-airbnb-final-update-handshake-20260825.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: beds24-airbnb-final-update-324882
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: Production
+    env:
+      BEDS24_VAULT_KEK: ${{ secrets.BEDS24_REFRESH_CREDENTIAL }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install runtime
+        run: |
+          pip install 'playwright>=1.55,<2' cryptography
+          playwright install --with-deps chromium
+
+      - name: Push AUMARA content to both Airbnb listings
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import base64, datetime as dt, hashlib, json, os, pathlib, subprocess, sys
+          from cryptography.fernet import Fernet
+          from cryptography.hazmat.primitives import hashes, serialization
+          from cryptography.hazmat.primitives.asymmetric import padding
+          from playwright.sync_api import sync_playwright
+
+          PROPERTY_ID='324882'
+          TARGETS={'674465':'1759764557896676605','674466':'1759764847919085354'}
+          USERNAME='EL CID / AUMARA'
+          ROOT=pathlib.Path('aumara-control-tower/evidence/beds24-ui-handshake')
+          OUT=pathlib.Path('aumara-control-tower/evidence/beds24-airbnb-final-update-handshake-20260825.json')
+          KEK=(os.environ.get('BEDS24_VAULT_KEK') or '').strip()
+          if not KEK: raise SystemExit('Production KEK missing')
+          print(f'::add-mask::{KEK}')
+
+          key=base64.urlsafe_b64encode(hashlib.sha256(('AUMARA_BEDS24_UI_HANDSHAKE_V1\0'+KEK).encode()).digest())
+          private_pem=Fernet(key).decrypt((ROOT/'private.enc').read_text().strip().encode())
+          private=serialization.load_pem_private_key(private_pem,password=None)
+          pwd_ct=base64.b64decode((ROOT/'password.enc').read_text().strip())
+          password=private.decrypt(pwd_ct,padding.OAEP(mgf=padding.MGF1(algorithm=hashes.SHA256()),algorithm=hashes.SHA256(),label=None)).decode().strip()
+          if not password: raise SystemExit('Decrypted Beds24 password empty')
+          print(f'::add-mask::{password}')
+
+          report={'schema':'aumara.beds24-airbnb-final-update-handshake.v1','checked_at_utc':dt.datetime.now(dt.timezone.utc).isoformat(),'property_id':324882,'targets':TARGETS,'clicked':[],'status':'STARTING','secret_exposed':False}
+          def save():
+              OUT.parent.mkdir(parents=True,exist_ok=True)
+              OUT.write_text(json.dumps(report,ensure_ascii=False,indent=2,sort_keys=True)+'\n',encoding='utf-8')
+          def fail(stage,msg):
+              report.update(status='FAILED',stage=stage,diagnostic=msg); save(); print(f'ERROR [{stage}]: {msg}',file=sys.stderr); raise SystemExit(1)
+
+          with sync_playwright() as p:
+              browser=p.chromium.launch(headless=True)
+              page=browser.new_page(viewport={'width':1600,'height':1200})
+              page.set_default_timeout(30000)
+              page.on('dialog',lambda d:d.accept())
+              page.goto('https://beds24.com/control3.php',wait_until='domcontentloaded',timeout=60000)
+              user=page.locator("input[name='username'], input[name='user'], input[autocomplete='username'], input[type='email']").first
+              if not user.count(): user=page.locator("input[type='text']").first
+              pw=page.locator("input[name='password'], input[autocomplete='current-password'], input[type='password']").first
+              if not user.count() or not pw.count(): fail('login_form','Beds24 login fields not found')
+              user.fill(USERNAME); pw.fill(password)
+              submit=page.locator("button[type='submit'], input[type='submit'], #loginButton, button:has-text('Log in'), button:has-text('Login'), button:has-text('Sign in')").first
+              if not submit.count(): fail('login_form','Beds24 login button not found')
+              submit.click(); page.wait_for_timeout(5000)
+              if page.locator("input[type='password']").count(): fail('login','Beds24 rejected encrypted UI credential')
+
+              page.goto('https://beds24.com/control3.php?pagetype=synchroniserairbnbmap',wait_until='domcontentloaded',timeout=60000)
+              page.wait_for_timeout(2500)
+              body=page.locator('body').inner_text()
+              if PROPERTY_ID not in body and 'Aumara El Cid' not in body: fail('property_gate','AUMARA 324882 not visible on Airbnb Mapping page')
+
+              for room_id,listing_id in TARGETS.items():
+                  rows=page.locator('tr')
+                  row=rows.filter(has_text=room_id).first
+                  if not row.count(): row=rows.filter(has_text=listing_id).first
+                  if not row.count(): fail('mapping_gate',f'Mapping row missing for {room_id}/{listing_id}')
+                  text=row.inner_text()
+                  if 'Everything' not in text: fail('sync_gate',f'Sync Type Everything not visible for room {room_id}')
+                  update=row.locator("button:has-text('Update'), a:has-text('Update'), input[value='Update']").first
+                  if not update.count(): fail('update_button',f'Update button missing for room {room_id}')
+                  update.click(); page.wait_for_timeout(7000)
+                  report['clicked'].append({'room_id':room_id,'listing_id':listing_id,'at_utc':dt.datetime.now(dt.timezone.utc).isoformat()})
+                  page.goto('https://beds24.com/control3.php?pagetype=synchroniserairbnbmap',wait_until='domcontentloaded',timeout=60000); page.wait_for_timeout(2000)
+
+              browser.close()
+
+          report['status']='SUCCESS'; report['completed_at_utc']=dt.datetime.now(dt.timezone.utc).isoformat(); save()
+          subprocess.run(['git','config','user.name','github-actions[bot]'],check=True)
+          subprocess.run(['git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com'],check=True)
+          subprocess.run(['git','add',str(OUT)],check=True)
+          if subprocess.run(['git','diff','--cached','--quiet'],check=False).returncode!=0:
+              subprocess.run(['git','commit','-m','Record AUMARA Airbnb handshake update SUCCESS [skip ci]'],check=True)
+              subprocess.run(['git','pull','--rebase','origin','main'],check=True)
+              subprocess.run(['git','push','origin','HEAD:main'],check=True)
+          print(json.dumps({'status':report['status'],'clicked':report['clicked']},ensure_ascii=False))
+          PY

@@ -1,0 +1,4 @@
+RUN beds24-approved-photo-set-20260823
+property_id=324882
+expected_total=18
+source=owner-approved-drive-zips
