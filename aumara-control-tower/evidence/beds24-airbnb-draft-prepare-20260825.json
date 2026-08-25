@@ -4,13 +4,13 @@
       "listingId": "1759764557896676605",
       "listingType": "entire_home",
       "propertyTypeGroup": "houses",
-      "publish": "no"
+      "publish": "yes"
     },
     "674466": {
       "listingId": "1759764847919085354",
       "listingType": "entire_home",
       "propertyTypeGroup": "houses",
-      "publish": "no"
+      "publish": "yes"
     }
   },
   "before": {
@@ -18,20 +18,20 @@
       "listingId": "1759764557896676605",
       "listingType": "entire_home",
       "propertyTypeGroup": "houses",
-      "publish": "yes"
+      "publish": "no"
     },
     "674466": {
       "listingId": "1759764847919085354",
       "listingType": "entire_home",
       "propertyTypeGroup": "houses",
-      "publish": "yes"
+      "publish": "no"
     }
   },
-  "checked_at_utc": "2026-08-25T22:18:23.632637+00:00",
+  "checked_at_utc": "2026-08-25T22:24:47.673240+00:00",
   "decision": {
     "propertyTypeGroup": "houses",
-    "publish": "no",
-    "reason": "Beds24 roomType chalet belongs to Airbnb propertyTypeGroup houses; listingType entire_home remains consistent while publish stays no for revalidation."
+    "publish": "yes",
+    "reason": "Beds24 roomType chalet now matches Airbnb propertyTypeGroup houses; publish is enabled for both corrected listings."
   },
   "mismatches": [],
   "property_id": 324882,
@@ -42,12 +42,12 @@
     "674465": {
       "listingType": "entire_home",
       "propertyTypeGroup": "houses",
-      "publish": "no"
+      "publish": "yes"
     },
     "674466": {
       "listingType": "entire_home",
       "propertyTypeGroup": "houses",
-      "publish": "no"
+      "publish": "yes"
     }
   },
   "write_response": {
