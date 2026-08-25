@@ -1,0 +1,109 @@
+{
+  "airbnb_listing_reads": [],
+  "airbnb_users": {
+    "code": 401,
+    "error": "Token not valid",
+    "success": false,
+    "type": "error"
+  },
+  "airbnb_users_http_status": 401,
+  "auth_details": {
+    "diagnostics": {
+      "requestIp": "52.159.244.83"
+    },
+    "token": "[REDACTED]",
+    "validToken": "[REDACTED]"
+  },
+  "auth_details_http_status": 200,
+  "channel_settings_attempts": [
+    {
+      "http_status": 401,
+      "query": [
+        [
+          "propertyId",
+          "324882"
+        ],
+        [
+          "roomId",
+          "674465"
+        ],
+        [
+          "roomId",
+          "674466"
+        ],
+        [
+          "channel",
+          "airbnb"
+        ]
+      ],
+      "response": {
+        "code": 401,
+        "error": "Token not valid",
+        "success": false,
+        "type": "error"
+      }
+    },
+    {
+      "http_status": 401,
+      "query": [
+        [
+          "propertyId",
+          "324882"
+        ],
+        [
+          "roomIds",
+          "674465,674466"
+        ],
+        [
+          "channel",
+          "airbnb"
+        ]
+      ],
+      "response": {
+        "code": 401,
+        "error": "Token not valid",
+        "success": false,
+        "type": "error"
+      }
+    },
+    {
+      "http_status": 401,
+      "query": [
+        [
+          "propertyId",
+          "324882"
+        ],
+        [
+          "channel",
+          "airbnb"
+        ]
+      ],
+      "response": {
+        "code": 401,
+        "error": "Token not valid",
+        "success": false,
+        "type": "error"
+      }
+    }
+  ],
+  "checked_at_utc": "2026-08-25T20:36:09.266054+00:00",
+  "listing_visibility": {
+    "674465": false,
+    "674466": false
+  },
+  "openapi_airbnb_post_excerpt": "  /channels/airbnb:\n      post:\n        summary: Alpha - Perform actions at Airbnb\n        tags:\n          - Channels - Airbnb\n        security:\n          - token: []\n          - organization: []\n        requestBody:\n          content:\n            application/json:\n              schema:\n                type: array\n                items:\n                  type: object\n                  properties:\n                    airbnbUserId: \n                      type: string\n                      nullable: true\n                    airbnbListingId: \n                      type: string\n                    roomId:\n                      type: string\n                    propertyId:\n                      type: string\n                    action: \n                        type: string\n                        enum:\n                          - \"importAsNewProperty\"\n                          - \"importToExistingProperty\"\n                          - \"connectToExistingRoom\"\n                          - \"disconnectRoom\"\n                    connect:\n                      type: string\n                      enum:\n                        - \"none\"\n                        - \"inventory\"\n                        - \"limited\"\n                        - \"full\"\n                    importBlockedDates:\n                      type: boolean\n                    importBookings:\n                      type: boolean\n              examples:\n                importAsNewProperty:\n                  summary: Import an Airbnb listing as a new property\n                  value: [\n                          {\n                            \"action\": \"importAsNewProperty\",\n                            \"airbnbUserId\": \"123456\",\n                            \"airbnbListingId\": \"789012\",\n                            \"connect\": \"full\"\n                          }\n                        ]\n                importAsNewPropertyBlockedDates:\n                  summary: Import an Airbnb listing and blocked dates\n                  value: [\n                          {\n                            \"action\": \"importAsNewProperty\",\n                            \"airbnbUserId\": \"123456\",\n                            \"airbnbListingId\": \"789012\",\n                            \"connect\": \"full\",\n                            \"importBlockedDates\": true\n                          }\n                        ]\n                importAsNewPropertyBookings:\n                  summary: Import an Airbnb listing and bookings\n                  value: [\n                          {\n                            \"action\": \"importAsNewProperty\",\n                            \"airbnbUserId\": \"123456\",\n                            \"airbnbListingId\": \"789012\",\n                            \"connect\": \"full\",\n                            \"importBlockedDates\": true,\n                            \"importBookings\": true\n                          }\n                        ]\n                importToExistingProperty:\n                  summary: Import an Airbnb listing to an existing property\n                  value: [\n                          {\n                          \"action\": \"importToExistingProperty\",\n                          \"airbnbUserId\": \"123456\",\n                          \"airbnbListingId\": \"789012\",\n                          \"connect\": \"full\",\n                          \"propertyId\": 3456789\n                         }\n                        ]\n                connectToExistingRoom:\n                  summary: Connect an Airbnb listing to an existing room\n                  value: [\n                          {\n                          \"action\": \"connectToExistingRoom\",\n                          \"airbnbUserId\": \"123456\",\n                          \"airbnbListingId\": \"789012\",\n                          \"connect\": \"full\",\n                          \"roomId\": 3456789\n                         }\n                        ]\n                disconnectRoom:\n                  summary: Disconnect a room from Airbnb\n                  value: [\n                          {\n                            \"action\": \"disconnectRoom\",\n                            \"roomId\": 12345\n                          }\n                        ]\n        responses:\n          '201':\n            description: Successful operation\n            headers:\n              X-FiveMinCreditLimit:\n                $ref: '#/components/headers/X-FiveMinCreditLimit'\n              X-FiveMinCreditLimit-ResetsIn:\n                $ref: '#/components/headers/X-FiveMinCreditLimit-ResetsIn'\n              X-FiveMinCreditLimit-Remaining:\n                $ref: '#/components/headers/X-FiveMinCreditLimit-Remaining'\n              X-RequestCost:\n                $ref: '#/components/headers/X-RequestCost'\n            content:\n              application/json:\n                schema:\n                  type: array\n                  items:\n                    allOf:\n                      - type: object\n                      - $ref: '#/components/schemas/multiplePostResponse'",
+  "openapi_diagnostic": null,
+  "openapi_http_status": 200,
+  "property_id": 324882,
+  "room_ids": [
+    "674465",
+    "674466"
+  ],
+  "schema": "aumara.beds24-airbnb-api-status.v1",
+  "secret_exposed": false,
+  "status": "SUCCESS",
+  "target_listings": {
+    "674465": "1759764557896676605",
+    "674466": "1759764847919085354"
+  }
+}
