@@ -3,14 +3,14 @@
     "674465": {
       "listingId": "1759764557896676605",
       "listingType": "private_room",
-      "picturesFrom": "p",
+      "picturesFrom": "r",
       "propertyTypeGroup": "boutique_hotels_and_more",
       "publish": "yes"
     },
     "674466": {
       "listingId": "1759764847919085354",
       "listingType": "private_room",
-      "picturesFrom": "p",
+      "picturesFrom": "r",
       "propertyTypeGroup": "boutique_hotels_and_more",
       "publish": "yes"
     }
@@ -20,18 +20,18 @@
       "listingId": "1759764557896676605",
       "listingType": "private_room",
       "picturesFrom": "p",
-      "propertyTypeGroup": "houses",
+      "propertyTypeGroup": "boutique_hotels_and_more",
       "publish": "yes"
     },
     "674466": {
       "listingId": "1759764847919085354",
       "listingType": "private_room",
       "picturesFrom": "p",
-      "propertyTypeGroup": "houses",
+      "propertyTypeGroup": "boutique_hotels_and_more",
       "publish": "yes"
     }
   },
-  "checked_at_utc": "2026-08-25T23:09:39.425213+00:00",
+  "checked_at_utc": "2026-08-25T23:10:56.994443+00:00",
   "decision": {
     "propertyTypeGroup": "boutique_hotels_and_more",
     "publish": "yes",
@@ -45,11 +45,13 @@
   "wanted": {
     "674465": {
       "listingType": "private_room",
+      "picturesFrom": "r",
       "propertyTypeGroup": "boutique_hotels_and_more",
       "publish": "yes"
     },
     "674466": {
       "listingType": "private_room",
+      "picturesFrom": "r",
       "propertyTypeGroup": "boutique_hotels_and_more",
       "publish": "yes"
     }
@@ -63,6 +65,9 @@
               "listingType": {
                 "success": true
               },
+              "picturesFrom": {
+                "success": true
+              },
               "propertyTypeGroup": {
                 "success": true
               },
@@ -74,6 +79,9 @@
           "674466": {
             "airbnb": {
               "listingType": {
+                "success": true
+              },
+              "picturesFrom": {
                 "success": true
               },
               "propertyTypeGroup": {
