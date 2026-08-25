@@ -1,19 +1,20 @@
 {
-  "schema": "aumara.airbnb-operational-content.v1",
+  "schema": "aumara.airbnb-operational-content.v2",
   "property_id": 324882,
   "language": "es",
   "property_type_policy": {
     "property_type_group": "houses",
     "property_type": "house",
     "listing_type": "entire_home",
-    "note": "Airbnb rejects the boutique grouping for this listing flow; keep the accepted Houses / House / Entire home configuration."
+    "note": "Keep the Airbnb-accepted Houses / House / Entire home configuration."
   },
   "rooms": {
     "674465": {
       "listing_name": "Chalet · Aumara El Cid",
+      "cleaning_fee_eur": 20,
       "pre_booking_message": "Gracias por elegir Aumara El Cid. Antes de reservar, confirma el número total de huéspedes y revisa las normas de la casa. La piscina y las zonas exteriores son compartidas. Todos los alojamientos son para no fumadores.",
       "check_in_instructions": "El check-in se realiza en Aumara El Cid. El equipo estará disponible para recibirte y ayudarte con el acceso al chalet. El día de llegada recibirás la información final de acceso y contacto. Si tu hora prevista cambia, avísanos por el chat de Airbnb.",
-      "house_manual": "Bienvenido a Aumara El Cid. Wi-Fi, aire acondicionado, baño privado y zona de cocina están disponibles en el chalet. La piscina, el jardín y las zonas exteriores son compartidos con otros huéspedes. Respeta las horas de descanso y las zonas comunes. Todos los alojamientos son para no fumadores.",
+      "house_manual": "Bienvenido a Aumara El Cid. El chalet dispone de Wi-Fi, aire acondicionado, baño privado y zona de cocina compacta con nevera, microondas, hervidor, cafetera, fregadero y menaje. La piscina, el jardín y las zonas exteriores son compartidos con otros huéspedes. Respeta las horas de descanso y las zonas comunes. Todos los alojamientos son para no fumadores.",
       "checkout": {
         "return_keys": "Deja las llaves según las indicaciones recibidas durante el check-in.",
         "turn_things_off": "Apaga luces, aire acondicionado y otros equipos eléctricos antes de salir.",
@@ -25,9 +26,10 @@
     },
     "674466": {
       "listing_name": "Chalet Superior · Aumara El Cid",
+      "cleaning_fee_eur": 20,
       "pre_booking_message": "Gracias por elegir Aumara El Cid. Antes de reservar, confirma el número total de huéspedes y revisa las normas de la casa. La piscina y las zonas exteriores son compartidas. Todos los alojamientos son para no fumadores.",
       "check_in_instructions": "El check-in se realiza en Aumara El Cid. El equipo estará disponible para recibirte y ayudarte con el acceso al Chalet Superior. El día de llegada recibirás la información final de acceso y contacto. Si tu hora prevista cambia, avísanos por el chat de Airbnb.",
-      "house_manual": "Bienvenido a Aumara El Cid. Wi-Fi, aire acondicionado, baño privado y zona de cocina están disponibles en el Chalet Superior. La piscina, el jardín y las zonas exteriores son compartidos con otros huéspedes. Respeta las horas de descanso y las zonas comunes. Todos los alojamientos son para no fumadores.",
+      "house_manual": "Bienvenido a Aumara El Cid. El Chalet Superior dispone de dos dormitorios, dos baños, Wi-Fi, aire acondicionado y zona de cocina con nevera, microondas, hervidor, cafetera, fregadero y menaje. La piscina, el jardín y las zonas exteriores son compartidos con otros huéspedes. Respeta las horas de descanso y las zonas comunes. Todos los alojamientos son para no fumadores.",
       "checkout": {
         "return_keys": "Deja las llaves según las indicaciones recibidas durante el check-in.",
         "turn_things_off": "Apaga luces, aire acondicionado y otros equipos eléctricos antes de salir.",
