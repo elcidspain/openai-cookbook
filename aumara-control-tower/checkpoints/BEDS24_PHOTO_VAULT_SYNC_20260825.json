@@ -1,0 +1,50 @@
+{
+  "objective": "Run canonical AUMARA 324882 10-photo transfer through encrypted refresh vault with rotated-token persistence and sanitized evidence.",
+  "status": "complete",
+  "scope": {
+    "allowed_paths": [
+      ".github/workflows/update-beds24-photos.yml",
+      ".github/workflows/beds24-photo-sync-vault-controller.yml",
+      ".github/workflows/beds24-photo-sync-vault-run.yml",
+      ".github/workflows/beds24-live-recovery-dispatch-controller.yml",
+      "aumara-control-tower/scripts/beds24_photo_vault_sync.py",
+      "aumara-control-tower/tests/test_dynamodb_claim_atomic.py",
+      "aumara-control-tower/checkpoints/BEDS24_PHOTO_VAULT_SYNC_20260825.json"
+    ],
+    "exclusions": [
+      "No external manual credential edits",
+      "No non-Beds24 feature work"
+    ]
+  },
+  "evidence": [
+    "Canonical transfer workflow now includes refresh-token auth and rotated token output hook.",
+    "Vault wrapper now reuses canonical hook when present and keeps fallback injection for older canonical code.",
+    "Dispatcher/controller accept issue title alias: 'AUMARA control: sync Beds24 photos from vault'."
+  ],
+  "changes": [
+    "Enabled `BEDS24_REFRESH_CREDENTIAL` auth path in canonical update workflow while preserving API+PROP fallback.",
+    "Added rotated refresh capture to `BEDS24_ROTATED_OUT` and sanitized auth evidence fields.",
+    "Aligned vault artifact upload paths to `${{ runner.temp }}/beds24-324882-v1/evidence.json`.",
+    "Extended workflow contract tests for title alias and refresh-vault rotation contract."
+  ],
+  "tests": [
+    {
+      "command": "python -m unittest aumara-control-tower/tests/test_dynamodb_claim_atomic.py -v",
+      "result": "pass"
+    },
+    {
+      "command": "python -m py_compile aumara-control-tower/scripts/beds24_photo_vault_sync.py",
+      "result": "pass"
+    },
+    {
+      "command": "python - <<'PY' ... regex/AST check for canonical workflow extraction, rotation hook, and 10-photo manifest",
+      "result": "pass"
+    }
+  ],
+  "stop_condition": "Requested repository changes for issue #81 completed and validated with targeted tests; no follow-on tasks started.",
+  "recovery_point": {
+    "branch": "codex/sync-beds24-photos-from-vault",
+    "commit": "38858bf",
+    "next_safe_action": "Run the vault controller workflow in GitHub Actions Production environment to execute the live transfer."
+  }
+}
