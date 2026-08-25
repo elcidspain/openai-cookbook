@@ -66,7 +66,7 @@ jobs:
               rid:{
                   'propertyTypeGroup':'houses',
                   'listingType':'entire_home',
-                  'publish':'no'
+                  'publish':'yes'
               } for rid in room_ids
           }
 
@@ -112,8 +112,8 @@ jobs:
               'checked_at_utc':dt.datetime.now(dt.timezone.utc).isoformat(),
               'decision':{
                   'propertyTypeGroup':'houses',
-                  'reason':'Beds24 roomType chalet belongs to Airbnb propertyTypeGroup houses; listingType entire_home remains consistent while publish stays no for revalidation.',
-                  'publish':'no'
+                  'reason':'Beds24 roomType chalet now matches Airbnb propertyTypeGroup houses; publish is enabled for both corrected listings.',
+                  'publish':'yes'
               },
               'before':{rid:{k:before_airbnb[rid].get(k) for k in ('propertyTypeGroup','listingType','publish','listingId')} for rid in room_ids},
               'wanted':wanted,
