@@ -338,6 +338,7 @@ class DynamoClaimAtomicTests(unittest.TestCase):
             ROOT.parent / ".github" / "workflows" / "aumara-guest-journey-shadow.yml"
         ).read_text(encoding="utf-8")
         self.assertIn("auth-error.log", workflow)
+        self.assertIn("mkdir -p /tmp/aumara-guest-journey-shadow", workflow)
         self.assertIn(
             'grep -q "Beds24 authentication failed with HTTP status"',
             workflow,
