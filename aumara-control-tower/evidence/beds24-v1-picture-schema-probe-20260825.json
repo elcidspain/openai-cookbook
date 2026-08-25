@@ -1,0 +1,801 @@
+{
+  "checked_at_utc": "2026-08-25T00:47:35.338753+00:00",
+  "http_status": 200,
+  "picture_paths": [
+    {
+      "path": "$.images",
+      "value": {
+        "external": {
+          "1": {
+            "map": [
+              {
+                "position": "1",
+                "propId": "324882",
+                "roomId": "674465"
+              },
+              {
+                "position": "1",
+                "propId": "324882",
+                "roomId": "674466"
+              }
+            ],
+            "url": ""
+          },
+          "10": {
+            "map": [
+              {
+                "position": "7",
+                "propId": "324882",
+                "roomId": "674466"
+              }
+            ],
+            "url": ""
+          },
+          "100": {
+            "map": [],
+            "url": ""
+          },
+          "11": {
+            "map": [
+              {
+                "position": "5",
+                "propId": "324882",
+                "roomId": "674466"
+              }
+            ],
+            "url": ""
+          },
+          "12": {
+            "map": [
+              {
+                "position": "3",
+                "propId": "324882",
+                "roomId": "674465"
+              }
+            ],
+            "url": ""
+          },
+          "13": {
+            "map": [
+              {
+                "position": "4",
+                "propId": "324882",
+                "roomId": "674465"
+              }
+            ],
+            "url": ""
+          },
+          "14": {
+            "map": [
+              {
+                "position": "5",
+                "propId": "324882",
+                "roomId": "674465"
+              }
+            ],
+            "url": ""
+          },
+          "15": {
+            "map": [],
+            "url": ""
+          },
+          "16": {
+            "map": [
+              {
+                "position": "9",
+                "propId": "324882",
+                "roomId": "674466"
+              }
+            ],
+            "url": ""
+          },
+          "17": {
+            "map": [],
+            "url": ""
+          },
+          "18": {
+            "map": [
+              {
+                "position": "10",
+                "propId": "324882",
+                "roomId": "674466"
+              }
+            ],
+            "url": ""
+          },
+          "19": {
+            "map": [],
+            "url": ""
+          },
+          "2": {
+            "map": [
+              {
+                "position": "2",
+                "propId": "324882",
+                "roomId": "674466"
+              }
+            ],
+            "url": ""
+          },
+          "20": {
+            "map": [],
+            "url": ""
+          },
+          "21": {
+            "map": [],
+            "url": ""
+          },
+          "22": {
+            "map": [],
+            "url": ""
+          },
+          "23": {
+            "map": [],
+            "url": ""
+          },
+          "24": {
+            "map": [
+              {
+                "position": "8",
+                "propId": "324882",
+                "roomId": "674465"
+              }
+            ],
+            "url": ""
+          },
+          "25": {
+            "map": [
+              {
+                "position": "9",
+                "propId": "324882",
+                "roomId": "674465"
+              }
+            ],
+            "url": ""
+          },
+          "26": {
+            "map": [
+              {
+                "position": "7",
+                "propId": "324882",
+                "roomId": "674465"
+              }
+            ],
+            "url": ""
+          },
+          "27": {
+            "map": [],
+            "url": ""
+          },
+          "28": {
+            "map": [],
+            "url": ""
+          },
+          "29": {
+            "map": [],
+            "url": ""
+          },
+          "3": {
+            "map": [
+              {
+                "position": "10",
+                "propId": "324882",
+                "roomId": "674465"
+              },
+              {
+                "position": "8",
+                "propId": "324882",
+                "roomId": "674466"
+              }
+            ],
+            "url": ""
+          },
+          "30": {
+            "map": [],
+            "url": ""
+          },
+          "31": {
+            "map": [],
+            "url": ""
+          },
+          "32": {
+            "map": [],
+            "url": ""
+          },
+          "33": {
+            "map": [],
+            "url": ""
+          },
+          "34": {
+            "map": [],
+            "url": ""
+          },
+          "35": {
+            "map": [],
+            "url": ""
+          },
+          "36": {
+            "map": [],
+            "url": ""
+          },
+          "37": {
+            "map": [],
+            "url": ""
+          },
+          "38": {
+            "map": [],
+            "url": ""
+          },
+          "39": {
+            "map": [],
+            "url": ""
+          },
+          "4": {
+            "map": [],
+            "url": ""
+          },
+          "40": {
+            "map": [],
+            "url": ""
+          },
+          "41": {
+            "map": [],
+            "url": ""
+          },
+          "42": {
+            "map": [],
+            "url": ""
+          },
+          "43": {
+            "map": [],
+            "url": ""
+          },
+          "44": {
+            "map": [],
+            "url": ""
+          },
+          "45": {
+            "map": [],
+            "url": ""
+          },
+          "46": {
+            "map": [],
+            "url": ""
+          },
+          "47": {
+            "map": [],
+            "url": ""
+          },
+          "48": {
+            "map": [],
+            "url": ""
+          },
+          "49": {
+            "map": [],
+            "url": ""
+          },
+          "5": {
+            "map": [
+              {
+                "position": "2",
+                "propId": "324882",
+                "roomId": "674465"
+              }
+            ],
+            "url": ""
+          },
+          "50": {
+            "map": [],
+            "url": ""
+          },
+          "51": {
+            "map": [],
+            "url": ""
+          },
+          "52": {
+            "map": [],
+            "url": ""
+          },
+          "53": {
+            "map": [],
+            "url": ""
+          },
+          "54": {
+            "map": [],
+            "url": ""
+          },
+          "55": {
+            "map": [],
+            "url": ""
+          },
+          "56": {
+            "map": [],
+            "url": ""
+          },
+          "57": {
+            "map": [],
+            "url": ""
+          },
+          "58": {
+            "map": [],
+            "url": ""
+          },
+          "59": {
+            "map": [],
+            "url": ""
+          },
+          "6": {
+            "map": [
+              {
+                "position": "6",
+                "propId": "324882",
+                "roomId": "674465"
+              }
+            ],
+            "url": ""
+          },
+          "60": {
+            "map": [],
+            "url": ""
+          },
+          "61": {
+            "map": [],
+            "url": ""
+          },
+          "62": {
+            "map": [],
+            "url": ""
+          },
+          "63": {
+            "map": [],
+            "url": ""
+          },
+          "64": {
+            "map": [],
+            "url": ""
+          },
+          "65": {
+            "map": [],
+            "url": ""
+          },
+          "66": {
+            "map": [],
+            "url": ""
+          },
+          "67": {
+            "map": [],
+            "url": ""
+          },
+          "68": {
+            "map": [],
+            "url": ""
+          },
+          "69": {
+            "map": [],
+            "url": ""
+          },
+          "7": {
+            "map": [
+              {
+                "position": "4",
+                "propId": "324882",
+                "roomId": "674466"
+              }
+            ],
+            "url": ""
+          },
+          "70": {
+            "map": [],
+            "url": ""
+          },
+          "71": {
+            "map": [],
+            "url": ""
+          },
+          "72": {
+            "map": [],
+            "url": ""
+          },
+          "73": {
+            "map": [],
+            "url": ""
+          },
+          "74": {
+            "map": [],
+            "url": ""
+          },
+          "75": {
+            "map": [],
+            "url": ""
+          },
+          "76": {
+            "map": [],
+            "url": ""
+          },
+          "77": {
+            "map": [],
+            "url": ""
+          },
+          "78": {
+            "map": [],
+            "url": ""
+          },
+          "79": {
+            "map": [],
+            "url": ""
+          },
+          "8": {
+            "map": [
+              {
+                "position": "3",
+                "propId": "324882",
+                "roomId": "674466"
+              }
+            ],
+            "url": ""
+          },
+          "80": {
+            "map": [],
+            "url": ""
+          },
+          "81": {
+            "map": [],
+            "url": ""
+          },
+          "82": {
+            "map": [],
+            "url": ""
+          },
+          "83": {
+            "map": [],
+            "url": ""
+          },
+          "84": {
+            "map": [],
+            "url": ""
+          },
+          "85": {
+            "map": [],
+            "url": ""
+          },
+          "86": {
+            "map": [],
+            "url": ""
+          },
+          "87": {
+            "map": [],
+            "url": ""
+          },
+          "88": {
+            "map": [],
+            "url": ""
+          },
+          "89": {
+            "map": [],
+            "url": ""
+          },
+          "9": {
+            "map": [
+              {
+                "position": "6",
+                "propId": "324882",
+                "roomId": "674466"
+              }
+            ],
+            "url": ""
+          },
+          "90": {
+            "map": [],
+            "url": ""
+          },
+          "91": {
+            "map": [],
+            "url": ""
+          },
+          "92": {
+            "map": [],
+            "url": ""
+          },
+          "93": {
+            "map": [],
+            "url": ""
+          },
+          "94": {
+            "map": [],
+            "url": ""
+          },
+          "95": {
+            "map": [],
+            "url": ""
+          },
+          "96": {
+            "map": [],
+            "url": ""
+          },
+          "97": {
+            "map": [],
+            "url": ""
+          },
+          "98": {
+            "map": [],
+            "url": ""
+          },
+          "99": {
+            "map": [],
+            "url": ""
+          }
+        },
+        "hosted": []
+      }
+    },
+    {
+      "path": "$.roomIds.674465.images",
+      "value": {
+        "external": {
+          "1": {
+            "map": [],
+            "url": ""
+          },
+          "10": {
+            "map": [],
+            "url": ""
+          },
+          "11": {
+            "map": [],
+            "url": ""
+          },
+          "12": {
+            "map": [],
+            "url": ""
+          },
+          "13": {
+            "map": [],
+            "url": ""
+          },
+          "14": {
+            "map": [],
+            "url": ""
+          },
+          "15": {
+            "map": [],
+            "url": ""
+          },
+          "16": {
+            "map": [],
+            "url": ""
+          },
+          "17": {
+            "map": [],
+            "url": ""
+          },
+          "18": {
+            "map": [],
+            "url": ""
+          },
+          "19": {
+            "map": [],
+            "url": ""
+          },
+          "2": {
+            "map": [],
+            "url": ""
+          },
+          "20": {
+            "map": [],
+            "url": ""
+          },
+          "3": {
+            "map": [],
+            "url": ""
+          },
+          "4": {
+            "map": [],
+            "url": ""
+          },
+          "5": {
+            "map": [],
+            "url": ""
+          },
+          "6": {
+            "map": [],
+            "url": ""
+          },
+          "7": {
+            "map": [],
+            "url": ""
+          },
+          "8": {
+            "map": [],
+            "url": ""
+          },
+          "9": {
+            "map": [],
+            "url": ""
+          }
+        }
+      }
+    },
+    {
+      "path": "$.roomIds.674465.airbnb.picturesFrom",
+      "value": "rop"
+    },
+    {
+      "path": "$.roomIds.674466.images",
+      "value": {
+        "external": {
+          "1": {
+            "map": [],
+            "url": ""
+          },
+          "10": {
+            "map": [],
+            "url": ""
+          },
+          "11": {
+            "map": [],
+            "url": ""
+          },
+          "12": {
+            "map": [],
+            "url": ""
+          },
+          "13": {
+            "map": [],
+            "url": ""
+          },
+          "14": {
+            "map": [],
+            "url": ""
+          },
+          "15": {
+            "map": [],
+            "url": ""
+          },
+          "16": {
+            "map": [],
+            "url": ""
+          },
+          "17": {
+            "map": [],
+            "url": ""
+          },
+          "18": {
+            "map": [],
+            "url": ""
+          },
+          "19": {
+            "map": [],
+            "url": ""
+          },
+          "2": {
+            "map": [],
+            "url": ""
+          },
+          "20": {
+            "map": [],
+            "url": ""
+          },
+          "3": {
+            "map": [],
+            "url": ""
+          },
+          "4": {
+            "map": [],
+            "url": ""
+          },
+          "5": {
+            "map": [],
+            "url": ""
+          },
+          "6": {
+            "map": [],
+            "url": ""
+          },
+          "7": {
+            "map": [],
+            "url": ""
+          },
+          "8": {
+            "map": [],
+            "url": ""
+          },
+          "9": {
+            "map": [],
+            "url": ""
+          }
+        }
+      }
+    },
+    {
+      "path": "$.roomIds.674466.airbnb.picturesFrom",
+      "value": "rop"
+    }
+  ],
+  "property_id": 324882,
+  "room_674465_keys": [
+    "airbnb",
+    "cleaningFee",
+    "featureCodes",
+    "images",
+    "name",
+    "rackRate",
+    "roomId",
+    "roomType",
+    "securityDeposit",
+    "sellPriority",
+    "taxPercent",
+    "taxPerson"
+  ],
+  "room_674466_keys": [
+    "airbnb",
+    "cleaningFee",
+    "featureCodes",
+    "images",
+    "name",
+    "rackRate",
+    "roomId",
+    "roomType",
+    "securityDeposit",
+    "sellPriority",
+    "taxPercent",
+    "taxPerson"
+  ],
+  "schema": "aumara.beds24-v1-picture-schema-probe.v1",
+  "secret_exposed": false,
+  "status": "SUCCESS",
+  "top_level_keys": [
+    "bookingCutOffHour",
+    "bookingExceptType",
+    "bookingExceptTypeEnd",
+    "bookingExceptTypeStart",
+    "bookingNearType",
+    "bookingNearTypeDays",
+    "bookingPageMultiplier",
+    "bookingRequestStatus",
+    "bookingType",
+    "cardAcceptAmex",
+    "cardAcceptDiners",
+    "cardAcceptDiscover",
+    "cardAcceptEnroute",
+    "cardAcceptJcb",
+    "cardAcceptMaestro",
+    "cardAcceptMaster",
+    "cardAcceptUnionpay",
+    "cardAcceptVisa",
+    "cardAcceptVoyager",
+    "cardRequireCVV",
+    "checkInEndHour",
+    "checkInStartHour",
+    "checkOutEndHour",
+    "depositFixed1",
+    "depositFixed2",
+    "depositNonPayment",
+    "depositPercent1",
+    "depositPercent2",
+    "discountVoucherCode",
+    "featureCodes",
+    "groupKeywords",
+    "images",
+    "name",
+    "offerType",
+    "oneTimeVouchers",
+    "paymentGatewayAgodapayEnable",
+    "paymentGatewayAsiapayEnable",
+    "paymentGatewayAuthorizenetEnable",
+    "paymentGatewayBitpayEnable",
+    "paymentGatewayBorgunEnable",
+    "paymentGatewayCreditcardEnable",
+    "paymentGatewayCustomgatewayEnable",
+    "paymentGatewayGlobalpayments1Enable",
+    "paymentGatewayGlobalpayments2Enable",
+    "paymentGatewayOfflinepaymentEnable",
+    "paymentGatewayPaymillEnable",
+    "paymentGatewayPaypalEnable",
+    "paymentGatewayStripeEnable",
+    "permit",
+    "propId",
+    "roomChargeDisplay",
+    "roomIds",
+    "sellPriority"
+  ]
+}

@@ -207,6 +207,13 @@ class DynamoClaimAtomicTests(unittest.TestCase):
         self.assertIn("python -m pip install --upgrade pip boto3", workflow)
         self.assertNotIn("pip install -r requirements.txt", workflow)
 
+    def test_shadow_workflow_heredoc_closing_marker_alignment(self) -> None:
+        workflow = (
+            ROOT.parent / ".github" / "workflows" / "aumara-guest-journey-shadow.yml"
+        ).read_text(encoding="utf-8")
+        self.assertIn("\n          PY\n          else\n", workflow)
+        self.assertNotIn("\n            PY\n          else\n", workflow)
+
     def test_aumara_nominalia_workflow_has_host_and_user_fallbacks(self) -> None:
         workflow = (
             ROOT.parent / ".github" / "workflows" / "deploy-aumara-nominalia-v2.yml"
@@ -248,6 +255,30 @@ class DynamoClaimAtomicTests(unittest.TestCase):
         self.assertIn("BEDS24_LOGIN: ${{ secrets.BEDS24_LOGIN }}", workflow)
         self.assertIn("os.environ.get('BEDS24_USER')", workflow)
         self.assertIn("os.environ.get('BEDS24_LOGIN')", workflow)
+
+    def test_shadow_workflow_branch_heredoc_delimiter_aligns_to_run_block(self) -> None:
+        workflow_lines = (
+            ROOT.parent / ".github" / "workflows" / "aumara-guest-journey-shadow.yml"
+        ).read_text(encoding="utf-8").splitlines()
+
+        run_block_indent = next(
+            len(line) - len(line.lstrip(" "))
+            for line in workflow_lines
+            if "auth_error_log=/tmp/aumara-guest-journey-shadow/auth-error.log" in line
+        )
+        heredoc_start = next(
+            len(line) - len(line.lstrip(" "))
+            for line in workflow_lines
+            if "python - <<'PY'" in line
+        )
+        heredoc_end = next(
+            len(line) - len(line.lstrip(" "))
+            for line in workflow_lines
+            if line.strip() == "PY"
+        )
+
+        self.assertEqual(heredoc_start, run_block_indent)
+        self.assertEqual(heredoc_end, run_block_indent)
 
     def test_photo_vault_dispatcher_accepts_owner_retry_comment(self) -> None:
         workflow = (

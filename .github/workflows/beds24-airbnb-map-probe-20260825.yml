@@ -1,0 +1,61 @@
+name: Beds24 Airbnb map probe AUMARA 2026-08-25
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/beds24-airbnb-map-probe-20260825.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: Production
+    env:
+      BEDS24_API_KEY: ${{ secrets.BEDS24_API_KEY }}
+      BEDS24_PROP_KEY: ${{ secrets.BEDS24_PROP_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Read exact returned image maps
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import datetime as dt, json, os, pathlib, subprocess, urllib.request
+          api=(os.environ.get('BEDS24_API_KEY') or '').strip()
+          prop=(os.environ.get('BEDS24_PROP_KEY') or '').strip()
+          for s in (api,prop):
+              if s: print(f'::add-mask::{s}')
+          if not api or not prop: raise SystemExit('Beds24 credentials missing')
+          payload={'authentication':{'apiKey':api,'propKey':prop},'bookingData':False,'images':True,'roomIds':True,'texts':False,'includeAirbnb':True,'includeVrbo':False}
+          req=urllib.request.Request('https://api.beds24.com/json/getPropertyContent',data=json.dumps(payload).encode(),headers={'Content-Type':'application/json','Accept':'application/json'},method='POST')
+          with urllib.request.urlopen(req,timeout=90) as r:
+              data=json.loads(r.read().decode())
+          root=(data.get('getPropertyContent') or [{}])[0]
+          ext=((root.get('images') or {}).get('external') or {})
+          slots=['35','36','37','38','39','40','44']
+          rooms=root.get('roomIds') or {}
+          evidence={
+            'schema':'aumara.beds24-airbnb-map-probe.v1',
+            'checked_at_utc':dt.datetime.now(dt.timezone.utc).isoformat(),
+            'slots':{k:{'url':(ext.get(k) or {}).get('url'),'caption':(ext.get(k) or {}).get('caption'),'map':(ext.get(k) or {}).get('map')} for k in slots},
+            'room_airbnb':{rid:{k:((rooms.get(rid) or {}).get('airbnb') or {}).get(k) for k in ('listingId','publish','picturesFrom')} for rid in ('674465','674466')},
+            'secret_exposed':False,
+          }
+          out=pathlib.Path('aumara-control-tower/evidence/beds24-airbnb-map-probe-20260825.json')
+          out.write_text(json.dumps(evidence,ensure_ascii=False,indent=2,sort_keys=True)+'\n',encoding='utf-8')
+          subprocess.run(['git','config','user.name','github-actions[bot]'],check=True)
+          subprocess.run(['git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com'],check=True)
+          subprocess.run(['git','add',str(out)],check=True)
+          if subprocess.run(['git','diff','--cached','--quiet']).returncode!=0:
+              subprocess.run(['git','commit','-m','Record exact Beds24 Airbnb photo maps [skip ci]'],check=True)
+              subprocess.run(['git','pull','--rebase','origin','main'],check=True)
+              subprocess.run(['git','push','origin','HEAD:main'],check=True)
+          print(json.dumps(evidence,ensure_ascii=False))
+          PY

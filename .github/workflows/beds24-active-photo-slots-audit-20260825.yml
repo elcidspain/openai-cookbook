@@ -1,0 +1,62 @@
+name: Beds24 active photo slots audit AUMARA 2026-08-25
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/beds24-active-photo-slots-audit-20260825.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: Production
+    env:
+      BEDS24_API_KEY: ${{ secrets.BEDS24_API_KEY }}
+      BEDS24_PROP_KEY: ${{ secrets.BEDS24_PROP_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Print active external photo slots only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, urllib.error, urllib.request
+          api=(os.environ.get('BEDS24_API_KEY') or '').strip()
+          prop=(os.environ.get('BEDS24_PROP_KEY') or '').strip()
+          if not api or not prop: raise SystemExit('Beds24 V1 credentials missing')
+          print(f'::add-mask::{api}'); print(f'::add-mask::{prop}')
+          payload={'authentication':{'apiKey':api,'propKey':prop},'bookingData':False,'images':True,'roomIds':True,'texts':False,'includeAirbnb':True,'includeVrbo':False}
+          req=urllib.request.Request('https://api.beds24.com/json/getPropertyContent',data=json.dumps(payload).encode(),headers={'Content-Type':'application/json','Accept':'application/json'},method='POST')
+          try:
+              with urllib.request.urlopen(req,timeout=90) as r: raw=r.read(); status=int(r.status)
+          except urllib.error.HTTPError as e: raw=e.read(); status=int(e.code)
+          data=json.loads(raw.decode('utf-8','replace')) if raw else {}
+          if not 200 <= status < 300: raise SystemExit(f'HTTP {status}: {str(data)[:800]}')
+          root=(data.get('getPropertyContent') or [{}])[0]
+          external=((root.get('images') or {}).get('external') or {})
+          active=[]
+          for slot,row in external.items():
+              if not isinstance(row,dict): continue
+              url=str(row.get('url') or '').strip()
+              maps=[]
+              for m in row.get('map') or []:
+                  if not isinstance(m,dict): continue
+                  rid=str(m.get('roomId') or '')
+                  if rid in ('674465','674466'):
+                      maps.append({'roomId':rid,'position':str(m.get('position') or '')})
+              if url and maps:
+                  active.append({'slot':str(slot),'url':url,'map':maps})
+          active.sort(key=lambda x:int(x['slot']) if x['slot'].isdigit() else 999999)
+          print('ACTIVE_SLOTS_JSON='+json.dumps(active,separators=(',',':'),ensure_ascii=False))
+          by_room={'674465':[],'674466':[]}
+          for row in active:
+              for m in row['map']:
+                  by_room[m['roomId']].append({'slot':row['slot'],'position':m['position'],'url':row['url']})
+          print('BY_ROOM_JSON='+json.dumps(by_room,separators=(',',':'),ensure_ascii=False))
+          print('COUNTS='+json.dumps({k:len(v) for k,v in by_room.items()},sort_keys=True))
+          PY

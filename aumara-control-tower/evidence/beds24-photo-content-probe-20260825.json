@@ -1,0 +1,1791 @@
+{
+  "checked_at_utc": "2026-08-25T01:11:26.482020+00:00",
+  "images": {
+    "external": {
+      "1": {
+        "map": [
+          {
+            "position": "1",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "1",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": ""
+      },
+      "10": {
+        "map": [
+          {
+            "position": "10",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "10",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": ""
+      },
+      "100": {
+        "map": [],
+        "url": ""
+      },
+      "11": {
+        "map": [
+          {
+            "position": "11",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "11",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": ""
+      },
+      "12": {
+        "map": [
+          {
+            "position": "12",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "12",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": ""
+      },
+      "13": {
+        "map": [
+          {
+            "position": "13",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "13",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": ""
+      },
+      "14": {
+        "map": [
+          {
+            "position": "14",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "14",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": ""
+      },
+      "15": {
+        "map": [
+          {
+            "position": "15",
+            "propId": "324882",
+            "roomId": "674465"
+          }
+        ],
+        "url": ""
+      },
+      "16": {
+        "map": [
+          {
+            "position": "16",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "9",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": ""
+      },
+      "17": {
+        "map": [
+          {
+            "position": "17",
+            "propId": "324882",
+            "roomId": "674465"
+          }
+        ],
+        "url": ""
+      },
+      "18": {
+        "map": [
+          {
+            "position": "15",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": ""
+      },
+      "19": {
+        "map": [],
+        "url": ""
+      },
+      "2": {
+        "map": [
+          {
+            "position": "2",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "2",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": ""
+      },
+      "20": {
+        "map": [],
+        "url": ""
+      },
+      "21": {
+        "map": [],
+        "url": ""
+      },
+      "22": {
+        "map": [],
+        "url": ""
+      },
+      "23": {
+        "map": [],
+        "url": ""
+      },
+      "24": {
+        "map": [
+          {
+            "position": "8",
+            "propId": "324882",
+            "roomId": "674465"
+          }
+        ],
+        "url": ""
+      },
+      "25": {
+        "map": [
+          {
+            "position": "9",
+            "propId": "324882",
+            "roomId": "674465"
+          }
+        ],
+        "url": ""
+      },
+      "26": {
+        "map": [
+          {
+            "position": "7",
+            "propId": "324882",
+            "roomId": "674465"
+          }
+        ],
+        "url": ""
+      },
+      "27": {
+        "map": [
+          {
+            "position": "1",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "1",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": ""
+      },
+      "28": {
+        "map": [
+          {
+            "position": "2",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "2",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": ""
+      },
+      "29": {
+        "map": [
+          {
+            "position": "3",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "3",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": ""
+      },
+      "3": {
+        "map": [
+          {
+            "position": "3",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "3",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": ""
+      },
+      "30": {
+        "map": [
+          {
+            "position": "4",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "4",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": ""
+      },
+      "31": {
+        "map": [
+          {
+            "position": "5",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "5",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": ""
+      },
+      "32": {
+        "map": [
+          {
+            "position": "6",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "6",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": ""
+      },
+      "33": {
+        "map": [
+          {
+            "position": "7",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "7",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": ""
+      },
+      "34": {
+        "map": [
+          {
+            "position": "8",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "8",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": ""
+      },
+      "35": {
+        "map": [
+          {
+            "position": "9",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "9",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": ""
+      },
+      "36": {
+        "map": [
+          {
+            "position": "10",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "10",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": ""
+      },
+      "37": {
+        "map": [
+          {
+            "position": "11",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "11",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": ""
+      },
+      "38": {
+        "map": [
+          {
+            "position": "12",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "12",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": ""
+      },
+      "39": {
+        "map": [
+          {
+            "position": "13",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "13",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": ""
+      },
+      "4": {
+        "map": [
+          {
+            "position": "4",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "4",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": ""
+      },
+      "40": {
+        "map": [
+          {
+            "position": "14",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "14",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": ""
+      },
+      "41": {
+        "map": [
+          {
+            "position": "15",
+            "propId": "324882",
+            "roomId": "674465"
+          }
+        ],
+        "url": ""
+      },
+      "42": {
+        "map": [
+          {
+            "position": "16",
+            "propId": "324882",
+            "roomId": "674465"
+          }
+        ],
+        "url": ""
+      },
+      "43": {
+        "map": [
+          {
+            "position": "17",
+            "propId": "324882",
+            "roomId": "674465"
+          }
+        ],
+        "url": ""
+      },
+      "44": {
+        "map": [
+          {
+            "position": "15",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": ""
+      },
+      "45": {
+        "map": [],
+        "url": ""
+      },
+      "46": {
+        "map": [],
+        "url": ""
+      },
+      "47": {
+        "map": [],
+        "url": ""
+      },
+      "48": {
+        "map": [],
+        "url": ""
+      },
+      "49": {
+        "map": [],
+        "url": ""
+      },
+      "5": {
+        "map": [
+          {
+            "position": "5",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "5",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": ""
+      },
+      "50": {
+        "map": [],
+        "url": ""
+      },
+      "51": {
+        "map": [],
+        "url": ""
+      },
+      "52": {
+        "map": [],
+        "url": ""
+      },
+      "53": {
+        "map": [],
+        "url": ""
+      },
+      "54": {
+        "map": [],
+        "url": ""
+      },
+      "55": {
+        "map": [],
+        "url": ""
+      },
+      "56": {
+        "map": [],
+        "url": ""
+      },
+      "57": {
+        "map": [],
+        "url": ""
+      },
+      "58": {
+        "map": [],
+        "url": ""
+      },
+      "59": {
+        "map": [],
+        "url": ""
+      },
+      "6": {
+        "map": [
+          {
+            "position": "6",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "6",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": ""
+      },
+      "60": {
+        "map": [],
+        "url": ""
+      },
+      "61": {
+        "map": [],
+        "url": ""
+      },
+      "62": {
+        "map": [],
+        "url": ""
+      },
+      "63": {
+        "map": [],
+        "url": ""
+      },
+      "64": {
+        "map": [],
+        "url": ""
+      },
+      "65": {
+        "map": [],
+        "url": ""
+      },
+      "66": {
+        "map": [],
+        "url": ""
+      },
+      "67": {
+        "map": [],
+        "url": ""
+      },
+      "68": {
+        "map": [],
+        "url": ""
+      },
+      "69": {
+        "map": [],
+        "url": ""
+      },
+      "7": {
+        "map": [
+          {
+            "position": "7",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "7",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": ""
+      },
+      "70": {
+        "map": [],
+        "url": ""
+      },
+      "71": {
+        "map": [],
+        "url": ""
+      },
+      "72": {
+        "map": [],
+        "url": ""
+      },
+      "73": {
+        "map": [],
+        "url": ""
+      },
+      "74": {
+        "map": [],
+        "url": ""
+      },
+      "75": {
+        "map": [],
+        "url": ""
+      },
+      "76": {
+        "map": [],
+        "url": ""
+      },
+      "77": {
+        "map": [],
+        "url": ""
+      },
+      "78": {
+        "map": [],
+        "url": ""
+      },
+      "79": {
+        "map": [],
+        "url": ""
+      },
+      "8": {
+        "map": [
+          {
+            "position": "8",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "8",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": ""
+      },
+      "80": {
+        "map": [],
+        "url": ""
+      },
+      "81": {
+        "caption": {
+          "BG": "",
+          "CA": "",
+          "CS": "",
+          "DA": "",
+          "DE": "",
+          "EN": "",
+          "ES": "",
+          "FI": "",
+          "FR": "",
+          "HE": "",
+          "HY": "",
+          "IS": "",
+          "IT": "",
+          "LT": "",
+          "LV": "",
+          "NL": "",
+          "NO": "",
+          "PL": "",
+          "PT": "",
+          "RU": "",
+          "SK": "",
+          "SV": ""
+        },
+        "map": [
+          {
+            "position": "1",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "1",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/01_01_FULL_no_crop.jpg"
+      },
+      "82": {
+        "caption": {
+          "BG": "",
+          "CA": "",
+          "CS": "",
+          "DA": "",
+          "DE": "",
+          "EN": "",
+          "ES": "",
+          "FI": "",
+          "FR": "",
+          "HE": "",
+          "HY": "",
+          "IS": "",
+          "IT": "",
+          "LT": "",
+          "LV": "",
+          "NL": "",
+          "NO": "",
+          "PL": "",
+          "PT": "",
+          "RU": "",
+          "SK": "",
+          "SV": ""
+        },
+        "map": [
+          {
+            "position": "2",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "2",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/02_02_FULL_no_crop.jpg"
+      },
+      "83": {
+        "caption": {
+          "BG": "",
+          "CA": "",
+          "CS": "",
+          "DA": "",
+          "DE": "",
+          "EN": "",
+          "ES": "",
+          "FI": "",
+          "FR": "",
+          "HE": "",
+          "HY": "",
+          "IS": "",
+          "IT": "",
+          "LT": "",
+          "LV": "",
+          "NL": "",
+          "NO": "",
+          "PL": "",
+          "PT": "",
+          "RU": "",
+          "SK": "",
+          "SV": ""
+        },
+        "map": [
+          {
+            "position": "3",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "3",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/03_03_FULL_no_crop.jpg"
+      },
+      "84": {
+        "caption": {
+          "BG": "",
+          "CA": "",
+          "CS": "",
+          "DA": "",
+          "DE": "",
+          "EN": "",
+          "ES": "",
+          "FI": "",
+          "FR": "",
+          "HE": "",
+          "HY": "",
+          "IS": "",
+          "IT": "",
+          "LT": "",
+          "LV": "",
+          "NL": "",
+          "NO": "",
+          "PL": "",
+          "PT": "",
+          "RU": "",
+          "SK": "",
+          "SV": ""
+        },
+        "map": [
+          {
+            "position": "4",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "4",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/04_04_FULL_no_crop.jpg"
+      },
+      "85": {
+        "caption": {
+          "BG": "",
+          "CA": "",
+          "CS": "",
+          "DA": "",
+          "DE": "",
+          "EN": "",
+          "ES": "",
+          "FI": "",
+          "FR": "",
+          "HE": "",
+          "HY": "",
+          "IS": "",
+          "IT": "",
+          "LT": "",
+          "LV": "",
+          "NL": "",
+          "NO": "",
+          "PL": "",
+          "PT": "",
+          "RU": "",
+          "SK": "",
+          "SV": ""
+        },
+        "map": [
+          {
+            "position": "5",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "5",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/05_06_FULL_no_crop.jpg"
+      },
+      "86": {
+        "caption": {
+          "BG": "",
+          "CA": "",
+          "CS": "",
+          "DA": "",
+          "DE": "",
+          "EN": "",
+          "ES": "",
+          "FI": "",
+          "FR": "",
+          "HE": "",
+          "HY": "",
+          "IS": "",
+          "IT": "",
+          "LT": "",
+          "LV": "",
+          "NL": "",
+          "NO": "",
+          "PL": "",
+          "PT": "",
+          "RU": "",
+          "SK": "",
+          "SV": ""
+        },
+        "map": [
+          {
+            "position": "6",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "6",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/06_08_FULL_no_crop.jpg"
+      },
+      "87": {
+        "caption": {
+          "BG": "",
+          "CA": "",
+          "CS": "",
+          "DA": "",
+          "DE": "",
+          "EN": "",
+          "ES": "",
+          "FI": "",
+          "FR": "",
+          "HE": "",
+          "HY": "",
+          "IS": "",
+          "IT": "",
+          "LT": "",
+          "LV": "",
+          "NL": "",
+          "NO": "",
+          "PL": "",
+          "PT": "",
+          "RU": "",
+          "SK": "",
+          "SV": ""
+        },
+        "map": [
+          {
+            "position": "7",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "7",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/07_IMG_0005.jpg"
+      },
+      "88": {
+        "caption": {
+          "BG": "",
+          "CA": "",
+          "CS": "",
+          "DA": "",
+          "DE": "",
+          "EN": "",
+          "ES": "",
+          "FI": "",
+          "FR": "",
+          "HE": "",
+          "HY": "",
+          "IS": "",
+          "IT": "",
+          "LT": "",
+          "LV": "",
+          "NL": "",
+          "NO": "",
+          "PL": "",
+          "PT": "",
+          "RU": "",
+          "SK": "",
+          "SV": ""
+        },
+        "map": [
+          {
+            "position": "8",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "8",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/08_IMG_0006.jpg"
+      },
+      "89": {
+        "caption": {
+          "BG": "",
+          "CA": "",
+          "CS": "",
+          "DA": "",
+          "DE": "",
+          "EN": "",
+          "ES": "",
+          "FI": "",
+          "FR": "",
+          "HE": "",
+          "HY": "",
+          "IS": "",
+          "IT": "",
+          "LT": "",
+          "LV": "",
+          "NL": "",
+          "NO": "",
+          "PL": "",
+          "PT": "",
+          "RU": "",
+          "SK": "",
+          "SV": ""
+        },
+        "map": [
+          {
+            "position": "9",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "9",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/09_IMG_0007.jpg"
+      },
+      "9": {
+        "map": [
+          {
+            "position": "9",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "9",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": ""
+      },
+      "90": {
+        "caption": {
+          "BG": "",
+          "CA": "",
+          "CS": "",
+          "DA": "",
+          "DE": "",
+          "EN": "",
+          "ES": "",
+          "FI": "",
+          "FR": "",
+          "HE": "",
+          "HY": "",
+          "IS": "",
+          "IT": "",
+          "LT": "",
+          "LV": "",
+          "NL": "",
+          "NO": "",
+          "PL": "",
+          "PT": "",
+          "RU": "",
+          "SK": "",
+          "SV": ""
+        },
+        "map": [
+          {
+            "position": "10",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "10",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/10_IMG_0008.jpg"
+      },
+      "91": {
+        "caption": {
+          "BG": "",
+          "CA": "",
+          "CS": "",
+          "DA": "",
+          "DE": "",
+          "EN": "",
+          "ES": "",
+          "FI": "",
+          "FR": "",
+          "HE": "",
+          "HY": "",
+          "IS": "",
+          "IT": "",
+          "LT": "",
+          "LV": "",
+          "NL": "",
+          "NO": "",
+          "PL": "",
+          "PT": "",
+          "RU": "",
+          "SK": "",
+          "SV": ""
+        },
+        "map": [
+          {
+            "position": "11",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "11",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/11_IMG_0009.jpg"
+      },
+      "92": {
+        "caption": {
+          "BG": "",
+          "CA": "",
+          "CS": "",
+          "DA": "",
+          "DE": "",
+          "EN": "",
+          "ES": "",
+          "FI": "",
+          "FR": "",
+          "HE": "",
+          "HY": "",
+          "IS": "",
+          "IT": "",
+          "LT": "",
+          "LV": "",
+          "NL": "",
+          "NO": "",
+          "PL": "",
+          "PT": "",
+          "RU": "",
+          "SK": "",
+          "SV": ""
+        },
+        "map": [
+          {
+            "position": "12",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "12",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/12_IMG_0010.jpg"
+      },
+      "93": {
+        "caption": {
+          "BG": "",
+          "CA": "",
+          "CS": "",
+          "DA": "",
+          "DE": "",
+          "EN": "",
+          "ES": "",
+          "FI": "",
+          "FR": "",
+          "HE": "",
+          "HY": "",
+          "IS": "",
+          "IT": "",
+          "LT": "",
+          "LV": "",
+          "NL": "",
+          "NO": "",
+          "PL": "",
+          "PT": "",
+          "RU": "",
+          "SK": "",
+          "SV": ""
+        },
+        "map": [
+          {
+            "position": "13",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "13",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/13_IMG_0011.jpg"
+      },
+      "94": {
+        "caption": {
+          "BG": "",
+          "CA": "",
+          "CS": "",
+          "DA": "",
+          "DE": "",
+          "EN": "",
+          "ES": "",
+          "FI": "",
+          "FR": "",
+          "HE": "",
+          "HY": "",
+          "IS": "",
+          "IT": "",
+          "LT": "",
+          "LV": "",
+          "NL": "",
+          "NO": "",
+          "PL": "",
+          "PT": "",
+          "RU": "",
+          "SK": "",
+          "SV": ""
+        },
+        "map": [
+          {
+            "position": "14",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "14",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/common/14_IMG_0012.jpg"
+      },
+      "95": {
+        "caption": {
+          "BG": "",
+          "CA": "",
+          "CS": "",
+          "DA": "",
+          "DE": "",
+          "EN": "",
+          "ES": "",
+          "FI": "",
+          "FR": "",
+          "HE": "",
+          "HY": "",
+          "IS": "",
+          "IT": "",
+          "LT": "",
+          "LV": "",
+          "NL": "",
+          "NO": "",
+          "PL": "",
+          "PT": "",
+          "RU": "",
+          "SK": "",
+          "SV": ""
+        },
+        "map": [
+          {
+            "position": "15",
+            "propId": "324882",
+            "roomId": "674465"
+          }
+        ],
+        "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/chalet/01_AUMARA_Chalet_Sunset_v01.jpg"
+      },
+      "96": {
+        "caption": {
+          "BG": "",
+          "CA": "",
+          "CS": "",
+          "DA": "",
+          "DE": "",
+          "EN": "",
+          "ES": "",
+          "FI": "",
+          "FR": "",
+          "HE": "",
+          "HY": "",
+          "IS": "",
+          "IT": "",
+          "LT": "",
+          "LV": "",
+          "NL": "",
+          "NO": "",
+          "PL": "",
+          "PT": "",
+          "RU": "",
+          "SK": "",
+          "SV": ""
+        },
+        "map": [
+          {
+            "position": "16",
+            "propId": "324882",
+            "roomId": "674465"
+          }
+        ],
+        "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/chalet/02_AUMARA_Night_Forest_Chalets_v01.jpg"
+      },
+      "97": {
+        "caption": {
+          "BG": "",
+          "CA": "",
+          "CS": "",
+          "DA": "",
+          "DE": "",
+          "EN": "",
+          "ES": "",
+          "FI": "",
+          "FR": "",
+          "HE": "",
+          "HY": "",
+          "IS": "",
+          "IT": "",
+          "LT": "",
+          "LV": "",
+          "NL": "",
+          "NO": "",
+          "PL": "",
+          "PT": "",
+          "RU": "",
+          "SK": "",
+          "SV": ""
+        },
+        "map": [
+          {
+            "position": "17",
+            "propId": "324882",
+            "roomId": "674465"
+          }
+        ],
+        "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/chalet/03_AUMARA_Night_Moon_Chalets_v01.jpg"
+      },
+      "98": {
+        "caption": {
+          "BG": "",
+          "CA": "",
+          "CS": "",
+          "DA": "",
+          "DE": "",
+          "EN": "",
+          "ES": "",
+          "FI": "",
+          "FR": "",
+          "HE": "",
+          "HY": "",
+          "IS": "",
+          "IT": "",
+          "LT": "",
+          "LV": "",
+          "NL": "",
+          "NO": "",
+          "PL": "",
+          "PT": "",
+          "RU": "",
+          "SK": "",
+          "SV": ""
+        },
+        "map": [
+          {
+            "position": "15",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3c69fba2479dd5ed44ab2320c0d7a0add7212e26/aumara-control-tower/public/airbnb/20260825/superior/01_AUMARA_Superior_Chalet_Blue_Hour_v01.jpg"
+      },
+      "99": {
+        "map": [],
+        "url": ""
+      }
+    },
+    "hosted": []
+  },
+  "images_type": "dict",
+  "property_id": 324882,
+  "rooms": {
+    "674465": {
+      "airbnb": {
+        "accessText": {
+          "ES": "Los huéspedes tienen acceso a su chalet y a las zonas comunes exteriores, incluida la piscina compartida y el jardín."
+        },
+        "advanceNoticeHours": 0,
+        "allowRequests": 1,
+        "bathroomShared": "",
+        "cancellationPolicy": "flexible",
+        "checkInText": "",
+        "checkInType": "host_checkin",
+        "commonSpacesShared": "",
+        "custom": "",
+        "datesNoPrice": "",
+        "discountDays14": 1,
+        "discountDays2": 1,
+        "discountDays21": 1,
+        "discountDays28": 1,
+        "discountDays3": 1,
+        "discountDays4": 1,
+        "discountDays5": 1,
+        "discountDays6": 1,
+        "discountDays7": 1,
+        "discountMonthly": 1,
+        "discountWeekly": 1,
+        "earlyBirdDays": 28,
+        "earlyBirdDiscountPercent": 0,
+        "extraPersonPrice": "",
+        "guestsIncluded": "",
+        "houseManualText": "",
+        "houseRulesText": {
+          "ES": "Alojamiento para no fumadores. Respeta las zonas comunes y utiliza la piscina y los espacios exteriores de forma responsable."
+        },
+        "instantBookingAllowed": "everyone",
+        "interactionText": {
+          "ES": "El equipo está disponible para ayudar durante la estancia cuando sea necesario."
+        },
+        "lastMinuteDays": 0,
+        "lastMinuteDiscountPercent": 0,
+        "listingId": "1759764557896676605",
+        "listingType": "entire_home",
+        "maxDaysAdvance": "365",
+        "name": {
+          "ES": "Chalet · Aumara El Cid"
+        },
+        "neighborhoodText": {
+          "ES": ""
+        },
+        "notesText": {
+          "ES": "La piscina y las zonas exteriores son compartidas con otros huéspedes. Todos los alojamientos son para no fumadores."
+        },
+        "picturesFrom": "rop",
+        "priceStategy": 0,
+        "propertyTypeGroup": "houses",
+        "publish": "yes",
+        "spaceText": {
+          "ES": "Chalet privado con baño y zona de cocina compacta equipada con nevera, microondas, hervidor, cafetera, fregadero y menaje."
+        },
+        "summaryText": {
+          "ES": "Chalet privado con aire acondicionado, Wi-Fi, baño privado y zona de cocina con nevera, microondas, hervidor, cafetera, fregadero y menaje. Acceso a piscina compartida, jardín y zonas exteriores. Alojamiento para no fumadores."
+        },
+        "transitText": {
+          "ES": ""
+        }
+      },
+      "images": {
+        "external": {
+          "1": {
+            "map": [],
+            "url": ""
+          },
+          "10": {
+            "map": [],
+            "url": ""
+          },
+          "11": {
+            "map": [],
+            "url": ""
+          },
+          "12": {
+            "map": [],
+            "url": ""
+          },
+          "13": {
+            "map": [],
+            "url": ""
+          },
+          "14": {
+            "map": [],
+            "url": ""
+          },
+          "15": {
+            "map": [],
+            "url": ""
+          },
+          "16": {
+            "map": [],
+            "url": ""
+          },
+          "17": {
+            "map": [],
+            "url": ""
+          },
+          "18": {
+            "map": [],
+            "url": ""
+          },
+          "19": {
+            "map": [],
+            "url": ""
+          },
+          "2": {
+            "map": [],
+            "url": ""
+          },
+          "20": {
+            "map": [],
+            "url": ""
+          },
+          "3": {
+            "map": [],
+            "url": ""
+          },
+          "4": {
+            "map": [],
+            "url": ""
+          },
+          "5": {
+            "map": [],
+            "url": ""
+          },
+          "6": {
+            "map": [],
+            "url": ""
+          },
+          "7": {
+            "map": [],
+            "url": ""
+          },
+          "8": {
+            "map": [],
+            "url": ""
+          },
+          "9": {
+            "map": [],
+            "url": ""
+          }
+        }
+      },
+      "images_type": "dict",
+      "keys": [
+        "airbnb",
+        "cleaningFee",
+        "featureCodes",
+        "images",
+        "name",
+        "rackRate",
+        "roomId",
+        "roomType",
+        "securityDeposit",
+        "sellPriority",
+        "taxPercent",
+        "taxPerson",
+        "texts"
+      ]
+    },
+    "674466": {
+      "airbnb": {
+        "accessText": {
+          "ES": "Los huéspedes tienen acceso a su chalet y a las zonas comunes exteriores, incluida la piscina compartida y el jardín."
+        },
+        "advanceNoticeHours": 0,
+        "allowRequests": 1,
+        "bathroomShared": "",
+        "cancellationPolicy": "flexible",
+        "checkInText": "",
+        "checkInType": "host_checkin",
+        "commonSpacesShared": "",
+        "custom": "",
+        "datesNoPrice": "",
+        "discountDays14": 1,
+        "discountDays2": 1,
+        "discountDays21": 1,
+        "discountDays28": 1,
+        "discountDays3": 1,
+        "discountDays4": 1,
+        "discountDays5": 1,
+        "discountDays6": 1,
+        "discountDays7": 1,
+        "discountMonthly": 1,
+        "discountWeekly": 1,
+        "earlyBirdDays": 28,
+        "earlyBirdDiscountPercent": 0,
+        "extraPersonPrice": "",
+        "guestsIncluded": "",
+        "houseManualText": "",
+        "houseRulesText": {
+          "ES": "Alojamiento para no fumadores. Respeta las zonas comunes y utiliza la piscina y los espacios exteriores de forma responsable."
+        },
+        "instantBookingAllowed": "everyone",
+        "interactionText": {
+          "ES": "El equipo está disponible para ayudar durante la estancia cuando sea necesario."
+        },
+        "lastMinuteDays": 0,
+        "lastMinuteDiscountPercent": 0,
+        "listingId": "1759764847919085354",
+        "listingType": "entire_home",
+        "maxDaysAdvance": "365",
+        "name": {
+          "ES": "Chalet Superior · Aumara El Cid"
+        },
+        "neighborhoodText": {
+          "ES": ""
+        },
+        "notesText": {
+          "ES": "La piscina y las zonas exteriores son compartidas con otros huéspedes. Todos los alojamientos son para no fumadores."
+        },
+        "picturesFrom": "rop",
+        "priceStategy": 0,
+        "propertyTypeGroup": "houses",
+        "publish": "yes",
+        "spaceText": {
+          "ES": "Chalet privado con baño y zona de cocina compacta equipada con nevera, microondas, hervidor, cafetera, fregadero y menaje."
+        },
+        "summaryText": {
+          "ES": "Superior Chalet privado con aire acondicionado, Wi-Fi, baño privado y zona de cocina con nevera, microondas, hervidor, cafetera, fregadero y menaje. Acceso a piscina compartida, jardín y zonas exteriores. Alojamiento para no fumadores."
+        },
+        "transitText": {
+          "ES": ""
+        }
+      },
+      "images": {
+        "external": {
+          "1": {
+            "map": [],
+            "url": ""
+          },
+          "10": {
+            "map": [],
+            "url": ""
+          },
+          "11": {
+            "map": [],
+            "url": ""
+          },
+          "12": {
+            "map": [],
+            "url": ""
+          },
+          "13": {
+            "map": [],
+            "url": ""
+          },
+          "14": {
+            "map": [],
+            "url": ""
+          },
+          "15": {
+            "map": [],
+            "url": ""
+          },
+          "16": {
+            "map": [],
+            "url": ""
+          },
+          "17": {
+            "map": [],
+            "url": ""
+          },
+          "18": {
+            "map": [],
+            "url": ""
+          },
+          "19": {
+            "map": [],
+            "url": ""
+          },
+          "2": {
+            "map": [],
+            "url": ""
+          },
+          "20": {
+            "map": [],
+            "url": ""
+          },
+          "3": {
+            "map": [],
+            "url": ""
+          },
+          "4": {
+            "map": [],
+            "url": ""
+          },
+          "5": {
+            "map": [],
+            "url": ""
+          },
+          "6": {
+            "map": [],
+            "url": ""
+          },
+          "7": {
+            "map": [],
+            "url": ""
+          },
+          "8": {
+            "map": [],
+            "url": ""
+          },
+          "9": {
+            "map": [],
+            "url": ""
+          }
+        }
+      },
+      "images_type": "dict",
+      "keys": [
+        "airbnb",
+        "cleaningFee",
+        "featureCodes",
+        "images",
+        "name",
+        "rackRate",
+        "roomId",
+        "roomType",
+        "securityDeposit",
+        "sellPriority",
+        "taxPercent",
+        "taxPerson",
+        "texts"
+      ]
+    }
+  },
+  "schema": "aumara.beds24-photo-content-probe.v1",
+  "secret_exposed": false,
+  "top_level_keys": [
+    "bookingCutOffHour",
+    "bookingExceptType",
+    "bookingExceptTypeEnd",
+    "bookingExceptTypeStart",
+    "bookingNearType",
+    "bookingNearTypeDays",
+    "bookingPageMultiplier",
+    "bookingRequestStatus",
+    "bookingType",
+    "cardAcceptAmex",
+    "cardAcceptDiners",
+    "cardAcceptDiscover",
+    "cardAcceptEnroute",
+    "cardAcceptJcb",
+    "cardAcceptMaestro",
+    "cardAcceptMaster",
+    "cardAcceptUnionpay",
+    "cardAcceptVisa",
+    "cardAcceptVoyager",
+    "cardRequireCVV",
+    "checkInEndHour",
+    "checkInStartHour",
+    "checkOutEndHour",
+    "depositFixed1",
+    "depositFixed2",
+    "depositNonPayment",
+    "depositPercent1",
+    "depositPercent2",
+    "discountVoucherCode",
+    "featureCodes",
+    "groupKeywords",
+    "images",
+    "name",
+    "offerType",
+    "oneTimeVouchers",
+    "paymentGatewayAgodapayEnable",
+    "paymentGatewayAsiapayEnable",
+    "paymentGatewayAuthorizenetEnable",
+    "paymentGatewayBitpayEnable",
+    "paymentGatewayBorgunEnable",
+    "paymentGatewayCreditcardEnable",
+    "paymentGatewayCustomgatewayEnable",
+    "paymentGatewayGlobalpayments1Enable",
+    "paymentGatewayGlobalpayments2Enable",
+    "paymentGatewayOfflinepaymentEnable",
+    "paymentGatewayPaymillEnable",
+    "paymentGatewayPaypalEnable",
+    "paymentGatewayStripeEnable",
+    "permit",
+    "propId",
+    "roomChargeDisplay",
+    "roomIds",
+    "sellPriority",
+    "texts"
+  ]
+}

@@ -1,0 +1,173 @@
+name: Beds24 external photo remap AUMARA 2026-08-25
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/beds24-external-photo-remap-20260825.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: beds24-external-photo-remap-324882
+  cancel-in-progress: false
+
+jobs:
+  remap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: Production
+    env:
+      BEDS24_API_KEY: ${{ secrets.BEDS24_API_KEY }}
+      BEDS24_PROP_KEY: ${{ secrets.BEDS24_PROP_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Move active photo URLs to clean slots and verify exact room inventories
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import datetime as dt, json, os, pathlib, subprocess, time, urllib.error, urllib.request
+
+          PROPERTY_ID='324882'
+          CHALET='674465'
+          SUPERIOR='674466'
+          ASSET_SHA='3004659e6b77a5a3bec50c41acad7734ce059ea1'
+          BASE=f'https://raw.githubusercontent.com/elcidspain/openai-cookbook/{ASSET_SHA}/aumara-control-tower/public/airbnb-20260825'
+          api=(os.environ.get('BEDS24_API_KEY') or '').strip()
+          prop=(os.environ.get('BEDS24_PROP_KEY') or '').strip()
+          if not api or not prop:
+              raise SystemExit('Beds24 V1 credentials missing')
+          print(f'::add-mask::{api}'); print(f'::add-mask::{prop}')
+          auth={'apiKey':api,'propKey':prop}
+
+          def post(path,payload):
+              req=urllib.request.Request(
+                  'https://api.beds24.com/json/'+path,
+                  data=json.dumps(payload,ensure_ascii=False).encode(),
+                  headers={'Content-Type':'application/json','Accept':'application/json','User-Agent':'AUMARA-Control-Tower/1.0'},
+                  method='POST')
+              try:
+                  with urllib.request.urlopen(req,timeout=90) as r:
+                      raw=r.read(); status=int(r.status)
+              except urllib.error.HTTPError as e:
+                  raw=e.read(); status=int(e.code)
+              try: body=json.loads(raw.decode('utf-8','replace')) if raw else {}
+              except Exception: body={'non_json_bytes':len(raw)}
+              if not 200 <= status < 300:
+                  raise SystemExit(f'{path} HTTP {status}: {str(body)[:1200]}')
+              return body
+
+          filenames=[f'{i:02d}-common-{i:02d}.jpg' for i in range(1,15)] + [
+              '15-chalet-01.jpg','16-chalet-02.jpg','17-chalet-03.jpg','18-superior-01.jpg']
+          categories=['common']*14+['chalet']*3+['superior']
+          clean_slots=list(range(27,45))
+          desired={}
+          chalet_pos=superior_pos=0
+          for slot,filename,category in zip(clean_slots,filenames,categories):
+              maps=[]
+              if category=='common':
+                  chalet_pos+=1; superior_pos+=1
+                  maps=[
+                      {'propId':PROPERTY_ID,'roomId':CHALET,'position':str(chalet_pos)},
+                      {'propId':PROPERTY_ID,'roomId':SUPERIOR,'position':str(superior_pos)},
+                  ]
+              elif category=='chalet':
+                  chalet_pos+=1
+                  maps=[{'propId':PROPERTY_ID,'roomId':CHALET,'position':str(chalet_pos)}]
+              else:
+                  superior_pos+=1
+                  maps=[{'propId':PROPERTY_ID,'roomId':SUPERIOR,'position':str(superior_pos)}]
+              desired[str(slot)]={'url':f'{BASE}/{filename}','map':maps}
+          if (chalet_pos,superior_pos)!=(17,15):
+              raise SystemExit('Internal photo count error')
+
+          # V1 merges map arrays rather than reliably deleting stale mappings. Keep old map metadata
+          # harmless by blanking the old active URLs, then place the approved set only in slots that
+          # were proven empty by the schema probe.
+          patch={str(i):{'url':''} for i in range(1,19)}
+          patch.update(desired)
+          write=post('setPropertyContent',{
+              'authentication':auth,
+              'setPropertyContent':[{'action':'modify','images':{'external':patch}}],
+          })
+          time.sleep(4)
+          read=post('getPropertyContent',{
+              'authentication':auth,'bookingData':False,'images':True,'roomIds':True,'texts':False,
+              'includeAirbnb':True,'includeVrbo':False})
+          root=(read.get('getPropertyContent') or [{}])[0]
+          ext=((root.get('images') or {}).get('external') or {})
+
+          def norm_maps(value):
+              return sorted((str(x.get('propId','')),str(x.get('roomId','')),str(x.get('position',''))) for x in (value or []))
+
+          mismatches=[]
+          for i in range(1,19):
+              got=(ext.get(str(i)) or {}).get('url')
+              if got not in ('',None):
+                  mismatches.append({'slot':str(i),'field':'old_url_not_blank','got':got})
+          for key,want in desired.items():
+              got=ext.get(key) or {}
+              if got.get('url')!=want['url']:
+                  mismatches.append({'slot':key,'field':'url','wanted':want['url'],'got':got.get('url')})
+              if norm_maps(got.get('map'))!=norm_maps(want['map']):
+                  mismatches.append({'slot':key,'field':'map','wanted':want['map'],'got':got.get('map')})
+
+          active=[]
+          counts={CHALET:0,SUPERIOR:0}
+          for slot,obj in ext.items():
+              if not isinstance(obj,dict) or not str(obj.get('url') or '').strip():
+                  continue
+              for m in obj.get('map') or []:
+                  rid=str(m.get('roomId') or '')
+                  if rid in counts:
+                      counts[rid]+=1
+                      active.append({'slot':str(slot),'roomId':rid,'position':str(m.get('position') or ''),'url':obj.get('url')})
+          if counts!={CHALET:17,SUPERIOR:15}:
+              mismatches.append({'field':'active_room_counts','wanted':{CHALET:17,SUPERIOR:15},'got':counts})
+
+          rooms=root.get('roomIds') or {}
+          airbnb={}
+          expected_ids={CHALET:'1759764557896676605',SUPERIOR:'1759764847919085354'}
+          for rid in (CHALET,SUPERIOR):
+              a=((rooms.get(rid) or {}).get('airbnb') or {})
+              state={k:a.get(k) for k in ('listingId','publish','picturesFrom','propertyTypeGroup','listingType')}
+              airbnb[rid]=state
+              if str(state.get('listingId') or '')!=expected_ids[rid]:
+                  mismatches.append({'roomId':rid,'field':'listingId','wanted':expected_ids[rid],'got':state.get('listingId')})
+              if str(state.get('publish') or '').lower()!='no':
+                  mismatches.append({'roomId':rid,'field':'publish_gate','wanted':'no','got':state.get('publish')})
+
+          evidence={
+              'schema':'aumara.beds24-external-photo-remap.v1',
+              'checked_at_utc':dt.datetime.now(dt.timezone.utc).isoformat(),
+              'property_id':324882,
+              'asset_commit':ASSET_SHA,
+              'clean_slots':[27,44],
+              'active_room_photo_counts':counts,
+              'active_mappings':active,
+              'airbnb_state':airbnb,
+              'write_response':write,
+              'mismatches':mismatches,
+              'status':'SUCCESS' if not mismatches else 'FAILED_READBACK',
+              'secret_exposed':False,
+          }
+          text=json.dumps(evidence,ensure_ascii=False,indent=2,sort_keys=True)
+          for secret in (api,prop): text=text.replace(secret,'[REDACTED]')
+          out=pathlib.Path('aumara-control-tower/evidence/beds24-external-photo-remap-20260825.json')
+          out.parent.mkdir(parents=True,exist_ok=True)
+          out.write_text(text+'\n',encoding='utf-8')
+          subprocess.run(['git','config','user.name','github-actions[bot]'],check=True)
+          subprocess.run(['git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com'],check=True)
+          subprocess.run(['git','add',str(out)],check=True)
+          if subprocess.run(['git','diff','--cached','--quiet'],check=False).returncode!=0:
+              subprocess.run(['git','commit','-m',f'Record AUMARA external photo remap {evidence["status"]} [skip ci]'],check=True)
+              subprocess.run(['git','pull','--rebase','origin','main'],check=True)
+              subprocess.run(['git','push','origin','HEAD:main'],check=True)
+          print(json.dumps({'status':evidence['status'],'active_room_photo_counts':counts,'airbnb_state':airbnb,'mismatch_count':len(mismatches)},ensure_ascii=False))
+          if mismatches: raise SystemExit(1)
+          PY
