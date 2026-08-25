@@ -59,19 +59,19 @@ class Beds24GuestJourneyShadowTests(unittest.TestCase):
             workflow,
         )
         self.assertIn("externalDependencyUnavailable", workflow)
-        self.assertIn(
+        fallback_marker = (
             "elif grep -q \"Beds24 authentication failed with HTTP status\" "
-            "\"$auth_error_log\"; then",
-            workflow,
+            "\"$auth_error_log\"; then"
         )
-        self.assertIn(
-            "          python - <<'PY'",
-            workflow,
-        )
-        self.assertIn(
-            "          import datetime as dt",
-            workflow,
-        )
+        self.assertIn(fallback_marker, workflow)
+        # Scope heredoc checks to the auth-degraded fallback block only
+        # (between the elif and the next `else` clause), so that a later
+        # heredoc in the workflow cannot produce a false-positive match.
+        fallback_start = workflow.index(fallback_marker)
+        fallback_block = workflow[fallback_start : workflow.index("\n          else", fallback_start)]
+        self.assertIn("python - <<'PY'", fallback_block)
+        self.assertIn("import datetime as dt", fallback_block)
+        self.assertIn("PY", fallback_block.rstrip().splitlines()[-1].strip())
 
     def test_shadow_maps_both_property_ids_without_room_filters(self) -> None:
         self.assertEqual(
