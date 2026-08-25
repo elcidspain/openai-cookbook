@@ -1,0 +1,138 @@
+name: Beds24 content audit AUMARA 2026-08-25
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/beds24-content-audit-20260825.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: beds24-content-audit-324882
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: Production
+    env:
+      BEDS24_API_KEY: ${{ secrets.BEDS24_API_KEY }}
+      BEDS24_PROP_KEY: ${{ secrets.BEDS24_PROP_KEY }}
+      PROPERTY_ID: '324882'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Read current property, channel content and room prices
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import datetime as dt, json, os, pathlib, statistics, subprocess, time, urllib.error, urllib.request
+
+          api=(os.environ.get('BEDS24_API_KEY') or '').strip()
+          prop=(os.environ.get('BEDS24_PROP_KEY') or '').strip()
+          pid=int(os.environ.get('PROPERTY_ID','324882'))
+          if not api or not prop:
+              raise SystemExit('Beds24 V1 API credentials missing in Production')
+          print(f'::add-mask::{api}')
+          print(f'::add-mask::{prop}')
+
+          auth={'apiKey':api,'propKey':prop}
+          def post(path,payload):
+              raw=json.dumps(payload).encode()
+              req=urllib.request.Request('https://api.beds24.com/json/'+path,data=raw,headers={'Content-Type':'application/json','Accept':'application/json','User-Agent':'AUMARA-Control-Tower/1.0'},method='POST')
+              try:
+                  with urllib.request.urlopen(req,timeout=90) as r:
+                      body=r.read(); status=int(r.status)
+              except urllib.error.HTTPError as e:
+                  body=e.read(); status=int(e.code)
+              try: data=json.loads(body.decode('utf-8','replace')) if body else {}
+              except Exception: data={'non_json_bytes':len(body)}
+              if not 200 <= status < 300:
+                  raise SystemExit(f'{path} HTTP {status}: {str(data)[:1000]}')
+              return data
+
+          setup=post('getProperty',{'authentication':auth})
+          time.sleep(3)
+          content=post('getPropertyContent',{
+              'authentication':auth,
+              'bookingData':True,
+              'images':False,
+              'roomIds':True,
+              'texts':True,
+              'includeAirbnb':True,
+              'includeVrbo':False
+          })
+
+          today=dt.date.today()
+          date_from=today.strftime('%Y%m%d')
+          date_to=(today+dt.timedelta(days=180)).strftime('%Y%m%d')
+          room_dates={}
+          price_summary={}
+          for rid in (674465,674466):
+              time.sleep(2)
+              data=post('getRoomDates',{
+                  'authentication':auth,
+                  'roomId':rid,
+                  'from':date_from,
+                  'to':date_to,
+                  'incMaxStay':1,
+                  'incMultiplier':1,
+                  'incOverride':1
+              })
+              room_dates[str(rid)]=data
+              vals=[]
+              rows={f'p{i}':[] for i in range(1,17)}
+              if isinstance(data,dict):
+                  for _,day in data.items():
+                      if not isinstance(day,dict):
+                          continue
+                      for key in rows:
+                          try:
+                              v=float(day.get(key) or 0)
+                          except (TypeError,ValueError):
+                              v=0
+                          if v>0:
+                              rows[key].append(v); vals.append(v)
+              price_summary[str(rid)]={
+                  'all_positive_min':min(vals) if vals else None,
+                  'all_positive_median':statistics.median(vals) if vals else None,
+                  'all_positive_max':max(vals) if vals else None,
+                  'price_rows':{
+                      k:{'count':len(v),'min':min(v) if v else None,'median':statistics.median(v) if v else None,'max':max(v) if v else None}
+                      for k,v in rows.items() if v
+                  }
+              }
+
+          out={
+              'schema':'aumara.beds24-content-audit.v2',
+              'checked_at_utc':dt.datetime.now(dt.timezone.utc).isoformat(),
+              'property_id':pid,
+              'setup':setup,
+              'content':content,
+              'room_dates_window':{'from':date_from,'to':date_to},
+              'room_dates':room_dates,
+              'price_summary':price_summary,
+              'secret_exposed':False
+          }
+          text=json.dumps(out,ensure_ascii=False,indent=2,sort_keys=True)
+          for secret in (api,prop):
+              text=text.replace(secret,'[REDACTED]')
+          path=pathlib.Path('aumara-control-tower/evidence/beds24-content-audit-20260825.json')
+          path.parent.mkdir(parents=True,exist_ok=True)
+          path.write_text(text+'\n',encoding='utf-8')
+
+          subprocess.run(['git','config','user.name','github-actions[bot]'],check=True)
+          subprocess.run(['git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com'],check=True)
+          subprocess.run(['git','add',str(path)],check=True)
+          if subprocess.run(['git','diff','--cached','--quiet'],check=False).returncode != 0:
+              subprocess.run(['git','commit','-m','Record AUMARA Beds24 content and rate audit [skip ci]'],check=True)
+              subprocess.run(['git','pull','--rebase','origin','main'],check=True)
+              subprocess.run(['git','push','origin','HEAD:main'],check=True)
+          print(json.dumps({'status':'SUCCESS','evidence':str(path),'property_id':pid,'price_summary':price_summary},ensure_ascii=False))
+          PY

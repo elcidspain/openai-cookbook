@@ -1,0 +1,109 @@
+name: Beds24 V1 picture schema probe AUMARA 2026-08-25
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/beds24-v1-picture-schema-probe-20260825.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: beds24-v1-picture-schema-probe-324882
+  cancel-in-progress: true
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: Production
+    env:
+      BEDS24_API_KEY: ${{ secrets.BEDS24_API_KEY }}
+      BEDS24_PROP_KEY: ${{ secrets.BEDS24_PROP_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Read current picture structure with V1
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import datetime as dt, json, os, pathlib, subprocess, urllib.error, urllib.request
+
+          api=(os.environ.get('BEDS24_API_KEY') or '').strip()
+          prop=(os.environ.get('BEDS24_PROP_KEY') or '').strip()
+          if not api or not prop:
+              raise SystemExit('Beds24 V1 credentials missing')
+          print(f'::add-mask::{api}')
+          print(f'::add-mask::{prop}')
+
+          payload={
+              'authentication':{'apiKey':api,'propKey':prop},
+              'bookingData':False,
+              'images':True,
+              'roomIds':True,
+              'texts':False,
+              'includeAirbnb':True,
+              'includeVrbo':False,
+          }
+          req=urllib.request.Request(
+              'https://api.beds24.com/json/getPropertyContent',
+              data=json.dumps(payload).encode(),
+              headers={'Content-Type':'application/json','Accept':'application/json'},
+              method='POST')
+          try:
+              with urllib.request.urlopen(req,timeout=90) as r:
+                  raw=r.read(); status=int(r.status)
+          except urllib.error.HTTPError as e:
+              raw=e.read(); status=int(e.code)
+          try:
+              data=json.loads(raw.decode('utf-8','replace')) if raw else {}
+          except Exception:
+              data={'non_json_bytes':len(raw)}
+          if not 200 <= status < 300:
+              raise SystemExit(f'getPropertyContent HTTP {status}: {str(data)[:1200]}')
+
+          def collect(value,path='$',out=None):
+              if out is None: out=[]
+              if isinstance(value,dict):
+                  for k,v in value.items():
+                      child=f'{path}.{k}'
+                      kl=str(k).lower()
+                      if any(token in kl for token in ('picture','image','photo')):
+                          out.append({'path':child,'value':v})
+                      collect(v,child,out)
+              elif isinstance(value,list):
+                  for i,v in enumerate(value[:200]): collect(v,f'{path}[{i}]',out)
+              return out
+
+          root=((data.get('getPropertyContent') or [{}])[0] if isinstance(data,dict) else {})
+          room_ids=root.get('roomIds') or {}
+          evidence={
+              'schema':'aumara.beds24-v1-picture-schema-probe.v1',
+              'checked_at_utc':dt.datetime.now(dt.timezone.utc).isoformat(),
+              'property_id':324882,
+              'http_status':status,
+              'top_level_keys':sorted(root.keys()) if isinstance(root,dict) else [],
+              'room_674465_keys':sorted((room_ids.get('674465') or {}).keys()) if isinstance(room_ids,dict) else [],
+              'room_674466_keys':sorted((room_ids.get('674466') or {}).keys()) if isinstance(room_ids,dict) else [],
+              'picture_paths':collect(root),
+              'status':'SUCCESS',
+              'secret_exposed':False,
+          }
+          text=json.dumps(evidence,ensure_ascii=False,indent=2,sort_keys=True)
+          for secret in (api,prop): text=text.replace(secret,'[REDACTED]')
+          out=pathlib.Path('aumara-control-tower/evidence/beds24-v1-picture-schema-probe-20260825.json')
+          out.parent.mkdir(parents=True,exist_ok=True)
+          out.write_text(text+'\n',encoding='utf-8')
+          subprocess.run(['git','config','user.name','github-actions[bot]'],check=True)
+          subprocess.run(['git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com'],check=True)
+          subprocess.run(['git','add',str(out)],check=True)
+          if subprocess.run(['git','diff','--cached','--quiet'],check=False).returncode!=0:
+              subprocess.run(['git','commit','-m','Record Beds24 V1 picture schema [skip ci]'],check=True)
+              subprocess.run(['git','pull','--rebase','origin','main'],check=True)
+              subprocess.run(['git','push','origin','HEAD:main'],check=True)
+          print(json.dumps({'status':'SUCCESS','picture_path_count':len(evidence['picture_paths']),'evidence':str(out)}))
+          PY

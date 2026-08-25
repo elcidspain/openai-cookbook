@@ -1,0 +1,133 @@
+name: Beds24 external photo delete probe AUMARA 2026-08-25
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/beds24-external-photo-delete-probe-20260825.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: beds24-external-photo-delete-probe-324882
+  cancel-in-progress: false
+
+jobs:
+  probe-and-clean:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: Production
+    env:
+      BEDS24_API_KEY: ${{ secrets.BEDS24_API_KEY }}
+      BEDS24_PROP_KEY: ${{ secrets.BEDS24_PROP_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Discover deletion semantics on unused slot 90, then clean old duplicate slots
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import datetime as dt, json, os, pathlib, subprocess, time, urllib.error, urllib.request
+
+          PROPERTY='324882'; CHALET='674465'; SUPERIOR='674466'; TEST_SLOT='90'
+          KEEP_SLOTS={str(i) for i in range(27,45)}
+          OLD_SLOTS={str(i) for i in range(1,19)}
+          TEST_URL='https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/01-common-01.jpg'
+          api=(os.environ.get('BEDS24_API_KEY') or '').strip(); prop=(os.environ.get('BEDS24_PROP_KEY') or '').strip()
+          if not api or not prop: raise SystemExit('Beds24 V1 credentials missing')
+          print(f'::add-mask::{api}'); print(f'::add-mask::{prop}')
+          auth={'apiKey':api,'propKey':prop}
+
+          def request(path,payload,strict=True):
+              req=urllib.request.Request('https://api.beds24.com/json/'+path,data=json.dumps(payload,ensure_ascii=False).encode(),headers={'Content-Type':'application/json','Accept':'application/json','User-Agent':'AUMARA-Control-Tower/1.0'},method='POST')
+              try:
+                  with urllib.request.urlopen(req,timeout=90) as r: raw=r.read(); status=int(r.status)
+              except urllib.error.HTTPError as e: raw=e.read(); status=int(e.code)
+              try: body=json.loads(raw.decode('utf-8','replace')) if raw else {}
+              except Exception: body={'non_json_bytes':len(raw)}
+              if strict and not 200 <= status < 300: raise SystemExit(f'{path} HTTP {status}: {str(body)[:1000]}')
+              return status,body
+
+          def read_root():
+              _,body=request('getPropertyContent',{'authentication':auth,'bookingData':False,'images':True,'roomIds':True,'texts':False,'includeAirbnb':True,'includeVrbo':False})
+              return (body.get('getPropertyContent') or [{}])[0]
+
+          def slot(root,key):
+              return (((root.get('images') or {}).get('external') or {}).get(key) or {})
+
+          def set_external(patch):
+              return request('setPropertyContent',{'authentication':auth,'setPropertyContent':[{'action':'modify','images':{'external':patch}}]},strict=False)
+
+          before=read_root(); initial_test=slot(before,TEST_SLOT)
+          if str(initial_test.get('url') or '').strip():
+              raise SystemExit('Safety gate: test slot 90 is not empty')
+
+          # Seed a harmless unmapped URL in an otherwise unused slot.
+          status,body=set_external({TEST_SLOT:{'url':TEST_URL,'map':[]}})
+          if not 200 <= status < 300: raise SystemExit(f'Could not seed test slot: HTTP {status} {str(body)[:500]}')
+          time.sleep(2)
+          seeded=slot(read_root(),TEST_SLOT)
+          if seeded.get('url')!=TEST_URL:
+              raise SystemExit('Test slot did not accept seed URL; active slots untouched')
+
+          methods=[
+              ('null_url_and_map',{TEST_SLOT:{'url':None,'map':None}}),
+              ('null_slot',{TEST_SLOT:None}),
+              ('null_url',{TEST_SLOT:{'url':None}}),
+          ]
+          probe=[]; deletion_method=None
+          for name,patch in methods:
+              # Re-seed before every candidate so each probe starts from the same state.
+              set_external({TEST_SLOT:{'url':TEST_URL,'map':[]}}); time.sleep(1)
+              s,b=set_external(patch); time.sleep(2)
+              got=slot(read_root(),TEST_SLOT)
+              cleared=not str(got.get('url') or '').strip()
+              probe.append({'method':name,'http_status':s,'response':b,'readback':got,'cleared':cleared})
+              if 200 <= s < 300 and cleared:
+                  deletion_method=(name,patch[TEST_SLOT]); break
+
+          if deletion_method is None:
+              # Leave the diagnostic slot harmless and unmapped. Do not touch active picture slots.
+              evidence={'schema':'aumara.beds24-external-photo-delete-probe.v1','checked_at_utc':dt.datetime.now(dt.timezone.utc).isoformat(),'property_id':324882,'probe':probe,'active_cleanup_attempted':False,'status':'NO_DELETE_SEMANTICS','secret_exposed':False}
+          else:
+              name,delete_value=deletion_method
+              # Third and final remediation: delete ONLY the older duplicated active URLs in slots 1..18.
+              patch={key:delete_value for key in sorted(OLD_SLOTS,key=int)}
+              s,b=set_external(patch)
+              if not 200 <= s < 300:
+                  raise SystemExit(f'Cleanup write failed HTTP {s}: {str(b)[:700]}')
+              time.sleep(4)
+              root=read_root(); ext=((root.get('images') or {}).get('external') or {})
+              active=[]; counts={CHALET:0,SUPERIOR:0}; active_slots=set()
+              for key,obj in ext.items():
+                  if not isinstance(obj,dict) or not str(obj.get('url') or '').strip(): continue
+                  active_slots.add(str(key))
+                  for m in obj.get('map') or []:
+                      rid=str(m.get('roomId') or '')
+                      if rid in counts:
+                          counts[rid]+=1
+                          active.append({'slot':str(key),'roomId':rid,'position':str(m.get('position') or ''),'url':obj.get('url')})
+              rooms=root.get('roomIds') or {}; airbnb={}; blockers=[]
+              expected_ids={CHALET:'1759764557896676605',SUPERIOR:'1759764847919085354'}
+              for rid in (CHALET,SUPERIOR):
+                  a=((rooms.get(rid) or {}).get('airbnb') or {})
+                  airbnb[rid]={k:a.get(k) for k in ('listingId','publish','picturesFrom','propertyTypeGroup','listingType')}
+                  if str(a.get('listingId') or '')!=expected_ids[rid]: blockers.append({'roomId':rid,'field':'listingId','got':a.get('listingId')})
+                  if str(a.get('publish') or '').lower()!='no': blockers.append({'roomId':rid,'field':'publish','got':a.get('publish')})
+              if counts!={CHALET:17,SUPERIOR:15}: blockers.append({'field':'active_room_photo_counts','wanted':{CHALET:17,SUPERIOR:15},'got':counts})
+              if active_slots!=KEEP_SLOTS: blockers.append({'field':'active_slots','wanted':sorted(KEEP_SLOTS,key=int),'got':sorted(active_slots,key=int)})
+              evidence={'schema':'aumara.beds24-external-photo-delete-probe.v1','checked_at_utc':dt.datetime.now(dt.timezone.utc).isoformat(),'property_id':324882,'probe':probe,'deletion_method':name,'active_cleanup_attempted':True,'cleanup_http_status':s,'active_room_photo_counts':counts,'active_slots':sorted(active_slots,key=int),'active_mappings':active,'airbnb_state':airbnb,'blockers':blockers,'status':'SUCCESS' if not blockers else 'FAILED_READBACK','secret_exposed':False}
+
+          text=json.dumps(evidence,ensure_ascii=False,indent=2,sort_keys=True)
+          for secret in (api,prop): text=text.replace(secret,'[REDACTED]')
+          out=pathlib.Path('aumara-control-tower/evidence/beds24-external-photo-delete-probe-20260825.json'); out.parent.mkdir(parents=True,exist_ok=True); out.write_text(text+'\n',encoding='utf-8')
+          subprocess.run(['git','config','user.name','github-actions[bot]'],check=True); subprocess.run(['git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com'],check=True); subprocess.run(['git','add',str(out)],check=True)
+          if subprocess.run(['git','diff','--cached','--quiet'],check=False).returncode!=0:
+              subprocess.run(['git','commit','-m',f'Record Beds24 external photo delete probe {evidence["status"]} [skip ci]'],check=True); subprocess.run(['git','pull','--rebase','origin','main'],check=True); subprocess.run(['git','push','origin','HEAD:main'],check=True)
+          print(json.dumps({'status':evidence['status'],'deletion_method':evidence.get('deletion_method'),'active_cleanup_attempted':evidence['active_cleanup_attempted'],'active_room_photo_counts':evidence.get('active_room_photo_counts'),'blockers':evidence.get('blockers',[])},ensure_ascii=False))
+          if evidence['status']!='SUCCESS': raise SystemExit(1)
+          PY

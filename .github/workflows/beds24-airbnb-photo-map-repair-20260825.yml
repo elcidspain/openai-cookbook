@@ -1,0 +1,163 @@
+name: Beds24 Airbnb photo map repair AUMARA 2026-08-25
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/beds24-airbnb-photo-map-repair-20260825.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: beds24-airbnb-photo-map-repair-324882
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: Production
+    env:
+      BEDS24_API_KEY: ${{ secrets.BEDS24_API_KEY }}
+      BEDS24_PROP_KEY: ${{ secrets.BEDS24_PROP_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Remove seven stale Superior mappings and verify all photo slots
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import datetime as dt, json, os, pathlib, subprocess, time, urllib.error, urllib.request
+
+          api=(os.environ.get('BEDS24_API_KEY') or '').strip()
+          prop=(os.environ.get('BEDS24_PROP_KEY') or '').strip()
+          for s in (api,prop):
+              if s: print(f'::add-mask::{s}')
+          if not api or not prop: raise SystemExit('Beds24 credentials missing')
+          auth={'apiKey':api,'propKey':prop}
+          bad_slots=['35','36','37','38','39','40','44']
+          expected_pos={'35':'35','36':'36','37':'37','38':'38','39':'39','40':'40','44':'44'}
+
+          def call(path,payload):
+              req=urllib.request.Request('https://api.beds24.com/json/'+path,data=json.dumps(payload).encode(),headers={'Content-Type':'application/json','Accept':'application/json'},method='POST')
+              try:
+                  with urllib.request.urlopen(req,timeout=90) as r: raw=r.read(); status=int(r.status)
+              except urllib.error.HTTPError as e: raw=e.read(); status=int(e.code)
+              data=json.loads(raw.decode('utf-8','replace')) if raw else {}
+              if not 200 <= status < 300: raise RuntimeError(f'{path} HTTP {status}: {str(data)[:1000]}')
+              return data
+
+          def read_content():
+              data=call('getPropertyContent',{'authentication':auth,'bookingData':False,'images':True,'roomIds':True,'texts':True,'includeAirbnb':True,'includeVrbo':False})
+              return (data.get('getPropertyContent') or [{}])[0]
+
+          before=read_content()
+          ext=((before.get('images') or {}).get('external') or {})
+          snapshot={}
+          for slot in bad_slots:
+              item=ext.get(slot) or {}
+              url=str(item.get('url') or '')
+              if not url: raise RuntimeError(f'slot {slot} unexpectedly empty before repair')
+              snapshot[slot]={'url':url,'caption':item.get('caption') or {}}
+
+          # Phase 1: delete the seven image records entirely. This is intentional: Beds24
+          # preserves omitted room mappings on modify, so recreating the record is the
+          # narrow way to remove stale room associations without touching the other 56 photos.
+          clear={slot:{'url':'','caption':{'ES':'','EN':''},'map':[]} for slot in bad_slots}
+          clear_response=call('setPropertyContent',{'authentication':auth,'setPropertyContent':[{'action':'modify','images':{'external':clear}}]})
+          time.sleep(6)
+          mid=read_content()
+          mid_ext=((mid.get('images') or {}).get('external') or {})
+          clear_fail=[]
+          for slot in bad_slots:
+              item=mid_ext.get(slot) or {}
+              if str(item.get('url') or '') or (item.get('map') or []): clear_fail.append(slot)
+
+          if clear_fail:
+              # Safe rollback to the exact URLs/captions present before this attempt.
+              rollback={}
+              for slot in bad_slots:
+                  old=snapshot[slot]
+                  rollback[slot]={'url':old['url'],'caption':old['caption'],'map':[{'position':expected_pos[slot],'propId':'324882','roomId':'674465'}]}
+              call('setPropertyContent',{'authentication':auth,'setPropertyContent':[{'action':'modify','images':{'external':rollback}}]})
+              raise RuntimeError(f'Beds24 did not clear stale map records for slots {clear_fail}; rollback applied')
+
+          # Phase 2: recreate only the seven Chalet photos with one explicit Chalet mapping.
+          captions={
+            '35':{'ES':'Chalet · AUMARA El Cid — interior del alojamiento','EN':'Chalet · AUMARA El Cid — accommodation interior'},
+            '36':{'ES':'Chalet · AUMARA El Cid — dormitorio','EN':'Chalet · AUMARA El Cid — bedroom'},
+            '37':{'ES':'Chalet · AUMARA El Cid — dormitorio','EN':'Chalet · AUMARA El Cid — bedroom'},
+            '38':{'ES':'Chalet · AUMARA El Cid — dormitorio','EN':'Chalet · AUMARA El Cid — bedroom'},
+            '39':{'ES':'Chalet · AUMARA El Cid — dormitorio','EN':'Chalet · AUMARA El Cid — bedroom'},
+            '40':{'ES':'Chalet · AUMARA El Cid — dormitorio','EN':'Chalet · AUMARA El Cid — bedroom'},
+            '44':{'ES':'Chalet · AUMARA El Cid — comedor y zona de cocina','EN':'Chalet · AUMARA El Cid — dining and kitchenette area'},
+          }
+          restore={}
+          for slot in bad_slots:
+              restore[slot]={
+                'url':snapshot[slot]['url'],
+                'caption':captions[slot],
+                'map':[{'position':expected_pos[slot],'propId':'324882','roomId':'674465'}],
+              }
+          restore_response=call('setPropertyContent',{'authentication':auth,'setPropertyContent':[{'action':'modify','images':{'external':restore}}]})
+          time.sleep(8)
+          after=read_content()
+          after_ext=((after.get('images') or {}).get('external') or {})
+
+          blockers=[]
+          repaired={}
+          for slot in bad_slots:
+              item=after_ext.get(slot) or {}
+              maps=item.get('map') or []
+              normalized=sorted((str(x.get('roomId')),str(x.get('position')),str(x.get('propId'))) for x in maps)
+              expected=[('674465',expected_pos[slot],'324882')]
+              repaired[slot]={'url':item.get('url'),'caption':item.get('caption'),'map':maps}
+              if str(item.get('url') or '') != snapshot[slot]['url']:
+                  blockers.append(f'{slot}: URL mismatch')
+              if normalized != expected:
+                  blockers.append(f'{slot}: map {normalized} != {expected}')
+              cap=item.get('caption') or {}
+              if not str(cap.get('ES') or '').strip() or not str(cap.get('EN') or '').strip():
+                  blockers.append(f'{slot}: caption missing')
+
+          present=[slot for slot in map(str,range(1,64)) if str((after_ext.get(slot) or {}).get('url') or '')]
+          stale=[slot for slot in map(str,range(64,101)) if str((after_ext.get(slot) or {}).get('url') or '')]
+          if len(present)!=63: blockers.append(f'expected 63 populated slots, got {len(present)}')
+          if stale: blockers.append(f'stale slots remain: {stale}')
+
+          rooms=after.get('roomIds') or {}
+          airbnb={rid:{k:((rooms.get(rid) or {}).get('airbnb') or {}).get(k) for k in ('listingId','publish','picturesFrom')} for rid in ('674465','674466')}
+          if any(not str(v.get('listingId') or '') for v in airbnb.values()): blockers.append('Airbnb listingId missing after repair')
+          if any(str(v.get('publish') or '').lower()!='yes' for v in airbnb.values()): blockers.append('Airbnb publish gate changed')
+
+          status='SUCCESS' if not blockers else 'FAILED'
+          evidence={
+            'schema':'aumara.beds24-airbnb-photo-map-repair.v1',
+            'checked_at_utc':dt.datetime.now(dt.timezone.utc).isoformat(),
+            'property_id':324882,
+            'status':status,
+            'repaired_slots':bad_slots,
+            'populated_slots_1_63':len(present),
+            'stale_slots_64_100':stale,
+            'room_airbnb':airbnb,
+            'repaired':repaired,
+            'blockers':blockers,
+            'write_response':{'clear':clear_response,'restore':restore_response},
+            'secret_exposed':False,
+          }
+          out=pathlib.Path('aumara-control-tower/evidence/beds24-airbnb-photo-map-repair-20260825.json')
+          out.write_text(json.dumps(evidence,ensure_ascii=False,indent=2,sort_keys=True)+'\n',encoding='utf-8')
+          subprocess.run(['git','config','user.name','github-actions[bot]'],check=True)
+          subprocess.run(['git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com'],check=True)
+          subprocess.run(['git','add',str(out)],check=True)
+          if subprocess.run(['git','diff','--cached','--quiet']).returncode!=0:
+              subprocess.run(['git','commit','-m',f'Record AUMARA Airbnb photo map repair {status} [skip ci]'],check=True)
+              subprocess.run(['git','pull','--rebase','origin','main'],check=True)
+              subprocess.run(['git','push','origin','HEAD:main'],check=True)
+          print(json.dumps({'status':status,'repaired_slots':bad_slots,'populated_slots':len(present),'stale_slots':stale,'blockers':blockers},ensure_ascii=False))
+          if blockers: raise SystemExit(1)
+          PY

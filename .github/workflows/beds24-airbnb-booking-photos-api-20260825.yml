@@ -1,0 +1,390 @@
+name: Beds24 Airbnb Booking photos API AUMARA 2026-08-25
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/beds24-airbnb-booking-photos-api-20260825.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: beds24-airbnb-booking-photos-api-324882
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: Production
+    env:
+      BEDS24_API_KEY: ${{ secrets.BEDS24_API_KEY }}
+      BEDS24_PROP_KEY: ${{ secrets.BEDS24_PROP_KEY }}
+      BEDS24_REFRESH_CREDENTIAL: ${{ secrets.BEDS24_REFRESH_CREDENTIAL }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fix Airbnb address blockers and load real Booking photo pack into Beds24
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import datetime as dt
+          import json
+          import os
+          import pathlib
+          import subprocess
+          import time
+          import urllib.error
+          import urllib.parse
+          import urllib.request
+
+          PROPERTY_ID = 324882
+          ROOMS = {
+              'CHALET': ['674465'],
+              'CHALET_SUPERIOR': ['674466'],
+              'GENERAL': ['674465', '674466'],
+          }
+          ADDRESS = 'Urb. Rincón del Silencio, 3'
+          CITY = 'Benidoleig'
+          LATITUDE = 38.79353655
+          LONGITUDE = -0.02037598
+          API = (os.environ.get('BEDS24_API_KEY') or '').strip()
+          PROP = (os.environ.get('BEDS24_PROP_KEY') or '').strip()
+          REFRESH = (os.environ.get('BEDS24_REFRESH_CREDENTIAL') or '').strip()
+          for secret in (API, PROP, REFRESH):
+              if secret:
+                  print(f'::add-mask::{secret}')
+          if not API or not PROP:
+              raise SystemExit('Beds24 V1 API credentials missing in Production')
+
+          auth = {'apiKey': API, 'propKey': PROP}
+
+          def utcnow():
+              return dt.datetime.now(dt.timezone.utc).isoformat()
+
+          def request_json(url, *, payload=None, headers=None, timeout=90):
+              body = None if payload is None else json.dumps(payload).encode('utf-8')
+              req = urllib.request.Request(
+                  url,
+                  data=body,
+                  headers={'Accept': 'application/json', **({'Content-Type': 'application/json'} if body is not None else {}), **(headers or {})},
+                  method='POST' if body is not None else 'GET',
+              )
+              try:
+                  with urllib.request.urlopen(req, timeout=timeout) as response:
+                      raw = response.read()
+                      status = int(response.status)
+              except urllib.error.HTTPError as exc:
+                  raw = exc.read()
+                  status = int(exc.code)
+              text = raw.decode('utf-8', 'replace') if raw else ''
+              try:
+                  data = json.loads(text) if text else {}
+              except json.JSONDecodeError:
+                  data = {'raw': text[:1000]}
+              return status, data
+
+          def v1(path, payload):
+              status, data = request_json('https://api.beds24.com/json/' + path, payload=payload)
+              if not 200 <= status < 300:
+                  raise RuntimeError(f'{path} HTTP {status}: {str(data)[:1000]}')
+              return data
+
+          def root_record(data, key):
+              value = data.get(key)
+              if isinstance(value, list):
+                  return value[0] if value else {}
+              if isinstance(value, dict):
+                  return value
+              return {}
+
+          # Immutable source revision for the real Booking-ready photo pack.
+          status, commit_data = request_json('https://api.github.com/repos/elcidspain/aumara-photos/commits/main')
+          if status != 200 or not isinstance(commit_data, dict) or not commit_data.get('sha'):
+              raise RuntimeError(f'Cannot resolve aumara-photos main SHA: HTTP {status}')
+          photo_sha = str(commit_data['sha'])
+          manifest_url = f'https://raw.githubusercontent.com/elcidspain/aumara-photos/{photo_sha}/booking-ready/manifest.json'
+          status, manifest = request_json(manifest_url)
+          if status != 200:
+              raise RuntimeError(f'Cannot load booking-ready manifest: HTTP {status}')
+          items = manifest.get('items') or []
+          if manifest.get('output_items') != 63 or len(items) != 63:
+              raise RuntimeError(f'Booking-ready manifest expected 63 photos, got {len(items)}')
+          if manifest.get('duplicates_removed') != 0:
+              raise RuntimeError('Booking-ready manifest duplicate policy changed unexpectedly')
+
+          # Validate every source item before touching Beds24.
+          expected_counts = {'GENERAL': 34, 'CHALET': 26, 'CHALET_SUPERIOR': 3}
+          actual_counts = {k: 0 for k in expected_counts}
+          for item in items:
+              bucket = str(item.get('bucket') or '')
+              if bucket not in expected_counts:
+                  raise RuntimeError(f'Unexpected photo bucket: {bucket}')
+              actual_counts[bucket] += 1
+              if str(item.get('output_format') or '').upper() != 'JPEG':
+                  raise RuntimeError(f'Non-JPEG booking-ready photo: {item.get("output_path")}')
+              w = int(item.get('output_width') or 0)
+              h = int(item.get('output_height') or 0)
+              if max(w, h) < 800 or min(w, h) < 500:
+                  raise RuntimeError(f'Photo below Airbnb minimum geometry: {item.get("output_path")} {w}x{h}')
+          if actual_counts != expected_counts:
+              raise RuntimeError(f'Booking-ready category counts changed: {actual_counts}')
+
+          # Read current Beds24 property and Airbnb mapping before write.
+          before_property_data = v1('getProperty', {'authentication': auth})
+          before_property = root_record(before_property_data, 'getProperty')
+          before_content_data = v1('getPropertyContent', {
+              'authentication': auth,
+              'bookingData': False,
+              'images': True,
+              'roomIds': True,
+              'texts': True,
+              'includeAirbnb': True,
+              'includeVrbo': False,
+          })
+          before_content = root_record(before_content_data, 'getPropertyContent')
+          room_ids = before_content.get('roomIds') or {}
+          listing_gate = {}
+          for rid in ('674465', '674466'):
+              room = room_ids.get(rid) or {}
+              airbnb = room.get('airbnb') or {}
+              listing_gate[rid] = {
+                  'listingId': str(airbnb.get('listingId') or ''),
+                  'publish': str(airbnb.get('publish') or ''),
+                  'picturesFrom': str(airbnb.get('picturesFrom') or ''),
+              }
+              if not listing_gate[rid]['listingId']:
+                  raise RuntimeError(f'Airbnb listingId missing for room {rid}')
+
+          # Clear the four red Airbnb View Content blockers from the user's current screen.
+          set_property_payload = {
+              'authentication': auth,
+              'setProperty': [{
+                  'action': 'modify',
+                  'address': ADDRESS,
+                  'city': CITY,
+                  'latitude': LATITUDE,
+                  'longitude': LONGITUDE,
+              }],
+          }
+          address_write = v1('setProperty', set_property_payload)
+          time.sleep(5)
+
+          # Build the 63-photo external gallery. GENERAL goes to both listings;
+          # room-specific photos stay on their correct room. Old slots 64-100 are cleared,
+          # removing the stale/generated night images that were occupying 81-98.
+          positions = {'674465': 0, '674466': 0}
+          external = {}
+          role_es = {
+              'site_landscape': 'paisaje y entorno natural',
+              'exterior_multi_house': 'chalets y zonas exteriores',
+              'exterior_single_house': 'exterior del chalet',
+              'pool': 'piscina y zona exterior',
+              'terrace': 'terraza y exterior',
+              'bedroom': 'dormitorio',
+              'interior': 'interior del alojamiento',
+              'bathroom': 'baño',
+              'kitchen': 'zona de cocina',
+              'corridor': 'acceso interior',
+          }
+          role_en = {
+              'site_landscape': 'landscape and natural setting',
+              'exterior_multi_house': 'chalets and outdoor areas',
+              'exterior_single_house': 'chalet exterior',
+              'pool': 'pool and outdoor area',
+              'terrace': 'terrace and outdoor area',
+              'bedroom': 'bedroom',
+              'interior': 'accommodation interior',
+              'bathroom': 'bathroom',
+              'kitchen': 'kitchenette area',
+              'corridor': 'interior access',
+          }
+          bucket_label_es = {'GENERAL': 'AUMARA El Cid', 'CHALET': 'Chalet · AUMARA El Cid', 'CHALET_SUPERIOR': 'Chalet Superior · AUMARA El Cid'}
+          bucket_label_en = {'GENERAL': 'AUMARA El Cid', 'CHALET': 'Chalet · AUMARA El Cid', 'CHALET_SUPERIOR': 'Superior Chalet · AUMARA El Cid'}
+          expected_urls = {}
+          expected_maps = {}
+          for slot, item in enumerate(items, start=1):
+              bucket = str(item['bucket'])
+              output_path = str(item['output_path'])
+              encoded_path = urllib.parse.quote(output_path, safe='/._-')
+              url = f'https://raw.githubusercontent.com/elcidspain/aumara-photos/{photo_sha}/booking-ready/{encoded_path}'
+              maps = []
+              for rid in ROOMS[bucket]:
+                  positions[rid] += 1
+                  maps.append({'position': str(positions[rid]), 'propId': str(PROPERTY_ID), 'roomId': rid})
+              role = str(item.get('role') or 'photo')
+              fallback_es = role.replace('_', ' ')
+              fallback_en = role.replace('_', ' ')
+              caption_es = f'{bucket_label_es[bucket]} — {role_es.get(role, fallback_es)} · {positions[ROOMS[bucket][0]]}'[:150]
+              caption_en = f'{bucket_label_en[bucket]} — {role_en.get(role, fallback_en)} · {positions[ROOMS[bucket][0]]}'[:150]
+              external[str(slot)] = {
+                  'url': url,
+                  'caption': {'ES': caption_es, 'EN': caption_en},
+                  'map': maps,
+              }
+              expected_urls[str(slot)] = url
+              expected_maps[str(slot)] = maps
+
+          for slot in range(64, 101):
+              external[str(slot)] = {
+                  'url': '',
+                  'caption': {'ES': '', 'EN': ''},
+                  'map': [],
+              }
+
+          photo_write = v1('setPropertyContent', {
+              'authentication': auth,
+              'setPropertyContent': [{
+                  'action': 'modify',
+                  'images': {'external': external},
+              }],
+          })
+          time.sleep(8)
+
+          # Read-after-write verification.
+          after_property_data = v1('getProperty', {'authentication': auth})
+          after_property = root_record(after_property_data, 'getProperty')
+          after_content_data = v1('getPropertyContent', {
+              'authentication': auth,
+              'bookingData': False,
+              'images': True,
+              'roomIds': True,
+              'texts': True,
+              'includeAirbnb': True,
+              'includeVrbo': False,
+          })
+          after_content = root_record(after_content_data, 'getPropertyContent')
+          after_external = ((after_content.get('images') or {}).get('external') or {})
+
+          blockers = []
+          # Property field names are the V1 fields returned by getProperty/setProperty.
+          if str(after_property.get('address') or '').strip() != ADDRESS:
+              blockers.append(f'address readback mismatch: {after_property.get("address")!r}')
+          if str(after_property.get('city') or '').strip() != CITY:
+              blockers.append(f'city readback mismatch: {after_property.get("city")!r}')
+          try:
+              lat_after = float(after_property.get('latitude'))
+              lon_after = float(after_property.get('longitude'))
+          except (TypeError, ValueError):
+              lat_after = lon_after = 0.0
+          if abs(lat_after - LATITUDE) > 0.000001:
+              blockers.append(f'latitude readback mismatch: {lat_after}')
+          if abs(lon_after - LONGITUDE) > 0.000001:
+              blockers.append(f'longitude readback mismatch: {lon_after}')
+
+          photo_mismatches = []
+          caption_missing = []
+          map_mismatches = []
+          stale_urls = []
+          for slot in range(1, 101):
+              key = str(slot)
+              got = after_external.get(key) or {}
+              got_url = str(got.get('url') or '')
+              if slot <= 63:
+                  if got_url != expected_urls[key]:
+                      photo_mismatches.append(key)
+                  cap = got.get('caption') or {}
+                  if not str(cap.get('ES') or '').strip() or not str(cap.get('EN') or '').strip():
+                      caption_missing.append(key)
+                  got_map = got.get('map') or []
+                  normalized_got = sorted((str(x.get('roomId')), str(x.get('position')), str(x.get('propId'))) for x in got_map)
+                  normalized_expected = sorted((str(x.get('roomId')), str(x.get('position')), str(x.get('propId'))) for x in expected_maps[key])
+                  if normalized_got != normalized_expected:
+                      map_mismatches.append(key)
+              elif got_url:
+                  stale_urls.append(key)
+
+          if photo_mismatches:
+              blockers.append(f'photo URL mismatches: {photo_mismatches}')
+          if caption_missing:
+              blockers.append(f'missing captions: {caption_missing}')
+          if map_mismatches:
+              blockers.append(f'photo map mismatches: {map_mismatches}')
+          if stale_urls:
+              blockers.append(f'stale URLs remain in slots: {stale_urls}')
+          if positions != {'674465': 60, '674466': 37}:
+              blockers.append(f'room photo counts unexpected: {positions}')
+
+          # Non-destructive V2 diagnostic only: determine whether the existing refresh
+          # credential can verify the live Airbnb connection. No mapping/publish action here.
+          v2 = {'refresh_present': bool(REFRESH), 'token_ok': False, 'scopes': [], 'airbnb_users_count': None, 'diagnostic': None}
+          if REFRESH:
+              status, token_data = request_json(
+                  'https://beds24.com/api/v2/authentication/token',
+                  headers={'refreshToken': REFRESH},
+              )
+              if status == 200 and isinstance(token_data, dict) and token_data.get('token'):
+                  token = str(token_data['token'])
+                  print(f'::add-mask::{token}')
+                  v2['token_ok'] = True
+                  d_status, details = request_json('https://beds24.com/api/v2/authentication/details', headers={'token': token})
+                  if d_status == 200:
+                      token_obj = details.get('token') if isinstance(details, dict) else {}
+                      v2['scopes'] = list((token_obj or {}).get('scopes') or [])
+                  u_status, users = request_json('https://beds24.com/api/v2/channels/airbnb/users', headers={'token': token})
+                  if u_status == 200 and isinstance(users, dict):
+                      v2['airbnb_users_count'] = len(users.get('data') or [])
+                  else:
+                      v2['diagnostic'] = f'Airbnb users read HTTP {u_status}'
+              else:
+                  v2['diagnostic'] = f'Refresh credential not accepted by API V2 (HTTP {status})'
+
+          status_text = 'SUCCESS' if not blockers else 'FAILED'
+          evidence = {
+              'schema': 'aumara.beds24-airbnb-booking-photos-api.v1',
+              'status': status_text,
+              'checked_at_utc': utcnow(),
+              'property_id': PROPERTY_ID,
+              'source': {
+                  'repo': 'elcidspain/aumara-photos',
+                  'commit': photo_sha,
+                  'pack': 'booking-ready',
+                  'manifest_schema': manifest.get('schema'),
+                  'photos_total': len(items),
+                  'category_counts': actual_counts,
+                  'policy': manifest.get('policy'),
+              },
+              'address_target': {'address': ADDRESS, 'city': CITY, 'latitude': LATITUDE, 'longitude': LONGITUDE},
+              'address_before': {k: before_property.get(k) for k in ('address', 'city', 'latitude', 'longitude', 'postcode', 'state', 'country')},
+              'address_after': {k: after_property.get(k) for k in ('address', 'city', 'latitude', 'longitude', 'postcode', 'state', 'country')},
+              'airbnb_mapping_gate': listing_gate,
+              'room_photo_counts': positions,
+              'photos_verified': 63 - len(photo_mismatches),
+              'captions_verified': 63 - len(caption_missing),
+              'stale_slots_remaining': stale_urls,
+              'photo_mismatches': photo_mismatches,
+              'caption_missing': caption_missing,
+              'map_mismatches': map_mismatches,
+              'v2_diagnostic': v2,
+              'blockers': blockers,
+              'write_response': {'address': address_write, 'photos': photo_write},
+              'secret_exposed': False,
+          }
+          out = pathlib.Path('aumara-control-tower/evidence/beds24-airbnb-booking-photos-api-20260825.json')
+          out.parent.mkdir(parents=True, exist_ok=True)
+          out.write_text(json.dumps(evidence, ensure_ascii=False, indent=2, sort_keys=True) + '\n', encoding='utf-8')
+
+          subprocess.run(['git', 'config', 'user.name', 'github-actions[bot]'], check=True)
+          subprocess.run(['git', 'config', 'user.email', '41898282+github-actions[bot]@users.noreply.github.com'], check=True)
+          subprocess.run(['git', 'add', str(out)], check=True)
+          if subprocess.run(['git', 'diff', '--cached', '--quiet'], check=False).returncode != 0:
+              subprocess.run(['git', 'commit', '-m', f'Record AUMARA Airbnb Booking photo API sync {status_text} [skip ci]'], check=True)
+              subprocess.run(['git', 'pull', '--rebase', 'origin', 'main'], check=True)
+              subprocess.run(['git', 'push', 'origin', 'HEAD:main'], check=True)
+
+          print(json.dumps({
+              'status': status_text,
+              'photos_verified': evidence['photos_verified'],
+              'captions_verified': evidence['captions_verified'],
+              'room_photo_counts': positions,
+              'blockers': blockers,
+              'v2': v2,
+          }, ensure_ascii=False))
+          if blockers:
+              raise SystemExit(1)
+          PY

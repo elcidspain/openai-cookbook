@@ -1,0 +1,1605 @@
+{
+  "address_after": {
+    "address": "Urb. Rincón del Silencio, 3",
+    "city": "Benidoleig",
+    "country": "ES",
+    "latitude": "38.7935366",
+    "longitude": "-0.0203760",
+    "postcode": "03759",
+    "state": "Alicante"
+  },
+  "address_before": {
+    "address": "Urbanización Rincón del Silencio 3",
+    "city": "Benidoleig",
+    "country": "ES",
+    "latitude": "38.7935726",
+    "longitude": "-0.0203057",
+    "postcode": "03759",
+    "state": "Alicante"
+  },
+  "address_target": {
+    "address": "Urb. Rincón del Silencio, 3",
+    "city": "Benidoleig",
+    "latitude": 38.79353655,
+    "longitude": -0.02037598
+  },
+  "airbnb_mapping_gate": {
+    "674465": {
+      "listingId": "1759764557896676605",
+      "picturesFrom": "rop",
+      "publish": "yes"
+    },
+    "674466": {
+      "listingId": "1759764847919085354",
+      "picturesFrom": "rop",
+      "publish": "yes"
+    }
+  },
+  "blockers": [
+    "photo map mismatches: ['35', '36', '37', '38', '39', '40', '44']"
+  ],
+  "caption_missing": [],
+  "captions_verified": 63,
+  "checked_at_utc": "2026-08-25T01:26:24.788435+00:00",
+  "map_mismatches": [
+    "35",
+    "36",
+    "37",
+    "38",
+    "39",
+    "40",
+    "44"
+  ],
+  "photo_mismatches": [],
+  "photos_verified": 63,
+  "property_id": 324882,
+  "room_photo_counts": {
+    "674465": 60,
+    "674466": 37
+  },
+  "schema": "aumara.beds24-airbnb-booking-photos-api.v1",
+  "secret_exposed": false,
+  "source": {
+    "category_counts": {
+      "CHALET": 26,
+      "CHALET_SUPERIOR": 3,
+      "GENERAL": 34
+    },
+    "commit": "621674f8c311c56d9a5457b3b7bd05d5a28a8e3f",
+    "manifest_schema": "aumara.booking-ready.pack",
+    "pack": "booking-ready",
+    "photos_total": 63,
+    "policy": {
+      "categories": [
+        "GENERAL",
+        "CHALET",
+        "CHALET_SUPERIOR"
+      ],
+      "dedup": "exact source SHA or exact decoded RGB pixel hash only",
+      "jpeg_sources": "copied byte-for-byte",
+      "png_sources": "RGB JPEG quality 96, 4:4:4; same pixel dimensions",
+      "resolution": "pixel dimensions preserved; no resize/downscale"
+    },
+    "repo": "elcidspain/aumara-photos"
+  },
+  "stale_slots_remaining": [],
+  "status": "FAILED",
+  "v2_diagnostic": {
+    "airbnb_users_count": null,
+    "diagnostic": "Airbnb users read HTTP 401",
+    "refresh_present": true,
+    "scopes": [
+      "read:bookings",
+      "write:bookings",
+      "read:bookings-personal",
+      "write:bookings-personal",
+      "read:bookings-financial",
+      "write:bookings-financial",
+      "read:inventory",
+      "write:inventory",
+      "read:properties",
+      "write:properties"
+    ],
+    "token_ok": true
+  },
+  "write_response": {
+    "address": {
+      "setProperty": [
+        {
+          "address": "Urb. Rincón del Silencio, 3",
+          "city": "Benidoleig",
+          "latitude": "38.7935366",
+          "longitude": "-0.0203760"
+        }
+      ]
+    },
+    "photos": {
+      "setPropertyContent": [
+        {
+          "images": {
+            "external": {
+              "1": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "AUMARA El Cid — landscape and natural setting · 1"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "AUMARA El Cid — paisaje y entorno natural · 1"
+                  }
+                },
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/GENERAL/001_site_landscape_08_FULL_no_crop.jpg"
+                }
+              },
+              "10": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "AUMARA El Cid — chalets and outdoor areas · 10"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "AUMARA El Cid — chalets y zonas exteriores · 10"
+                  }
+                },
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/GENERAL/010_exterior_multi_house_File_025.jpg"
+                }
+              },
+              "11": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "AUMARA El Cid — chalets and outdoor areas · 11"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "AUMARA El Cid — chalets y zonas exteriores · 11"
+                  }
+                },
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/GENERAL/011_exterior_multi_house_IMG_0005.jpg"
+                }
+              },
+              "12": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "AUMARA El Cid — chalets and outdoor areas · 12"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "AUMARA El Cid — chalets y zonas exteriores · 12"
+                  }
+                },
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/GENERAL/012_exterior_multi_house_IMG_0006.jpg"
+                }
+              },
+              "13": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "AUMARA El Cid — chalets and outdoor areas · 13"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "AUMARA El Cid — chalets y zonas exteriores · 13"
+                  }
+                },
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/GENERAL/013_exterior_multi_house_IMG_0007.jpg"
+                }
+              },
+              "14": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "AUMARA El Cid — chalets and outdoor areas · 14"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "AUMARA El Cid — chalets y zonas exteriores · 14"
+                  }
+                },
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/GENERAL/014_exterior_multi_house_IMG_0011.jpg"
+                }
+              },
+              "15": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "AUMARA El Cid — chalets and outdoor areas · 15"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "AUMARA El Cid — chalets y zonas exteriores · 15"
+                  }
+                },
+                "map": {
+                  "1": {
+                    "success": true,
+                    "val": 15
+                  }
+                },
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/GENERAL/015_exterior_multi_house_IMG_0012.jpg"
+                }
+              },
+              "16": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "AUMARA El Cid — exterior patios · 16"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "AUMARA El Cid — exterior patios · 16"
+                  }
+                },
+                "map": {
+                  "1": {
+                    "success": true,
+                    "val": 16
+                  }
+                },
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/GENERAL/016_exterior_patios_File_013.jpg"
+                }
+              },
+              "17": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "AUMARA El Cid — exterior patios · 17"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "AUMARA El Cid — exterior patios · 17"
+                  }
+                },
+                "map": {
+                  "1": {
+                    "success": true,
+                    "val": 17
+                  }
+                },
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/GENERAL/017_exterior_patios_File_0161.jpg"
+                }
+              },
+              "18": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "AUMARA El Cid — exterior patios · 18"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "AUMARA El Cid — exterior patios · 18"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 18
+                  },
+                  {
+                    "success": true,
+                    "val": 18
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/GENERAL/018_exterior_patios_File_0191.jpg"
+                }
+              },
+              "19": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "AUMARA El Cid — exterior patios · 19"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "AUMARA El Cid — exterior patios · 19"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 19
+                  },
+                  {
+                    "success": true,
+                    "val": 19
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/GENERAL/019_exterior_patios_IMG_0009.jpg"
+                }
+              },
+              "2": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "AUMARA El Cid — landscape and natural setting · 2"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "AUMARA El Cid — paisaje y entorno natural · 2"
+                  }
+                },
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/GENERAL/002_site_landscape_File_0181.jpg"
+                }
+              },
+              "20": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "AUMARA El Cid — exterior patios · 20"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "AUMARA El Cid — exterior patios · 20"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 20
+                  },
+                  {
+                    "success": true,
+                    "val": 20
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/GENERAL/020_exterior_patios_03_FULL_no_crop.jpg"
+                }
+              },
+              "21": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "AUMARA El Cid — chalet exterior · 21"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "AUMARA El Cid — exterior del chalet · 21"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 21
+                  },
+                  {
+                    "success": true,
+                    "val": 21
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/GENERAL/021_exterior_single_house_temp_image_53E7DE34-8214-40C5-BE19-AC808264814C.jpg"
+                }
+              },
+              "22": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "AUMARA El Cid — chalet exterior · 22"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "AUMARA El Cid — exterior del chalet · 22"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 22
+                  },
+                  {
+                    "success": true,
+                    "val": 22
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/GENERAL/022_exterior_single_house_04_interior_FULL_no_crop.jpg"
+                }
+              },
+              "23": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "AUMARA El Cid — chalet exterior · 23"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "AUMARA El Cid — exterior del chalet · 23"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 23
+                  },
+                  {
+                    "success": true,
+                    "val": 23
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/GENERAL/023_exterior_single_house_File_009.jpg"
+                }
+              },
+              "24": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "AUMARA El Cid — chalet exterior · 24"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "AUMARA El Cid — exterior del chalet · 24"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 24
+                  },
+                  {
+                    "success": true,
+                    "val": 24
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/GENERAL/024_exterior_single_house_File_017.jpg"
+                }
+              },
+              "25": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "AUMARA El Cid — chalet exterior · 25"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "AUMARA El Cid — exterior del chalet · 25"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 25
+                  },
+                  {
+                    "success": true,
+                    "val": 25
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/GENERAL/025_exterior_single_house_IMG_7368.jpg"
+                }
+              },
+              "26": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "AUMARA El Cid — chalet exterior · 26"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "AUMARA El Cid — exterior del chalet · 26"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 26
+                  },
+                  {
+                    "success": true,
+                    "val": 26
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/GENERAL/026_exterior_single_house_telegram-photo-0-5375166754113392601.jpg"
+                }
+              },
+              "27": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "AUMARA El Cid — night ambience · 27"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "AUMARA El Cid — night ambience · 27"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 27
+                  },
+                  {
+                    "success": true,
+                    "val": 27
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/GENERAL/027_night_ambience_2062DAA5-8B0C-42EF-AB59-01050814F8B3.jpg"
+                }
+              },
+              "28": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "AUMARA El Cid — night exterior · 28"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "AUMARA El Cid — night exterior · 28"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 28
+                  },
+                  {
+                    "success": true,
+                    "val": 28
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/GENERAL/028_night_exterior_1F2C7D6B-78FE-4A54-989C-D512479ED95F.jpg"
+                }
+              },
+              "29": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "AUMARA El Cid — night exterior · 29"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "AUMARA El Cid — night exterior · 29"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 29
+                  },
+                  {
+                    "success": true,
+                    "val": 29
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/GENERAL/029_night_exterior_890835F8-78BC-4C12-8AA5-8F3FB3AD09B0.jpg"
+                }
+              },
+              "3": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "AUMARA El Cid — chalets and outdoor areas · 3"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "AUMARA El Cid — chalets y zonas exteriores · 3"
+                  }
+                },
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/GENERAL/003_exterior_multi_house_02_FULL_no_crop.jpg"
+                }
+              },
+              "30": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "AUMARA El Cid — night exterior · 30"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "AUMARA El Cid — night exterior · 30"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 30
+                  },
+                  {
+                    "success": true,
+                    "val": 30
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/GENERAL/030_night_exterior_BBFDDD46-B04A-40E2-B789-B4BB090C5E58.jpg"
+                }
+              },
+              "31": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "AUMARA El Cid — night exterior · 31"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "AUMARA El Cid — night exterior · 31"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 31
+                  },
+                  {
+                    "success": true,
+                    "val": 31
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/GENERAL/031_night_exterior_CA9259AB-CC7F-475D-B595-80D0E88247AE.jpg"
+                }
+              },
+              "32": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "AUMARA El Cid — night exterior · 32"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "AUMARA El Cid — night exterior · 32"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 32
+                  },
+                  {
+                    "success": true,
+                    "val": 32
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/GENERAL/032_night_exterior_E7822871-470D-45A2-89DD-3FF4B6749DD5.jpg"
+                }
+              },
+              "33": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "AUMARA El Cid — night exterior · 33"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "AUMARA El Cid — night exterior · 33"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 33
+                  },
+                  {
+                    "success": true,
+                    "val": 33
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/GENERAL/033_night_exterior_IMG_0850.jpg"
+                }
+              },
+              "34": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "AUMARA El Cid — night exterior · 34"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "AUMARA El Cid — night exterior · 34"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 34
+                  },
+                  {
+                    "success": true,
+                    "val": 34
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/GENERAL/034_night_exterior_IMG_0854.jpg"
+                }
+              },
+              "35": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior living · 35"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior living · 35"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 35
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/CHALET/001_interior_living_1B6A8852.jpg"
+                }
+              },
+              "36": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior bed · 36"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior bed · 36"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 36
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/CHALET/002_interior_bed_05_interior_FULL_no_crop.jpg"
+                }
+              },
+              "37": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior bed · 37"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior bed · 37"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 37
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/CHALET/003_interior_bed_1B6A8803.jpg"
+                }
+              },
+              "38": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior bed · 38"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior bed · 38"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 38
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/CHALET/004_interior_bed_1B6A8857.jpg"
+                }
+              },
+              "39": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior bed · 39"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior bed · 39"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 39
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/CHALET/005_interior_bed_File_0031.jpg"
+                }
+              },
+              "4": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "AUMARA El Cid — chalets and outdoor areas · 4"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "AUMARA El Cid — chalets y zonas exteriores · 4"
+                  }
+                },
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/GENERAL/004_exterior_multi_house_04_FULL_no_crop.jpg"
+                }
+              },
+              "40": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior bed · 40"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior bed · 40"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 40
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/CHALET/006_interior_bed_File_005.jpg"
+                }
+              },
+              "41": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior kitchen · 41"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior kitchen · 41"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 41
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/CHALET/007_interior_kitchen_1B6A8842.jpg"
+                }
+              },
+              "42": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior kitchen · 42"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior kitchen · 42"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 42
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/CHALET/008_interior_kitchen_1B6A8845.jpg"
+                }
+              },
+              "43": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior kitchen · 43"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior kitchen · 43"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 43
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/CHALET/009_interior_kitchen_File_0111.jpg"
+                }
+              },
+              "44": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior dining kitchen · 44"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior dining kitchen · 44"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 44
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/CHALET/010_interior_dining_kitchen_File_020.jpg"
+                }
+              },
+              "45": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior dining · 45"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior dining · 45"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 45
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/CHALET/011_interior_dining_02_interior_FULL_no_crop.jpg"
+                }
+              },
+              "46": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior dining · 46"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior dining · 46"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 46
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/CHALET/012_interior_dining_File_004.jpg"
+                }
+              },
+              "47": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior dining · 47"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior dining · 47"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 47
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/CHALET/013_interior_dining_File_007.jpg"
+                }
+              },
+              "48": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior dining · 48"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior dining · 48"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 48
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/CHALET/014_interior_dining_01_interior_FULL_no_crop.jpg"
+                }
+              },
+              "49": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior dining · 49"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior dining · 49"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 49
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/CHALET/015_interior_dining_03_interior_FULL_no_crop.jpg"
+                }
+              },
+              "5": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "AUMARA El Cid — chalets and outdoor areas · 5"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "AUMARA El Cid — chalets y zonas exteriores · 5"
+                  }
+                },
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/GENERAL/005_exterior_multi_house_06_FULL_no_crop.jpg"
+                }
+              },
+              "50": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior dining · 50"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior dining · 50"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 50
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/CHALET/016_interior_dining_File_008.jpg"
+                }
+              },
+              "51": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior dining · 51"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior dining · 51"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 51
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/CHALET/017_interior_dining_File_0101.jpg"
+                }
+              },
+              "52": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior glazing · 52"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior glazing · 52"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 52
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/CHALET/018_interior_glazing_File_0121.jpg"
+                }
+              },
+              "53": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior glazing · 53"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior glazing · 53"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 53
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/CHALET/019_interior_glazing_06_interior_FULL_no_crop.jpg"
+                }
+              },
+              "54": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior glazing · 54"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior glazing · 54"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 54
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/CHALET/020_interior_glazing_File_000.jpg"
+                }
+              },
+              "55": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior glazing · 55"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior glazing · 55"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 55
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/CHALET/021_interior_glazing_File_0011.jpg"
+                }
+              },
+              "56": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior transition · 56"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior transition · 56"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 56
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/CHALET/022_interior_transition_1B6A8816.jpg"
+                }
+              },
+              "57": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior bath · 57"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior bath · 57"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 57
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/CHALET/023_interior_bath_1B6A8879.jpg"
+                }
+              },
+              "58": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior bath · 58"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior bath · 58"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 58
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/CHALET/024_interior_bath_1B6A8880.jpg"
+                }
+              },
+              "59": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior bath · 59"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior bath · 59"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 59
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/CHALET/025_interior_bath_1B6A8887.jpg"
+                }
+              },
+              "6": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "AUMARA El Cid — chalets and outdoor areas · 6"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "AUMARA El Cid — chalets y zonas exteriores · 6"
+                  }
+                },
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/GENERAL/006_exterior_multi_house_File_021.jpg"
+                }
+              },
+              "60": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior bath · 60"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "Chalet · AUMARA El Cid — interior bath · 60"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 60
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/CHALET/026_interior_bath_File_002.jpg"
+                }
+              },
+              "61": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "Superior Chalet · AUMARA El Cid — interior bed · 35"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "Chalet Superior · AUMARA El Cid — interior bed · 35"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 35
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/CHALET_SUPERIOR/001_interior_bed_1B6A9866.jpg"
+                }
+              },
+              "62": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "Superior Chalet · AUMARA El Cid — interior bed · 36"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "Chalet Superior · AUMARA El Cid — interior bed · 36"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 36
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/CHALET_SUPERIOR/002_interior_bed_1B6A9867.jpg"
+                }
+              },
+              "63": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "Superior Chalet · AUMARA El Cid — interior bed · 37"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "Chalet Superior · AUMARA El Cid — interior bed · 37"
+                  }
+                },
+                "map": [
+                  {
+                    "success": true,
+                    "val": 37
+                  }
+                ],
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/CHALET_SUPERIOR/003_interior_bed_1B6A9875.jpg"
+                }
+              },
+              "7": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "AUMARA El Cid — chalets and outdoor areas · 7"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "AUMARA El Cid — chalets y zonas exteriores · 7"
+                  }
+                },
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/GENERAL/007_exterior_multi_house_File_022.jpg"
+                }
+              },
+              "8": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "AUMARA El Cid — chalets and outdoor areas · 8"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "AUMARA El Cid — chalets y zonas exteriores · 8"
+                  }
+                },
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/GENERAL/008_exterior_multi_house_File_023.jpg"
+                }
+              },
+              "81": {
+                "url": {
+                  "success": true,
+                  "val": ""
+                }
+              },
+              "82": {
+                "url": {
+                  "success": true,
+                  "val": ""
+                }
+              },
+              "83": {
+                "url": {
+                  "success": true,
+                  "val": ""
+                }
+              },
+              "84": {
+                "url": {
+                  "success": true,
+                  "val": ""
+                }
+              },
+              "85": {
+                "url": {
+                  "success": true,
+                  "val": ""
+                }
+              },
+              "86": {
+                "url": {
+                  "success": true,
+                  "val": ""
+                }
+              },
+              "87": {
+                "url": {
+                  "success": true,
+                  "val": ""
+                }
+              },
+              "88": {
+                "url": {
+                  "success": true,
+                  "val": ""
+                }
+              },
+              "89": {
+                "url": {
+                  "success": true,
+                  "val": ""
+                }
+              },
+              "9": {
+                "caption": {
+                  "EN": {
+                    "success": true,
+                    "val": "AUMARA El Cid — chalets and outdoor areas · 9"
+                  },
+                  "ES": {
+                    "success": true,
+                    "val": "AUMARA El Cid — chalets y zonas exteriores · 9"
+                  }
+                },
+                "url": {
+                  "success": true,
+                  "val": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/GENERAL/009_exterior_multi_house_File_024.jpg"
+                }
+              },
+              "90": {
+                "url": {
+                  "success": true,
+                  "val": ""
+                }
+              },
+              "91": {
+                "url": {
+                  "success": true,
+                  "val": ""
+                }
+              },
+              "92": {
+                "url": {
+                  "success": true,
+                  "val": ""
+                }
+              },
+              "93": {
+                "url": {
+                  "success": true,
+                  "val": ""
+                }
+              },
+              "94": {
+                "url": {
+                  "success": true,
+                  "val": ""
+                }
+              },
+              "95": {
+                "url": {
+                  "success": true,
+                  "val": ""
+                }
+              },
+              "96": {
+                "url": {
+                  "success": true,
+                  "val": ""
+                }
+              },
+              "97": {
+                "url": {
+                  "success": true,
+                  "val": ""
+                }
+              },
+              "98": {
+                "url": {
+                  "success": true,
+                  "val": ""
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
