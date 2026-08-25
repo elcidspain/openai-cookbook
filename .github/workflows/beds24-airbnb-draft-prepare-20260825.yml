@@ -64,7 +64,7 @@ jobs:
           room_ids=('674465','674466')
           wanted={
               rid:{
-                  'propertyTypeGroup':'boutique_hotels_and_more',
+                  'propertyTypeGroup':'houses',
                   'listingType':'private_room',
                   'publish':'yes',
                   'picturesFrom':'r'
@@ -112,7 +112,7 @@ jobs:
               'property_id':pid,
               'checked_at_utc':dt.datetime.now(dt.timezone.utc).isoformat(),
               'decision':{
-                  'propertyTypeGroup':'boutique_hotels_and_more',
+                  'propertyTypeGroup':'houses',
                   'reason':'Beds24 roomType chalet now matches Airbnb propertyTypeGroup houses; publish is enabled for both corrected listings.',
                   'publish':'yes'
               },
