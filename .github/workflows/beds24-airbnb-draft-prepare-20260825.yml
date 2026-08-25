@@ -1,4 +1,4 @@
-name: Beds24 Airbnb draft prepare AUMARA 2026-08-25
+name: Beds24 Airbnb final classification AUMARA 2026-08-25
 
 on:
   workflow_dispatch:
@@ -27,7 +27,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Set unpublished Airbnb multi-inventory content and verify
+      - name: Set final Airbnb multi-inventory classification and verify
         shell: bash
         run: |
           set -euo pipefail
@@ -64,8 +64,8 @@ jobs:
           room_ids=('674465','674466')
           wanted={
               rid:{
-                  'propertyTypeGroup':'houses',
-                  'listingType':'entire_home',
+                  'propertyTypeGroup':'boutique_hotels_and_more',
+                  'listingType':'private_room',
                   'publish':'yes'
               } for rid in room_ids
           }
@@ -111,13 +111,13 @@ jobs:
               'property_id':pid,
               'checked_at_utc':dt.datetime.now(dt.timezone.utc).isoformat(),
               'decision':{
-                  'propertyTypeGroup':'houses',
+                  'propertyTypeGroup':'boutique_hotels_and_more',
                   'reason':'Beds24 roomType chalet now matches Airbnb propertyTypeGroup houses; publish is enabled for both corrected listings.',
                   'publish':'yes'
               },
-              'before':{rid:{k:before_airbnb[rid].get(k) for k in ('propertyTypeGroup','listingType','publish','listingId')} for rid in room_ids},
+              'before':{rid:{k:before_airbnb[rid].get(k) for k in ('propertyTypeGroup','listingType','publish','listingId','picturesFrom')} for rid in room_ids},
               'wanted':wanted,
-              'after':{rid:{k:after_airbnb[rid].get(k) for k in ('propertyTypeGroup','listingType','publish','listingId')} for rid in room_ids},
+              'after':{rid:{k:after_airbnb[rid].get(k) for k in ('propertyTypeGroup','listingType','publish','listingId','picturesFrom')} for rid in room_ids},
               'write_response':response,
               'mismatches':mismatches,
               'status':'SUCCESS' if not mismatches else 'FAILED_READBACK',
