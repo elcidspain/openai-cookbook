@@ -317,7 +317,14 @@ class DynamoClaimAtomicTests(unittest.TestCase):
         self.assertIn('"reasons": {"beds24_auth_unavailable": 1}', workflow)
         self.assertIn('"authStatus": "unavailable"', workflow)
         self.assertIn("/tmp/aumara-guest-journey-shadow/summary.json", workflow)
-        self.assertIn("python - <<'PY'\n          import datetime as dt", workflow)
+        # Anchor the assertion to the unique degraded-auth branch context so a
+        # regression in that specific block cannot pass unnoticed.
+        self.assertIn(
+            'echo "WARNING: Beds24 auth unavailable; emitting degraded shadow summary"\n'
+            "          python - <<'PY'\n"
+            "          import datetime as dt",
+            workflow,
+        )
 
     def test_documented_module_entrypoint_resolves(self) -> None:
         result = subprocess.run(
