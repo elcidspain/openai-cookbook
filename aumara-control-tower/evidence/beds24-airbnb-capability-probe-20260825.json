@@ -1,0 +1,413 @@
+{
+  "auth_details_http_status": 200,
+  "auth_metadata": {
+    "validToken": true
+  },
+  "checked_at_utc": "2026-08-25T20:40:10.358692+00:00",
+  "keyword_matches": {
+    "checkIn": [
+      {
+        "line": 3989,
+        "text": "checkInStart:"
+      },
+      {
+        "line": 3992,
+        "text": "checkInEnd:"
+      },
+      {
+        "line": 5397,
+        "text": "minDaysUntilCheckin:"
+      },
+      {
+        "line": 5401,
+        "text": "maxDaysUntilCheckin:"
+      },
+      {
+        "line": 5893,
+        "text": "- noCheckIn"
+      },
+      {
+        "line": 5895,
+        "text": "- noCheckInOrCheckOut"
+      },
+      {
+        "line": 6717,
+        "text": "autoCheckIn:"
+      },
+      {
+        "line": 6809,
+        "text": "- \"atCheckin\""
+      },
+      {
+        "line": 7113,
+        "text": "checkinType:"
+      },
+      {
+        "line": 7122,
+        "text": "checkinInstructions:"
+      },
+      {
+        "line": 7251,
+        "text": "earlyBirdDaysToCheckin:"
+      },
+      {
+        "line": 7282,
+        "text": "lastMinuteDaysToCheckin:"
+      },
+      {
+        "line": 7922,
+        "text": "checkInDays:"
+      }
+    ],
+    "checkOut": [
+      {
+        "line": 2653,
+        "text": "\"success_url\": \"https://example.com/success?session_id={CHECKOUT_SESSION_ID}\","
+      },
+      {
+        "line": 3995,
+        "text": "checkOutEnd:"
+      },
+      {
+        "line": 4225,
+        "text": "checkoutVersion:"
+      },
+      {
+        "line": 5124,
+        "text": "blockAfterCheckOutDays:"
+      },
+      {
+        "line": 5894,
+        "text": "- noCheckOut"
+      },
+      {
+        "line": 5895,
+        "text": "- noCheckInOrCheckOut"
+      },
+      {
+        "line": 6629,
+        "text": "- \"endDateCheckout\""
+      },
+      {
+        "line": 6630,
+        "text": "- \"endDateCheckoutIgnoreDuplicate\""
+      },
+      {
+        "line": 6631,
+        "text": "- \"endDateCheckoutIgnoreIfUnavailable\""
+      },
+      {
+        "line": 6635,
+        "text": "- \"endDateDayAfterCheckOut\""
+      },
+      {
+        "line": 6636,
+        "text": "- \"endDateDayAfterCheckOutIgnoreDuplicate\""
+      },
+      {
+        "line": 6637,
+        "text": "- \"endDateDayAfterCheckoutIgnoreIfUnavailable\""
+      },
+      {
+        "line": 6642,
+        "text": "- \"endDateCheckout\""
+      },
+      {
+        "line": 6643,
+        "text": "- \"endDateCheckoutIgnoreDuplicate\""
+      },
+      {
+        "line": 6644,
+        "text": "- \"endDateCheckoutIgnoreIfUnavailable\""
+      },
+      {
+        "line": 6648,
+        "text": "- \"endDateDayAfterCheckOut\""
+      },
+      {
+        "line": 6649,
+        "text": "- \"endDateDayAfterCheckOutIgnoreDuplicate\""
+      },
+      {
+        "line": 6650,
+        "text": "- \"endDateDayAfterCheckoutIgnoreIfUnavailable\""
+      },
+      {
+        "line": 6655,
+        "text": "- \"endDateCheckout\""
+      },
+      {
+        "line": 6656,
+        "text": "- \"endDateCheckoutIgnoreDuplicate\""
+      },
+      {
+        "line": 6657,
+        "text": "- \"endDateCheckoutIgnoreIfUnavailable\""
+      },
+      {
+        "line": 6661,
+        "text": "- \"endDateDayAfterCheckOut\""
+      },
+      {
+        "line": 6662,
+        "text": "- \"endDateDayAfterCheckOutIgnoreDuplicate\""
+      },
+      {
+        "line": 6663,
+        "text": "- \"endDateDayAfterCheckoutIgnoreIfUnavailable\""
+      },
+      {
+        "line": 7939,
+        "text": "checkOutDays:"
+      }
+    ],
+    "checkout": [
+      {
+        "line": 2653,
+        "text": "\"success_url\": \"https://example.com/success?session_id={CHECKOUT_SESSION_ID}\","
+      },
+      {
+        "line": 3995,
+        "text": "checkOutEnd:"
+      },
+      {
+        "line": 4225,
+        "text": "checkoutVersion:"
+      },
+      {
+        "line": 5124,
+        "text": "blockAfterCheckOutDays:"
+      },
+      {
+        "line": 5894,
+        "text": "- noCheckOut"
+      },
+      {
+        "line": 5895,
+        "text": "- noCheckInOrCheckOut"
+      },
+      {
+        "line": 6629,
+        "text": "- \"endDateCheckout\""
+      },
+      {
+        "line": 6630,
+        "text": "- \"endDateCheckoutIgnoreDuplicate\""
+      },
+      {
+        "line": 6631,
+        "text": "- \"endDateCheckoutIgnoreIfUnavailable\""
+      },
+      {
+        "line": 6635,
+        "text": "- \"endDateDayAfterCheckOut\""
+      },
+      {
+        "line": 6636,
+        "text": "- \"endDateDayAfterCheckOutIgnoreDuplicate\""
+      },
+      {
+        "line": 6637,
+        "text": "- \"endDateDayAfterCheckoutIgnoreIfUnavailable\""
+      },
+      {
+        "line": 6642,
+        "text": "- \"endDateCheckout\""
+      },
+      {
+        "line": 6643,
+        "text": "- \"endDateCheckoutIgnoreDuplicate\""
+      },
+      {
+        "line": 6644,
+        "text": "- \"endDateCheckoutIgnoreIfUnavailable\""
+      },
+      {
+        "line": 6648,
+        "text": "- \"endDateDayAfterCheckOut\""
+      },
+      {
+        "line": 6649,
+        "text": "- \"endDateDayAfterCheckOutIgnoreDuplicate\""
+      },
+      {
+        "line": 6650,
+        "text": "- \"endDateDayAfterCheckoutIgnoreIfUnavailable\""
+      },
+      {
+        "line": 6655,
+        "text": "- \"endDateCheckout\""
+      },
+      {
+        "line": 6656,
+        "text": "- \"endDateCheckoutIgnoreDuplicate\""
+      },
+      {
+        "line": 6657,
+        "text": "- \"endDateCheckoutIgnoreIfUnavailable\""
+      },
+      {
+        "line": 6661,
+        "text": "- \"endDateDayAfterCheckOut\""
+      },
+      {
+        "line": 6662,
+        "text": "- \"endDateDayAfterCheckOutIgnoreDuplicate\""
+      },
+      {
+        "line": 6663,
+        "text": "- \"endDateDayAfterCheckoutIgnoreIfUnavailable\""
+      },
+      {
+        "line": 7939,
+        "text": "checkOutDays:"
+      }
+    ],
+    "cleaning": [
+      {
+        "line": 4721,
+        "text": "enum: [\"notUsed\", \"optional\", \"optionalQty\", \"optionalPercentage\", \"obligatory\", \"obligatoryCleaning\", \"obligatoryTax\", \"obligatoryPercentTax\", \"obligatoryPercent\"]"
+      },
+      {
+        "line": 5099,
+        "text": "cleaningFee:"
+      }
+    ],
+    "connect": [
+      {
+        "line": 2202,
+        "text": "summary: Beta - Get all Airbnb user ids connected to an account"
+      },
+      {
+        "line": 2387,
+        "text": "- \"connectToExistingRoom\""
+      },
+      {
+        "line": 2388,
+        "text": "- \"disconnectRoom\""
+      },
+      {
+        "line": 2389,
+        "text": "connect:"
+      },
+      {
+        "line": 2408,
+        "text": "\"connect\": \"full\""
+      },
+      {
+        "line": 2418,
+        "text": "\"connect\": \"full\","
+      },
+      {
+        "line": 2429,
+        "text": "\"connect\": \"full\","
+      },
+      {
+        "line": 2441,
+        "text": "\"connect\": \"full\","
+      },
+      {
+        "line": 2445,
+        "text": "connectToExistingRoom:"
+      },
+      {
+        "line": 2446,
+        "text": "summary: Connect an Airbnb listing to an existing room"
+      },
+      {
+        "line": 2449,
+        "text": "\"action\": \"connectToExistingRoom\","
+      },
+      {
+        "line": 2452,
+        "text": "\"connect\": \"full\","
+      },
+      {
+        "line": 2456,
+        "text": "disconnectRoom:"
+      },
+      {
+        "line": 2457,
+        "text": "summary: Disconnect a room from Airbnb"
+      },
+      {
+        "line": 2460,
+        "text": "\"action\": \"disconnectRoom\","
+      },
+      {
+        "line": 6336,
+        "text": "tripconnect:"
+      },
+      {
+        "line": 7357,
+        "text": "connect:"
+      }
+    ],
+    "houseManual": [
+      {
+        "line": 7124,
+        "text": "houseManual:"
+      }
+    ],
+    "listingId": [
+      {
+        "line": 2266,
+        "text": "- name: airbnbListingId"
+      },
+      {
+        "line": 2267,
+        "text": "description: \"If the airbnbListingId is not specified then all listings will be returned. Must be included to see room data.\""
+      },
+      {
+        "line": 2376,
+        "text": "airbnbListingId:"
+      },
+      {
+        "line": 2407,
+        "text": "\"airbnbListingId\": \"789012\","
+      },
+      {
+        "line": 2417,
+        "text": "\"airbnbListingId\": \"789012\","
+      },
+      {
+        "line": 2428,
+        "text": "\"airbnbListingId\": \"789012\","
+      },
+      {
+        "line": 2440,
+        "text": "\"airbnbListingId\": \"789012\","
+      },
+      {
+        "line": 2451,
+        "text": "\"airbnbListingId\": \"789012\","
+      },
+      {
+        "line": 7355,
+        "text": "airbnbListingId:"
+      }
+    ],
+    "preBooking": [
+      {
+        "line": 7133,
+        "text": "preBookingMessage:"
+      }
+    ],
+    "publish": [
+      {
+        "line": 7069,
+        "text": "publish:"
+      }
+    ]
+  },
+  "schema": "aumara.beds24-airbnb-capability-probe.v1",
+  "schema_excerpts": {
+    "airbnbSettings": "",
+    "airbnbSettingsGet": "    airbnbSettingsGet:\n      allOf:\n      - properties:\n          channel:\n              type: string\n              example: airbnb\n          properties:\n            type: array\n            items:\n              type: object\n              properties:\n                airbnbUserId:\n                  type: string\n                  nullable: true\n      - $ref: '#/components/schemas/airbnbSettingsPost'\n      - properties:\n          properties:\n            type: array\n            items:\n              type: object\n              properties:\n                id: \n                  type: integer\n                roomTypes:\n                  type: array\n                  items:\n                    type: object\n                    properties:\n                      enabled:\n                        type: boolean\n                      airbnbListingId:\n                        type: number\n                      connect:\n                        type: string\n                        enum:\n                          - \"inventory\"\n                          - \"limited\"\n                          - \"full\"",
+    "airbnbSettingsPatch": "",
+    "airbnbSettingsPost": "    airbnbSettingsPost:\n      type: object\n      properties:\n        channel:\n          type: string\n          example: airbnb\n        properties:\n          type: array\n          items:\n            type: object\n            properties:\n              id: \n                type: integer\n              multiplier:\n                type: string\n                nullable: true\n              currency:\n                type: string\n                enum:\n                  - \"AED\"\n                  - \"ALL\"\n                  - \"AMD\"\n                  - \"ARS\"\n                  - \"AUD\"\n                  - \"AZN\"\n                  - \"BDT\"\n                  - \"BGN\"\n                  - \"BHD\"\n                  - \"BND\"\n                  - \"BRL\"\n                  - \"CAD\"\n                  - \"CHF\"\n                  - \"CLP\"\n                  - \"CNY\"\n                  - \"COP\"\n                  - \"CRC\"\n                  - \"CZK\"\n                  - \"DKK\"\n                  - \"DOP\"\n                  - \"EGP\"\n                  - \"EUR\"\n                  - \"FJD\"\n                  - \"GBP\"\n                  - \"GEL\"\n                  - \"HKD\"\n                  - \"HRK\"\n                  - \"HUF\"\n                  - \"INR\"\n                  - \"IDR\"\n                  - \"IRR\"\n                  - \"ILS\"\n                  - \"ISK\"\n                  - \"JOD\"\n                  - \"JPY\"\n                  - \"KES\"\n                  - \"KRW\"\n                  - \"LBP\"\n                  - \"LKR\"\n                  - \"MAD\"\n                  - \"MMK\"\n                  - \"MXN\"\n                  - \"MYR\"\n                  - \"MZN\"\n                  - \"NOK\"\n                  - \"NZD\"\n                  - \"OMR\"\n                  - \"PHP\"\n                  - \"PLN\"\n                  - \"RON\"\n                  - \"RSD\"\n                  - \"RUB\"\n                  - \"SAR\"\n                  - \"SEK\"\n                  - \"SGD\"\n                  - \"TWD\"\n                  - \"THB\"\n                  - \"TND\"\n                  - \"TRY\"\n                  - \"TZS\"\n                  - \"UAH\"\n                  - \"USD\"\n                  - \"VND\"\n                  - \"XOF\"\n                  - \"XPF\"\n                  - \"YER\"\n                  - \"ZAR\"\n              inquiryAndRequests:\n                type: string\n                enum:\n                  - \"ignore\"\n                  - \"importAll\"\n                  - \"importOnlyContainingBookingNumber\"\n              invoiceeId:\n                  type: string\n                  nullable: true\n              roomTypes:\n                type: array\n                items:\n                  type: object\n                  properties:\n                    id:\n                      type: integer\n                    publish:\n                      type: boolean\n                    propertyTypeGroup:\n                      type: string\n                      nullable: true\n                      enum:\n                        - \"apartments\"\n                        - \"bnb\"\n                        - \"boutiqueHotelsAndMore\"\n                        - \"houses\"\n                        - \"secondayUnits\"\n                        - \"uniqueHomes\"\n                    listingType:\n                      type: string\n                      enum:\n                        - \"entireHome\"\n                        - \"privateRoom\"\n                        - \"sharedRoom\"\n                    updateAddress:\n                      type: boolean\n                    bathroomShared:\n                      type: string\n                      nullable: true\n                      enum:\n                        - \"private\"\n                        - \"host\"\n                        - \"roommates\"\n                        - \"guests\"\n                        - \"host-roommates\"\n                        - \"host-guests\"\n                        - \"roommates-guests\"\n                        - \"host-roommates-guests\"\n                    commonSpacesShared:\n                      type: string\n                      nullable: true\n                      enum:\n                        - \"private\"\n                        - \"host\"\n                        - \"roommates\"\n                        - \"guests\"\n                        - \"host-roommates\"\n                        - \"host-guests\"\n                        - \"roommates-guests\"\n                        - \"host-roommates-guests\"\n                    checkinType:\n                      type: string\n                      enum:\n                       - \"host\"\n                       - \"doorman\"\n                       - \"keypad\"\n                       - \"lockbox\"\n                       - \"smartlock\"\n                       - \"other\"\n                    checkinInstructions:\n                      type: string\n                    houseManual:\n                      type: string\n                    instantBook:\n                      type: string\n                      enum:\n                        - \"everyone\"\n                        - \"experienced\"\n                        - \"governmentId\"\n                        - \"experiencedGovernmentId\"\n                    preBookingMessage:\n                      type: string\n                    cancellationPolicy:\n                      type: string\n                      enum:\n                       - \"flexible\"\n                       - \"moderate\"\n                       - \"firm\"\n                       - \"strict\"\n                       - \"superStrict30\"\n                       - \"superStrict60\"\n                    priceStrategy:\n                      type: string\n                      enum:\n                        - \"perDayPricing\"\n                        - \"perOccupancyPricing\"\n                        - \"ratePlans\"\n                    guestsIncluded:\n                      type: integer\n                      minimum: 1\n                      maximum: 50\n                      nullable: true\n                    extraPersonPrice:\n                      type: integer\n                      minimum: 1\n                      nullable: true\n                    datesWithNoPrice:\n                      type: string\n                      enum:\n                       - \"makeUnavailable\"\n                       - \"useBasePrice\"\n                    2DayDiscountPercent:\n                      type: integer\n                      minimum: 0\n                      maximum: 90\n                    3DayDiscountPercent:\n                      type: integer\n                      minimum: 0\n                      maximum: 90\n                    4DayDiscountPercent:\n                      type: integer\n                      minimum: 0\n                      maximum: 90\n                    5DayDiscountPercent:\n                      type: integer\n                      minimum: 0\n                      maximum: 90\n                    6DayDiscountPercent:\n                      type: integer\n                      minimum: 0\n                      maximum: 90\n                    7DayDiscountPercent:\n                      type: integer\n                      minimum: 0\n                      maximum: 90\n                    14DayDiscountPercent:\n                      type: integer\n                      minimum: 0\n                      maximum: 90\n                    21DayDiscountPercent:\n                      type: integer\n                      minimum: 0\n                      maximum: 90\n                    28DayDiscountPercent:\n                      type: integer\n                      minimum: 0\n                      maximum: 90\n                    maxDaysInAdvance:\n                      type: integer\n                      description: \"Can be set to null to have no limit\"\n                      nullable: true\n                      enum:\n                        - 0\n                        - 30\n                        - 60\n                        - 90\n                        - 120\n                        - 150\n                        - 180\n                        - 210\n                        - 240\n                        - 270\n                        - 300\n                        - 330\n                        - 365\n                    advanceNoticeHours:\n                      type: integer\n                      enum:\n                        - 0\n                        - 1\n                        - 2\n                        - 3\n                        - 4\n                        - 5\n                        - 6\n                        - 7\n                        - 8\n                        - 9\n                        - 10\n                        - 11\n                        - 12\n                        - 13\n                        - 14\n                        - 15\n                        - 16\n                        - 17\n                        - 18\n                        - 19\n                        - 20\n                        - 21\n                        - 22\n                        - 23\n                        - 24\n                        - 48\n                        - 72\n                        - 128\n                    allowAdvanceNoticeRequests:\n                      type: boolean\n                    earlyBirdDaysToCheckin:\n                      type: integer\n                      enum:\n                        - 360\n                        - 336\n                        - 330\n                        - 308\n                        - 300\n                        - 280\n                        - 270\n                        - 252\n                        - 240\n                        - 224\n                        - 210\n                        - 196\n                        - 180\n                        - 168\n                        - 150\n                        - 140\n                        - 120\n                        - 112\n                        - 90\n                        - 84\n                        - 60\n                        - 56\n                        - 30\n                        - 28\n                    earlyBirdDiscountPercent:\n                      type: integer\n                      minimum: 0\n                      maximum: 50\n                    lastMinuteDaysToCheckin:\n                      type: integer\n                      minimum: 0\n                      maximum: 28\n                    lastMinuteDiscountPercent:\n                      type: integer\n                      minimum: 0\n                      maximum: 50\n                    nonRefundableDiscountPercent:\n                      type: integer\n                      minimum: 0\n                      maximum: 50\n                    custom:\n                      type: array\n                      description: \"Each item in the array corresponds to a line in the custom textarea\"\n                      items:\n                        type: string\n                    allowMultiLanguage:\n                      type: boolean\n                    texts:\n                      type: array\n                      items:\n                        type: object\n                        properties:\n                          language:\n                            type: string\n                            example: en\n                          name:\n                            type: string\n                          description:\n                            type: string\n                          space:\n                            type: string\n                          guestAccess:\n                            type: string\n                          guestInteraction:\n                            type: string\n                          neighborhoodOverview:\n                            type: string\n                          gettingAround:\n                            type: string\n                          otherThingsToNote:\n                            type: string",
+    "channels_settings_path": "  /channels/settings:\n    get:\n      summary: Alpha - Get channel settings\n      tags:\n        - Channels - settings\n      security:\n        - token: []\n        - organization: []\n      parameters:\n          - name: propertyId\n            in: query\n            required: true\n            schema:\n              type: string\n          - name: roomId\n            in: query\n            schema:\n              type: array\n              items:\n                type: integer\n          - name: channel\n            in: query\n            schema:\n              type: array\n              items:\n                type: string\n                enum:\n                  #- \"vrbo\"\n                  #- \"nuki\"\n                  - \"iCalExport\"\n                  - \"iCalImport\"\n                  - \"airbnb\"\n                  - \"vrbo\"\n      responses:\n        '200':\n          description: Successful operation\n          headers:\n            X-FiveMinCreditLimit:\n              $ref: '#/components/headers/X-FiveMinCreditLimit'\n            X-FiveMinCreditLimit-ResetsIn:\n              $ref: '#/components/headers/X-FiveMinCreditLimit-ResetsIn'\n            X-FiveMinCreditLimit-Remaining:\n              $ref: '#/components/headers/X-FiveMinCreditLimit-Remaining'\n            X-RequestCost:\n              $ref: '#/components/headers/X-RequestCost'\n          content:\n            application/json:\n              schema:\n                allOf:\n                  - $ref: '#/components/schemas/SuccessfulApiResponse'\n                  - properties:\n                      type:\n                        type: string\n                        example: \"channelSetting\"\n                      pages:\n                        $ref: '#/components/schemas/pages'\n                      data:\n                        type: array\n                        items:\n                          anyOf:\n                            \n                            #- $ref: '#/components/schemas/nukiSettingsGet'\n                            - $ref: '#/components/schemas/airbnbSettingsGet'\n                            - $ref: '#/components/schemas/vrboSettingsGet'\n                            - $ref: '#/components/schemas/iCalExportSettingsGet'\n                            - $ref: '#/components/schemas/iCalImportSettingsGet'\n        '400':\n          description: Unsuccesful operation\n          content:\n            application/json:\n              schema:\n                $ref: '#/components/schemas/UnsuccessfulApiResponse'\n    post:\n      summary: Alpha - Set channel settings\n      tags:\n        - Channels - settings\n      security:\n        - token: []\n        - organization: []\n      requestBody:\n        content:\n          application/json:\n            schema:\n              type: array\n              items:\n                anyOf:\n                  - $ref: '#/components/schemas/vrboSettingsPost'\n                  #- $ref: '#/components/schemas/nukiSettingsPost'\n                  - $ref: '#/components/schemas/airbnbSettingsPost'\n                  - $ref: '#/components/schemas/iCalExportSettingsPost'\n                  - $ref: '#/components/schemas/iCalImportSettingsPost'\n            examples:\n              channelSetting:\n                summary: Change a channel setting\n                value: [\n                        {\n                          \"channel\": \"airbnb\",\n                          \"properties\": [\n                            {\n                              \"id\": 12345678,\n                              \"multiplier\": 1.3,\n                            }\n                          ]\n                        }\n                      ]\n              channelRoomSetting:\n                summary: Change a channel's room settings\n                value: [\n                        {\n                          \"channel\": \"vrbo\",\n                          \"properties\": [{\n                            \"id\": 12345678,\n                            \"roomTypes\": [\n                              {\n                                \"id\": 9012345,\n                                \"7DayDiscountPercent\": 35,\n                                \"cancellationPolicy\": \"noRefund\"\n                              }\n                            ]\n                          }]\n                        }\n                      ]\n                      \n      responses:\n        '201':\n          description: Successful operation\n          headers:\n            X-FiveMinCreditLimit:\n              $ref: '#/components/headers/X-FiveMinCreditLimit'\n            X-FiveMinCreditLimit-ResetsIn:\n              $ref: '#/components/headers/X-FiveMinCreditLimit-ResetsIn'\n            X-FiveMinCreditLimit-Remaining:\n              $ref: '#/components/headers/X-FiveMinCreditLimit-Remaining'\n            X-RequestCost:\n              $ref: '#/components/headers/X-RequestCost'\n          content:\n            application/json:\n              schema:\n                type: array\n                items:\n                  allOf:\n                    - type: object\n                    - $ref: '#/components/schemas/multiplePostResponse'"
+  },
+  "secret_exposed": false,
+  "status": "SUCCESS"
+}
