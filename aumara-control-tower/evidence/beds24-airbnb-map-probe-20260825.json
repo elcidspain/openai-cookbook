@@ -1,0 +1,131 @@
+{
+  "checked_at_utc": "2026-08-25T01:30:11.813498+00:00",
+  "room_airbnb": {
+    "674465": {
+      "listingId": "1759764557896676605",
+      "picturesFrom": "rop",
+      "publish": "yes"
+    },
+    "674466": {
+      "listingId": "1759764847919085354",
+      "picturesFrom": "rop",
+      "publish": "yes"
+    }
+  },
+  "schema": "aumara.beds24-airbnb-map-probe.v1",
+  "secret_exposed": false,
+  "slots": {
+    "35": {
+      "caption": null,
+      "map": [
+        {
+          "position": "35",
+          "propId": "324882",
+          "roomId": "674465"
+        },
+        {
+          "position": "9",
+          "propId": "324882",
+          "roomId": "674466"
+        }
+      ],
+      "url": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/CHALET/001_interior_living_1B6A8852.jpg"
+    },
+    "36": {
+      "caption": null,
+      "map": [
+        {
+          "position": "36",
+          "propId": "324882",
+          "roomId": "674465"
+        },
+        {
+          "position": "10",
+          "propId": "324882",
+          "roomId": "674466"
+        }
+      ],
+      "url": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/CHALET/002_interior_bed_05_interior_FULL_no_crop.jpg"
+    },
+    "37": {
+      "caption": null,
+      "map": [
+        {
+          "position": "37",
+          "propId": "324882",
+          "roomId": "674465"
+        },
+        {
+          "position": "11",
+          "propId": "324882",
+          "roomId": "674466"
+        }
+      ],
+      "url": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/CHALET/003_interior_bed_1B6A8803.jpg"
+    },
+    "38": {
+      "caption": null,
+      "map": [
+        {
+          "position": "38",
+          "propId": "324882",
+          "roomId": "674465"
+        },
+        {
+          "position": "12",
+          "propId": "324882",
+          "roomId": "674466"
+        }
+      ],
+      "url": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/CHALET/004_interior_bed_1B6A8857.jpg"
+    },
+    "39": {
+      "caption": null,
+      "map": [
+        {
+          "position": "39",
+          "propId": "324882",
+          "roomId": "674465"
+        },
+        {
+          "position": "13",
+          "propId": "324882",
+          "roomId": "674466"
+        }
+      ],
+      "url": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/CHALET/005_interior_bed_File_0031.jpg"
+    },
+    "40": {
+      "caption": null,
+      "map": [
+        {
+          "position": "40",
+          "propId": "324882",
+          "roomId": "674465"
+        },
+        {
+          "position": "14",
+          "propId": "324882",
+          "roomId": "674466"
+        }
+      ],
+      "url": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/CHALET/006_interior_bed_File_005.jpg"
+    },
+    "44": {
+      "caption": null,
+      "map": [
+        {
+          "position": "44",
+          "propId": "324882",
+          "roomId": "674465"
+        },
+        {
+          "position": "15",
+          "propId": "324882",
+          "roomId": "674466"
+        }
+      ],
+      "url": "https://raw.githubusercontent.com/elcidspain/aumara-photos/621674f8c311c56d9a5457b3b7bd05d5a28a8e3f/booking-ready/CHALET/010_interior_dining_kitchen_File_020.jpg"
+    }
+  }
+}
