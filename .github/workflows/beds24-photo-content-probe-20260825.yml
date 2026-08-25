@@ -1,0 +1,100 @@
+name: Beds24 photo content probe AUMARA 2026-08-25
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/beds24-photo-content-probe-20260825.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: beds24-photo-content-probe-324882
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: Production
+    env:
+      BEDS24_API_KEY: ${{ secrets.BEDS24_API_KEY }}
+      BEDS24_PROP_KEY: ${{ secrets.BEDS24_PROP_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Snapshot Beds24 image/content structure through API
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import datetime as dt, json, os, pathlib, subprocess, urllib.error, urllib.request
+
+          api=(os.environ.get('BEDS24_API_KEY') or '').strip()
+          prop=(os.environ.get('BEDS24_PROP_KEY') or '').strip()
+          for secret in (api,prop):
+              if secret: print(f'::add-mask::{secret}')
+          if not api or not prop:
+              raise SystemExit('Beds24 API credentials missing in Production')
+
+          payload={
+              'authentication': {'apiKey': api, 'propKey': prop},
+              'bookingData': False,
+              'images': True,
+              'roomIds': True,
+              'texts': True,
+              'includeAirbnb': True,
+              'includeVrbo': False,
+          }
+          req=urllib.request.Request(
+              'https://api.beds24.com/json/getPropertyContent',
+              data=json.dumps(payload).encode(),
+              headers={'Content-Type':'application/json','Accept':'application/json'},
+              method='POST',
+          )
+          try:
+              with urllib.request.urlopen(req,timeout=90) as r:
+                  body=r.read(); status=int(r.status)
+          except urllib.error.HTTPError as e:
+              body=e.read(); status=int(e.code)
+          data=json.loads(body.decode('utf-8','replace')) if body else {}
+          if not 200 <= status < 300:
+              raise SystemExit(f'getPropertyContent HTTP {status}: {str(data)[:1000]}')
+
+          root=(data.get('getPropertyContent') or [{}])[0]
+          room_ids=root.get('roomIds') or {}
+          summary={
+              'schema':'aumara.beds24-photo-content-probe.v1',
+              'checked_at_utc':dt.datetime.now(dt.timezone.utc).isoformat(),
+              'property_id':324882,
+              'top_level_keys':sorted(root.keys()),
+              'images_type':type(root.get('images')).__name__,
+              'images':root.get('images'),
+              'rooms':{},
+              'secret_exposed':False,
+          }
+          for rid in ('674465','674466'):
+              room=room_ids.get(rid) or room_ids.get(int(rid)) or {}
+              summary['rooms'][rid]={
+                  'keys':sorted(room.keys()),
+                  'images_type':type(room.get('images')).__name__,
+                  'images':room.get('images'),
+                  'airbnb':room.get('airbnb'),
+              }
+
+          out=pathlib.Path('aumara-control-tower/evidence/beds24-photo-content-probe-20260825.json')
+          out.parent.mkdir(parents=True,exist_ok=True)
+          out.write_text(json.dumps(summary,ensure_ascii=False,indent=2,sort_keys=True)+'\n',encoding='utf-8')
+          subprocess.run(['git','config','user.name','github-actions[bot]'],check=True)
+          subprocess.run(['git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com'],check=True)
+          subprocess.run(['git','add',str(out)],check=True)
+          if subprocess.run(['git','diff','--cached','--quiet'],check=False).returncode!=0:
+              subprocess.run(['git','commit','-m','Record Beds24 photo content structure [skip ci]'],check=True)
+              subprocess.run(['git','pull','--rebase','origin','main'],check=True)
+              subprocess.run(['git','push','origin','HEAD:main'],check=True)
+          print(json.dumps({'status':'SUCCESS','top_level_keys':summary['top_level_keys'],'room_keys':{k:v['keys'] for k,v in summary['rooms'].items()}},ensure_ascii=False))
+          PY
