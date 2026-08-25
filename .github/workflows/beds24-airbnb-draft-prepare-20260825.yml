@@ -64,7 +64,7 @@ jobs:
           room_ids=('674465','674466')
           wanted={
               rid:{
-                  'propertyTypeGroup':'boutique_hotels_and_more',
+                  'propertyTypeGroup':'houses',
                   'listingType':'entire_home',
                   'publish':'no'
               } for rid in room_ids
@@ -111,8 +111,8 @@ jobs:
               'property_id':pid,
               'checked_at_utc':dt.datetime.now(dt.timezone.utc).isoformat(),
               'decision':{
-                  'propertyTypeGroup':'boutique_hotels_and_more',
-                  'reason':'Airbnb room-type inventory supports multiple interchangeable units; House is not eligible. AUMARA rooms are pooled multi-unit room types.',
+                  'propertyTypeGroup':'houses',
+                  'reason':'Beds24 roomType chalet belongs to Airbnb propertyTypeGroup houses; listingType entire_home remains consistent while publish stays no for revalidation.',
                   'publish':'no'
               },
               'before':{rid:{k:before_airbnb[rid].get(k) for k in ('propertyTypeGroup','listingType','publish','listingId')} for rid in room_ids},
