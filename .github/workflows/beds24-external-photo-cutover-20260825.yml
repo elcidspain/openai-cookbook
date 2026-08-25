@@ -1,0 +1,291 @@
+name: Beds24 external photo cutover AUMARA 2026-08-25
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/beds24-external-photo-cutover-20260825.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: beds24-external-photo-cutover-324882
+  cancel-in-progress: false
+
+jobs:
+  cutover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: Production
+    env:
+      BEDS24_API_KEY: ${{ secrets.BEDS24_API_KEY }}
+      BEDS24_PROP_KEY: ${{ secrets.BEDS24_PROP_KEY }}
+      BEDS24_REFRESH_CREDENTIAL: ${{ secrets.BEDS24_REFRESH_CREDENTIAL }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install media dependencies
+        run: pip install --disable-pip-version-check 'gdown>=5.2,<6' 'pillow>=11,<12'
+
+      - name: Build immutable public photo set, map in Beds24, verify readback
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from __future__ import annotations
+
+          import datetime as dt
+          import hashlib
+          import json
+          import os
+          import pathlib
+          import shutil
+          import subprocess
+          import time
+          import urllib.error
+          import urllib.request
+          import zipfile
+
+          import gdown
+          from PIL import Image, ImageOps
+
+          PROPERTY_ID = 324882
+          ROOM_CHALET = '674465'
+          ROOM_SUPERIOR = '674466'
+          REPO = 'elcidspain/openai-cookbook'
+          ZIP_MANIFEST = [
+              ('common', 'AUMARA_COMMON_14.zip', '1nKYEWf7wt-dKyMSqn7cGBZY1Fsqfnh5j', 14),
+              ('chalet', 'AUMARA_CHALET_3.zip', '1q2EgyxM0jaGdoIrZMHRFIRmU4Z53CDgg', 3),
+              ('superior', 'AUMARA_SUPERIOR_1.zip', '1Det-7VAFrXW47F2zO8sh87De3unKRz49', 1),
+          ]
+          api = (os.environ.get('BEDS24_API_KEY') or '').strip()
+          prop = (os.environ.get('BEDS24_PROP_KEY') or '').strip()
+          refresh = (os.environ.get('BEDS24_REFRESH_CREDENTIAL') or '').strip()
+          if not api or not prop:
+              raise SystemExit('Beds24 V1 content credentials missing')
+          for secret in (api, prop, refresh):
+              if secret:
+                  print(f'::add-mask::{secret}')
+
+          root = pathlib.Path.cwd()
+          work = root / '.tmp-aumara-airbnb-photos'
+          public = root / 'aumara-control-tower/public/airbnb-20260825'
+          evidence_path = root / 'aumara-control-tower/evidence/beds24-external-photo-cutover-20260825.json'
+          if work.exists():
+              shutil.rmtree(work)
+          if public.exists():
+              shutil.rmtree(public)
+          work.mkdir(parents=True)
+          public.mkdir(parents=True)
+
+          manifest = []
+          global_index = 0
+          category_index = {'common': 0, 'chalet': 0, 'superior': 0}
+          for category, zip_name, file_id, expected in ZIP_MANIFEST:
+              archive = work / zip_name
+              if not gdown.download(id=file_id, output=str(archive), quiet=False):
+                  raise SystemExit(f'Drive download failed: {zip_name}')
+              extract = work / category
+              extract.mkdir()
+              with zipfile.ZipFile(archive) as zf:
+                  names = [n for n in zf.namelist() if not n.endswith('/')]
+                  if any(n.startswith('/') or '..' in pathlib.PurePosixPath(n).parts for n in names):
+                      raise SystemExit(f'Unsafe ZIP: {zip_name}')
+                  zf.extractall(extract)
+              sources = sorted(p for p in extract.rglob('*') if p.is_file() and p.suffix.lower() in {'.jpg','.jpeg','.png','.webp'})
+              if len(sources) != expected:
+                  raise SystemExit(f'{category}: expected {expected} images, got {len(sources)}')
+              for src in sources:
+                  global_index += 1
+                  category_index[category] += 1
+                  with Image.open(src) as opened:
+                      img = ImageOps.exif_transpose(opened).convert('RGB')
+                      original = img.size
+                  if max(img.size) > 2400:
+                      img.thumbnail((2400, 2400), Image.Resampling.LANCZOS)
+                  filename = f'{global_index:02d}-{category}-{category_index[category]:02d}.jpg'
+                  target = public / filename
+                  quality = 92
+                  while True:
+                      img.save(target, 'JPEG', quality=quality, optimize=True, progressive=True)
+                      if target.stat().st_size <= 4_500_000 or quality <= 76:
+                          break
+                      quality -= 4
+                  if target.stat().st_size < 50_000:
+                      raise SystemExit(f'Prepared image unexpectedly small: {filename}')
+                  manifest.append({
+                      'category': category,
+                      'filename': filename,
+                      'source': src.name,
+                      'source_size': list(original),
+                      'output_size': list(img.size),
+                      'bytes': target.stat().st_size,
+                      'sha256': hashlib.sha256(target.read_bytes()).hexdigest(),
+                  })
+
+          if len(manifest) != 18:
+              raise SystemExit(f'Expected 18 prepared images, got {len(manifest)}')
+
+          subprocess.run(['git','config','user.name','github-actions[bot]'], check=True)
+          subprocess.run(['git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com'], check=True)
+          subprocess.run(['git','add',str(public)], check=True)
+          if subprocess.run(['git','diff','--cached','--quiet'], check=False).returncode != 0:
+              subprocess.run(['git','commit','-m','Host immutable AUMARA Airbnb photo set [skip ci]'], check=True)
+              subprocess.run(['git','pull','--rebase','origin','main'], check=True)
+              subprocess.run(['git','push','origin','HEAD:main'], check=True)
+          asset_sha = subprocess.check_output(['git','rev-parse','HEAD'], text=True).strip()
+
+          base = f'https://raw.githubusercontent.com/{REPO}/{asset_sha}/aumara-control-tower/public/airbnb-20260825'
+          for item in manifest:
+              item['url'] = f"{base}/{item['filename']}"
+              if len(item['url']) > 250:
+                  raise SystemExit('External picture URL exceeds Beds24 limit')
+
+          # Prove every immutable URL is directly fetchable before touching Beds24.
+          for item in manifest:
+              last_error = None
+              for _ in range(10):
+                  try:
+                      req = urllib.request.Request(item['url'], headers={'User-Agent':'AUMARA-photo-readback/1.0'})
+                      with urllib.request.urlopen(req, timeout=30) as r:
+                          head = r.read(64)
+                          status = int(r.status)
+                          ctype = (r.headers.get('Content-Type') or '').lower()
+                      if status == 200 and head and 'image' in ctype:
+                          item['url_http_status'] = status
+                          item['url_content_type'] = ctype
+                          break
+                      last_error = f'status={status} content-type={ctype}'
+                  except Exception as exc:
+                      last_error = str(exc)
+                  time.sleep(3)
+              else:
+                  raise SystemExit(f"Public image not fetchable: {item['filename']}: {last_error}")
+
+          def post_v1(path: str, payload: dict):
+              req = urllib.request.Request(
+                  'https://api.beds24.com/json/' + path,
+                  data=json.dumps(payload, ensure_ascii=False).encode('utf-8'),
+                  headers={'Content-Type':'application/json','Accept':'application/json','User-Agent':'AUMARA-Control-Tower/1.0'},
+                  method='POST',
+              )
+              try:
+                  with urllib.request.urlopen(req, timeout=90) as r:
+                      raw = r.read(); status = int(r.status)
+              except urllib.error.HTTPError as e:
+                  raw = e.read(); status = int(e.code)
+              try:
+                  body = json.loads(raw.decode('utf-8','replace')) if raw else {}
+              except Exception:
+                  body = {'non_json_bytes': len(raw)}
+              if not 200 <= status < 300:
+                  raise SystemExit(f'{path} HTTP {status}: {str(body)[:1500]}')
+              return body
+
+          auth = {'apiKey': api, 'propKey': prop}
+
+          # One global external-picture pool. Common pictures are mapped to both room types;
+          # three Chalet-only pictures and one Superior-only picture follow the common set.
+          external = {str(i): {'url':'', 'map':[]} for i in range(1, 101)}
+          chalet_pos = 0
+          superior_pos = 0
+          for slot, item in enumerate(manifest, start=1):
+              maps = []
+              if item['category'] == 'common':
+                  chalet_pos += 1; superior_pos += 1
+                  maps = [
+                      {'propId': str(PROPERTY_ID), 'roomId': ROOM_CHALET, 'position': str(chalet_pos)},
+                      {'propId': str(PROPERTY_ID), 'roomId': ROOM_SUPERIOR, 'position': str(superior_pos)},
+                  ]
+              elif item['category'] == 'chalet':
+                  chalet_pos += 1
+                  maps = [{'propId': str(PROPERTY_ID), 'roomId': ROOM_CHALET, 'position': str(chalet_pos)}]
+              elif item['category'] == 'superior':
+                  superior_pos += 1
+                  maps = [{'propId': str(PROPERTY_ID), 'roomId': ROOM_SUPERIOR, 'position': str(superior_pos)}]
+              external[str(slot)] = {'url': item['url'], 'map': maps}
+
+          wanted_counts = {ROOM_CHALET: chalet_pos, ROOM_SUPERIOR: superior_pos}
+          if wanted_counts != {ROOM_CHALET:17, ROOM_SUPERIOR:15}:
+              raise SystemExit(f'Unexpected room photo counts: {wanted_counts}')
+
+          write_payload = {
+              'authentication': auth,
+              'setPropertyContent': [
+                  {
+                      'action': 'modify',
+                      'images': {'external': external},
+                  }
+              ],
+          }
+          write_response = post_v1('setPropertyContent', write_payload)
+          time.sleep(4)
+          readback = post_v1('getPropertyContent', {
+              'authentication': auth,
+              'bookingData': False,
+              'images': True,
+              'roomIds': True,
+              'texts': False,
+              'includeAirbnb': True,
+              'includeVrbo': False,
+          })
+          data = (readback.get('getPropertyContent') or [{}])[0]
+          got_external = ((data.get('images') or {}).get('external') or {})
+
+          mismatches = []
+          for slot in range(1, 19):
+              key = str(slot)
+              want = external[key]
+              got = got_external.get(key) or {}
+              if got.get('url') != want['url']:
+                  mismatches.append({'slot':key,'field':'url','wanted':want['url'],'got':got.get('url')})
+              def norm_maps(value):
+                  return sorted((str(x.get('propId','')),str(x.get('roomId','')),str(x.get('position',''))) for x in (value or []))
+              if norm_maps(got.get('map')) != norm_maps(want['map']):
+                  mismatches.append({'slot':key,'field':'map','wanted':want['map'],'got':got.get('map')})
+
+          room_ids = data.get('roomIds') or {}
+          airbnb_state = {}
+          for rid in (ROOM_CHALET, ROOM_SUPERIOR):
+              a = ((room_ids.get(rid) or {}).get('airbnb') or {})
+              airbnb_state[rid] = {k:a.get(k) for k in ('listingId','publish','picturesFrom','propertyTypeGroup','listingType')}
+
+          evidence = {
+              'schema':'aumara.beds24-external-photo-cutover.v1',
+              'checked_at_utc':dt.datetime.now(dt.timezone.utc).isoformat(),
+              'property_id':PROPERTY_ID,
+              'asset_commit':asset_sha,
+              'manifest':manifest,
+              'wanted_room_photo_counts':wanted_counts,
+              'airbnb_state':airbnb_state,
+              'write_response':write_response,
+              'mismatches':mismatches,
+              'status':'SUCCESS' if not mismatches else 'FAILED_READBACK',
+              'secret_exposed':False,
+          }
+          text = json.dumps(evidence, ensure_ascii=False, indent=2, sort_keys=True)
+          for secret in (api, prop, refresh):
+              if secret:
+                  text = text.replace(secret, '[REDACTED]')
+          evidence_path.parent.mkdir(parents=True, exist_ok=True)
+          evidence_path.write_text(text+'\n', encoding='utf-8')
+          subprocess.run(['git','add',str(evidence_path)], check=True)
+          if subprocess.run(['git','diff','--cached','--quiet'], check=False).returncode != 0:
+              subprocess.run(['git','commit','-m',f'Record AUMARA external photo cutover {evidence["status"]} [skip ci]'], check=True)
+              subprocess.run(['git','pull','--rebase','origin','main'], check=True)
+              subprocess.run(['git','push','origin','HEAD:main'], check=True)
+
+          print(json.dumps({
+              'status': evidence['status'],
+              'asset_commit': asset_sha,
+              'room_photo_counts': wanted_counts,
+              'airbnb_state': airbnb_state,
+              'mismatch_count': len(mismatches),
+          }, ensure_ascii=False))
+          if mismatches:
+              raise SystemExit(1)
+          PY

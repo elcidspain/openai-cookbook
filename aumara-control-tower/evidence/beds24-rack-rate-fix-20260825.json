@@ -1,0 +1,36 @@
+{
+  "after": {
+    "674465": "259.00",
+    "674466": "329.00"
+  },
+  "before": {
+    "674465": "0.00",
+    "674466": "0.00"
+  },
+  "checked_at_utc": "2026-08-24T23:35:13.126974+00:00",
+  "mismatches": [],
+  "property_id": 324882,
+  "schema": "aumara.beds24-rack-rate-fix.v1",
+  "secret_exposed": false,
+  "status": "SUCCESS",
+  "wanted": {
+    "674465": "259.00",
+    "674466": "329.00"
+  },
+  "write_response": {
+    "setPropertyContent": [
+      {
+        "roomIds": {
+          "674465": {
+            "success": true,
+            "val": "259.00"
+          },
+          "674466": {
+            "success": true,
+            "val": "329.00"
+          }
+        }
+      }
+    ]
+  }
+}

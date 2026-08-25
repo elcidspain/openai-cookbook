@@ -1,0 +1,1571 @@
+{
+  "after": {
+    "roomIds": {
+      "674465": {
+        "airbnb": {
+          "accessText": {
+            "ES": "Los huéspedes tienen acceso a su chalet y a las zonas comunes exteriores, incluida la piscina compartida y el jardín."
+          },
+          "houseRulesText": {
+            "ES": "Alojamiento para no fumadores. Respeta las zonas comunes y utiliza la piscina y los espacios exteriores de forma responsable."
+          },
+          "interactionText": {
+            "ES": "El equipo está disponible para ayudar durante la estancia cuando sea necesario."
+          },
+          "name": {
+            "ES": "Chalet · Aumara El Cid"
+          },
+          "notesText": {
+            "ES": "La piscina y las zonas exteriores son compartidas con otros huéspedes. Todos los alojamientos son para no fumadores."
+          },
+          "spaceText": {
+            "ES": "Chalet privado con baño y zona de cocina compacta equipada con nevera, microondas, hervidor, cafetera, fregadero y menaje."
+          },
+          "summaryText": {
+            "ES": "Chalet privado con aire acondicionado, Wi-Fi, baño privado y zona de cocina con nevera, microondas, hervidor, cafetera, fregadero y menaje. Acceso a piscina compartida, jardín y zonas exteriores. Alojamiento para no fumadores."
+          }
+        },
+        "texts": {
+          "contentDescriptionText": {
+            "BG": "",
+            "CA": "",
+            "CS": "",
+            "DA": "",
+            "DE": "Privates Chalet mit Klimaanlage, WLAN, eigenem Bad und Küchenzeile mit Kühlschrank, Mikrowelle, Wasserkocher, Kaffeemaschine, Spüle und Geschirr. Zugang zum Gemeinschaftspool, Garten und den Außenbereichen. Nichtraucherunterkunft.",
+            "EN": "Private Chalet with air conditioning, Wi-Fi, a private bathroom and a kitchenette with a refrigerator, microwave, kettle, coffee maker, sink and utensils. Access to the shared pool, garden and outdoor areas. Non-smoking accommodation.",
+            "ES": "Chalet privado con aire acondicionado, Wi-Fi, baño privado y zona de cocina con nevera, microondas, hervidor, cafetera, fregadero y menaje. Acceso a piscina compartida, jardín y zonas exteriores. Alojamiento para no fumadores.",
+            "FI": "",
+            "FR": "Chalet privé avec climatisation, Wi-Fi, salle de bain privée et kitchenette avec réfrigérateur, micro-ondes, bouilloire, cafetière, évier et vaisselle. Accès à la piscine partagée, au jardin et aux espaces extérieurs. Hébergement non-fumeur.",
+            "HE": "",
+            "HY": "",
+            "IS": "",
+            "IT": "Chalet privato con aria condizionata, Wi-Fi, bagno privato e angolo cottura con frigorifero, microonde, bollitore, macchina da caffè, lavello e utensili. Accesso alla piscina condivisa, al giardino e agli spazi esterni. Alloggio non fumatori.",
+            "LT": "",
+            "LV": "",
+            "NL": "Privé Chalet met airconditioning, wifi, eigen badkamer en kitchenette met koelkast, magnetron, waterkoker, koffiezetapparaat, gootsteen en keukengerei. Toegang tot het gedeelde zwembad, de tuin en buitenruimtes. Rookvrije accommodatie.",
+            "NO": "",
+            "PL": "",
+            "PT": "Chalet privado com ar condicionado, Wi-Fi, casa de banho privativa e kitchenette com frigorífico, micro-ondas, chaleira, máquina de café, lava-loiça e utensílios. Acesso à piscina partilhada, ao jardim e às áreas exteriores. Alojamento para não fumadores.",
+            "RU": "Chalet: отдельное шале с кондиционером, Wi-Fi, собственной ванной комнатой и мини-кухней с холодильником, микроволновой печью, чайником, кофеваркой, мойкой и посудой. Доступ к общему бассейну, саду и открытым зонам. Размещение для некурящих.",
+            "SK": "",
+            "SV": ""
+          },
+          "contentHeadlineText": {
+            "BG": "",
+            "CA": "",
+            "CS": "",
+            "DA": "",
+            "DE": "Chalet",
+            "EN": "Chalet",
+            "ES": "Chalet",
+            "FI": "",
+            "FR": "Chalet",
+            "HE": "",
+            "HY": "",
+            "IS": "",
+            "IT": "Chalet",
+            "LT": "",
+            "LV": "",
+            "NL": "Chalet",
+            "NO": "",
+            "PL": "",
+            "PT": "Chalet",
+            "RU": "Chalet",
+            "SK": "",
+            "SV": ""
+          },
+          "displayName": {
+            "BG": "",
+            "CA": "",
+            "CS": "",
+            "DA": "",
+            "DE": "Chalet",
+            "EN": "Chalet",
+            "ES": "Chalet",
+            "FI": "",
+            "FR": "Chalet",
+            "HE": "",
+            "HY": "",
+            "IS": "",
+            "IT": "Chalet",
+            "LT": "",
+            "LV": "",
+            "NL": "Chalet",
+            "NO": "",
+            "PL": "",
+            "PT": "Chalet",
+            "RU": "Chalet",
+            "SK": "",
+            "SV": ""
+          },
+          "roomDescription1": {
+            "BG": "",
+            "CA": "",
+            "CS": "",
+            "DA": "",
+            "DE": "Privates Chalet mit Klimaanlage, WLAN, eigenem Bad und Küchenzeile mit Kühlschrank, Mikrowelle, Wasserkocher, Kaffeemaschine, Spüle und Geschirr. Zugang zum Gemeinschaftspool, Garten und den Außenbereichen. Nichtraucherunterkunft.",
+            "EN": "Private Chalet with air conditioning, Wi-Fi, a private bathroom and a kitchenette with a refrigerator, microwave, kettle, coffee maker, sink and utensils. Access to the shared pool, garden and outdoor areas. Non-smoking accommodation.",
+            "ES": "Chalet privado con aire acondicionado, Wi-Fi, baño privado y zona de cocina con nevera, microondas, hervidor, cafetera, fregadero y menaje. Acceso a piscina compartida, jardín y zonas exteriores. Alojamiento para no fumadores.",
+            "FI": "",
+            "FR": "Chalet privé avec climatisation, Wi-Fi, salle de bain privée et kitchenette avec réfrigérateur, micro-ondes, bouilloire, cafetière, évier et vaisselle. Accès à la piscine partagée, au jardin et aux espaces extérieurs. Hébergement non-fumeur.",
+            "HE": "",
+            "HY": "",
+            "IS": "",
+            "IT": "Chalet privato con aria condizionata, Wi-Fi, bagno privato e angolo cottura con frigorifero, microonde, bollitore, macchina da caffè, lavello e utensili. Accesso alla piscina condivisa, al giardino e agli spazi esterni. Alloggio non fumatori.",
+            "LT": "",
+            "LV": "",
+            "NL": "Privé Chalet met airconditioning, wifi, eigen badkamer en kitchenette met koelkast, magnetron, waterkoker, koffiezetapparaat, gootsteen en keukengerei. Toegang tot het gedeelde zwembad, de tuin en buitenruimtes. Rookvrije accommodatie.",
+            "NO": "",
+            "PL": "",
+            "PT": "Chalet privado com ar condicionado, Wi-Fi, casa de banho privativa e kitchenette com frigorífico, micro-ondas, chaleira, máquina de café, lava-loiça e utensílios. Acesso à piscina partilhada, ao jardim e às áreas exteriores. Alojamento para não fumadores.",
+            "RU": "Chalet: отдельное шале с кондиционером, Wi-Fi, собственной ванной комнатой и мини-кухней с холодильником, микроволновой печью, чайником, кофеваркой, мойкой и посудой. Доступ к общему бассейну, саду и открытым зонам. Размещение для некурящих.",
+            "SK": "",
+            "SV": ""
+          }
+        }
+      },
+      "674466": {
+        "airbnb": {
+          "accessText": {
+            "ES": "Los huéspedes tienen acceso a su chalet y a las zonas comunes exteriores, incluida la piscina compartida y el jardín."
+          },
+          "houseRulesText": {
+            "ES": "Alojamiento para no fumadores. Respeta las zonas comunes y utiliza la piscina y los espacios exteriores de forma responsable."
+          },
+          "interactionText": {
+            "ES": "El equipo está disponible para ayudar durante la estancia cuando sea necesario."
+          },
+          "name": {
+            "ES": "Chalet Superior · Aumara El Cid"
+          },
+          "notesText": {
+            "ES": "La piscina y las zonas exteriores son compartidas con otros huéspedes. Todos los alojamientos son para no fumadores."
+          },
+          "spaceText": {
+            "ES": "Chalet privado con baño y zona de cocina compacta equipada con nevera, microondas, hervidor, cafetera, fregadero y menaje."
+          },
+          "summaryText": {
+            "ES": "Superior Chalet privado con aire acondicionado, Wi-Fi, baño privado y zona de cocina con nevera, microondas, hervidor, cafetera, fregadero y menaje. Acceso a piscina compartida, jardín y zonas exteriores. Alojamiento para no fumadores."
+          }
+        },
+        "texts": {
+          "contentDescriptionText": {
+            "BG": "",
+            "CA": "",
+            "CS": "",
+            "DA": "",
+            "DE": "Privates Superior Chalet mit Klimaanlage, WLAN, eigenem Bad und Küchenzeile mit Kühlschrank, Mikrowelle, Wasserkocher, Kaffeemaschine, Spüle und Geschirr. Zugang zum Gemeinschaftspool, Garten und den Außenbereichen. Nichtraucherunterkunft.",
+            "EN": "Private Superior Chalet with air conditioning, Wi-Fi, a private bathroom and a kitchenette with a refrigerator, microwave, kettle, coffee maker, sink and utensils. Access to the shared pool, garden and outdoor areas. Non-smoking accommodation.",
+            "ES": "Superior Chalet privado con aire acondicionado, Wi-Fi, baño privado y zona de cocina con nevera, microondas, hervidor, cafetera, fregadero y menaje. Acceso a piscina compartida, jardín y zonas exteriores. Alojamiento para no fumadores.",
+            "FI": "",
+            "FR": "Superior Chalet privé avec climatisation, Wi-Fi, salle de bain privée et kitchenette avec réfrigérateur, micro-ondes, bouilloire, cafetière, évier et vaisselle. Accès à la piscine partagée, au jardin et aux espaces extérieurs. Hébergement non-fumeur.",
+            "HE": "",
+            "HY": "",
+            "IS": "",
+            "IT": "Superior Chalet privato con aria condizionata, Wi-Fi, bagno privato e angolo cottura con frigorifero, microonde, bollitore, macchina da caffè, lavello e utensili. Accesso alla piscina condivisa, al giardino e agli spazi esterni. Alloggio non fumatori.",
+            "LT": "",
+            "LV": "",
+            "NL": "Privé Superior Chalet met airconditioning, wifi, eigen badkamer en kitchenette met koelkast, magnetron, waterkoker, koffiezetapparaat, gootsteen en keukengerei. Toegang tot het gedeelde zwembad, de tuin en buitenruimtes. Rookvrije accommodatie.",
+            "NO": "",
+            "PL": "",
+            "PT": "Superior Chalet privado com ar condicionado, Wi-Fi, casa de banho privativa e kitchenette com frigorífico, micro-ondas, chaleira, máquina de café, lava-loiça e utensílios. Acesso à piscina partilhada, ao jardim e às áreas exteriores. Alojamento para não fumadores.",
+            "RU": "Superior Chalet: отдельное шале с кондиционером, Wi-Fi, собственной ванной комнатой и мини-кухней с холодильником, микроволновой печью, чайником, кофеваркой, мойкой и посудой. Доступ к общему бассейну, саду и открытым зонам. Размещение для некурящих.",
+            "SK": "",
+            "SV": ""
+          },
+          "contentHeadlineText": {
+            "BG": "",
+            "CA": "",
+            "CS": "",
+            "DA": "",
+            "DE": "Superior Chalet",
+            "EN": "Superior Chalet",
+            "ES": "Chalet Superior",
+            "FI": "",
+            "FR": "Superior Chalet",
+            "HE": "",
+            "HY": "",
+            "IS": "",
+            "IT": "Superior Chalet",
+            "LT": "",
+            "LV": "",
+            "NL": "Superior Chalet",
+            "NO": "",
+            "PL": "",
+            "PT": "Chalet Superior",
+            "RU": "Superior Chalet",
+            "SK": "",
+            "SV": ""
+          },
+          "displayName": {
+            "BG": "",
+            "CA": "",
+            "CS": "",
+            "DA": "",
+            "DE": "Superior Chalet",
+            "EN": "Superior Chalet",
+            "ES": "Chalet Superior",
+            "FI": "",
+            "FR": "Superior Chalet",
+            "HE": "",
+            "HY": "",
+            "IS": "",
+            "IT": "Superior Chalet",
+            "LT": "",
+            "LV": "",
+            "NL": "Superior Chalet",
+            "NO": "",
+            "PL": "",
+            "PT": "Chalet Superior",
+            "RU": "Superior Chalet",
+            "SK": "",
+            "SV": ""
+          },
+          "roomDescription1": {
+            "BG": "",
+            "CA": "",
+            "CS": "",
+            "DA": "",
+            "DE": "Privates Superior Chalet mit Klimaanlage, WLAN, eigenem Bad und Küchenzeile mit Kühlschrank, Mikrowelle, Wasserkocher, Kaffeemaschine, Spüle und Geschirr. Zugang zum Gemeinschaftspool, Garten und den Außenbereichen. Nichtraucherunterkunft.",
+            "EN": "Private Superior Chalet with air conditioning, Wi-Fi, a private bathroom and a kitchenette with a refrigerator, microwave, kettle, coffee maker, sink and utensils. Access to the shared pool, garden and outdoor areas. Non-smoking accommodation.",
+            "ES": "Superior Chalet privado con aire acondicionado, Wi-Fi, baño privado y zona de cocina con nevera, microondas, hervidor, cafetera, fregadero y menaje. Acceso a piscina compartida, jardín y zonas exteriores. Alojamiento para no fumadores.",
+            "FI": "",
+            "FR": "Superior Chalet privé avec climatisation, Wi-Fi, salle de bain privée et kitchenette avec réfrigérateur, micro-ondes, bouilloire, cafetière, évier et vaisselle. Accès à la piscine partagée, au jardin et aux espaces extérieurs. Hébergement non-fumeur.",
+            "HE": "",
+            "HY": "",
+            "IS": "",
+            "IT": "Superior Chalet privato con aria condizionata, Wi-Fi, bagno privato e angolo cottura con frigorifero, microonde, bollitore, macchina da caffè, lavello e utensili. Accesso alla piscina condivisa, al giardino e agli spazi esterni. Alloggio non fumatori.",
+            "LT": "",
+            "LV": "",
+            "NL": "Privé Superior Chalet met airconditioning, wifi, eigen badkamer en kitchenette met koelkast, magnetron, waterkoker, koffiezetapparaat, gootsteen en keukengerei. Toegang tot het gedeelde zwembad, de tuin en buitenruimtes. Rookvrije accommodatie.",
+            "NO": "",
+            "PL": "",
+            "PT": "Superior Chalet privado com ar condicionado, Wi-Fi, casa de banho privativa e kitchenette com frigorífico, micro-ondas, chaleira, máquina de café, lava-loiça e utensílios. Acesso à piscina partilhada, ao jardim e às áreas exteriores. Alojamento para não fumadores.",
+            "RU": "Superior Chalet: отдельное шале с кондиционером, Wi-Fi, собственной ванной комнатой и мини-кухней с холодильником, микроволновой печью, чайником, кофеваркой, мойкой и посудой. Доступ к общему бассейну, саду и открытым зонам. Размещение для некурящих.",
+            "SK": "",
+            "SV": ""
+          }
+        }
+      }
+    },
+    "texts": {
+      "headlineText": {
+        "BG": "",
+        "CA": "",
+        "CS": "",
+        "DA": "",
+        "DE": "Ruhige Chalets mit Gemeinschaftspool an der Costa Blanca",
+        "EN": "Peaceful chalets with a shared pool on the Costa Blanca",
+        "ES": "Chalets tranquilos con piscina compartida en la Costa Blanca",
+        "FI": "",
+        "FR": "Chalets paisibles avec piscine partagée sur la Costa Blanca",
+        "HE": "",
+        "HY": "",
+        "IS": "",
+        "IT": "Chalet tranquilli con piscina condivisa sulla Costa Blanca",
+        "LT": "",
+        "LV": "",
+        "NL": "Rustige chalets met gedeeld zwembad aan de Costa Blanca",
+        "NO": "",
+        "PL": "",
+        "PT": "Chalés tranquilos com piscina partilhada na Costa Blanca",
+        "RU": "Спокойные шале с общим бассейном на Коста-Бланке",
+        "SK": "",
+        "SV": ""
+      },
+      "houseRules": {
+        "BG": "",
+        "CA": "",
+        "CS": "",
+        "DA": "",
+        "DE": "Nichtraucherunterkunft. Bitte respektieren Sie die Gemeinschaftsbereiche und nutzen Sie Pool und Außenbereiche verantwortungsvoll.",
+        "EN": "Non-smoking accommodation. Please respect shared areas and use the pool and outdoor spaces responsibly.",
+        "ES": "Alojamiento para no fumadores. Respeta las zonas comunes y utiliza la piscina y los espacios exteriores de forma responsable.",
+        "FI": "",
+        "FR": "Hébergement non-fumeur. Merci de respecter les espaces communs et d’utiliser la piscine et les espaces extérieurs de manière responsable.",
+        "HE": "",
+        "HY": "",
+        "IS": "",
+        "IT": "Alloggio non fumatori. Si prega di rispettare le aree comuni e di utilizzare la piscina e gli spazi esterni in modo responsabile.",
+        "LT": "",
+        "LV": "",
+        "NL": "Rookvrije accommodatie. Respecteer de gedeelde ruimtes en gebruik het zwembad en de buitenruimtes op verantwoorde wijze.",
+        "NO": "",
+        "PL": "",
+        "PT": "Alojamento para não fumadores. Respeite as áreas comuns e utilize a piscina e os espaços exteriores de forma responsável.",
+        "RU": "Размещение для некурящих. Пожалуйста, бережно относитесь к общим зонам и ответственно пользуйтесь бассейном и открытыми пространствами.",
+        "SK": "",
+        "SV": ""
+      },
+      "locationDescription": {
+        "BG": "",
+        "CA": "",
+        "CS": "",
+        "DA": "",
+        "DE": "Eine ruhige Lage an der Costa Blanca zum Entspannen und Genießen der Natur und Außenbereiche.",
+        "EN": "A peaceful Costa Blanca setting for relaxing and enjoying nature and the outdoor areas.",
+        "ES": "Un entorno tranquilo de la Costa Blanca, pensado para descansar y disfrutar de la naturaleza y de las zonas exteriores.",
+        "FI": "",
+        "FR": "Un cadre paisible sur la Costa Blanca pour se détendre et profiter de la nature et des espaces extérieurs.",
+        "HE": "",
+        "HY": "",
+        "IS": "",
+        "IT": "Un ambiente tranquillo sulla Costa Blanca, ideale per rilassarsi e godersi la natura e gli spazi esterni.",
+        "LT": "",
+        "LV": "",
+        "NL": "Een rustige omgeving aan de Costa Blanca om te ontspannen en van de natuur en buitenruimtes te genieten.",
+        "NO": "",
+        "PL": "",
+        "PT": "Um ambiente tranquilo na Costa Blanca para descansar e aproveitar a natureza e as áreas exteriores.",
+        "RU": "Спокойная обстановка на Коста-Бланке для отдыха на природе и на открытом воздухе.",
+        "SK": "",
+        "SV": ""
+      },
+      "propertyDescription1": {
+        "BG": "",
+        "CA": "",
+        "CS": "",
+        "DA": "",
+        "DE": "Aumara El Cid ist eine ruhige Unterkunft an der Costa Blanca, umgeben von Natur und Außenbereichen. Die Chalets verfügen über Klimaanlage, WLAN, ein eigenes Bad und eine Küchenzeile mit Kühlschrank, Mikrowelle, Wasserkocher, Kaffeemaschine, Spüle und Geschirr. Gästen stehen der Gemeinschaftspool, der Garten und die Außenbereiche zur Verfügung. Alle Unterkünfte sind Nichtraucherunterkünfte.",
+        "EN": "Aumara El Cid is a peaceful Costa Blanca stay surrounded by nature and outdoor space. The chalets offer air conditioning, Wi-Fi, a private bathroom and a kitchenette with a refrigerator, microwave, kettle, coffee maker, sink and utensils. Guests can enjoy the shared pool, garden and outdoor areas. All accommodation is non-smoking.",
+        "ES": "Aumara El Cid es un alojamiento tranquilo en la Costa Blanca, rodeado de naturaleza y zonas exteriores. Los chalets disponen de aire acondicionado, Wi-Fi, baño privado y una zona de cocina con nevera, microondas, hervidor, cafetera, fregadero y menaje. Los huéspedes pueden disfrutar de la piscina compartida, el jardín y las zonas exteriores. Todos los alojamientos son para no fumadores.",
+        "FI": "",
+        "FR": "Aumara El Cid est un hébergement paisible sur la Costa Blanca, entouré de nature et d'espaces extérieurs. Les chalets disposent de la climatisation, du Wi-Fi, d'une salle de bain privée et d'une kitchenette avec réfrigérateur, micro-ondes, bouilloire, cafetière, évier et vaisselle. Les voyageurs peuvent profiter de la piscine partagée, du jardin et des espaces extérieurs. Tous les hébergements sont non-fumeurs.",
+        "HE": "",
+        "HY": "",
+        "IS": "",
+        "IT": "Aumara El Cid è una struttura tranquilla sulla Costa Blanca, circondata dalla natura e da spazi esterni. Gli chalet dispongono di aria condizionata, Wi-Fi, bagno privato e angolo cottura con frigorifero, microonde, bollitore, macchina da caffè, lavello e utensili. Gli ospiti possono utilizzare la piscina condivisa, il giardino e gli spazi esterni. Tutti gli alloggi sono non fumatori.",
+        "LT": "",
+        "LV": "",
+        "NL": "Aumara El Cid is een rustige accommodatie aan de Costa Blanca, omgeven door natuur en buitenruimte. De chalets hebben airconditioning, wifi, een eigen badkamer en een kitchenette met koelkast, magnetron, waterkoker, koffiezetapparaat, gootsteen en keukengerei. Gasten kunnen gebruikmaken van het gedeelde zwembad, de tuin en de buitenruimtes. Alle accommodaties zijn rookvrij.",
+        "NO": "",
+        "PL": "",
+        "PT": "Aumara El Cid é um alojamento tranquilo na Costa Blanca, rodeado de natureza e espaços exteriores. Os chalés dispõem de ar condicionado, Wi-Fi, casa de banho privativa e kitchenette com frigorífico, micro-ondas, chaleira, máquina de café, lava-loiça e utensílios. Os hóspedes podem desfrutar da piscina partilhada, do jardim e das áreas exteriores. Todos os alojamentos são para não fumadores.",
+        "RU": "Aumara El Cid — спокойное место для отдыха на Коста-Бланке, окружённое природой и открытыми зонами. В шале есть кондиционер, Wi-Fi, собственная ванная комната и мини-кухня с холодильником, микроволновой печью, чайником, кофеваркой, мойкой и посудой. Гости могут пользоваться общим бассейном, садом и открытыми зонами. Во всех помещениях проживание для некурящих.",
+        "SK": "",
+        "SV": ""
+      },
+      "propertyDescriptionBookingPage1": {
+        "BG": "",
+        "CA": "",
+        "CS": "",
+        "DA": "",
+        "DE": "Aumara El Cid ist eine ruhige Unterkunft an der Costa Blanca, umgeben von Natur und Außenbereichen. Die Chalets verfügen über Klimaanlage, WLAN, ein eigenes Bad und eine Küchenzeile mit Kühlschrank, Mikrowelle, Wasserkocher, Kaffeemaschine, Spüle und Geschirr. Gästen stehen der Gemeinschaftspool, der Garten und die Außenbereiche zur Verfügung. Alle Unterkünfte sind Nichtraucherunterkünfte.",
+        "EN": "Aumara El Cid is a peaceful Costa Blanca stay surrounded by nature and outdoor space. The chalets offer air conditioning, Wi-Fi, a private bathroom and a kitchenette with a refrigerator, microwave, kettle, coffee maker, sink and utensils. Guests can enjoy the shared pool, garden and outdoor areas. All accommodation is non-smoking.",
+        "ES": "Aumara El Cid es un alojamiento tranquilo en la Costa Blanca, rodeado de naturaleza y zonas exteriores. Los chalets disponen de aire acondicionado, Wi-Fi, baño privado y una zona de cocina con nevera, microondas, hervidor, cafetera, fregadero y menaje. Los huéspedes pueden disfrutar de la piscina compartida, el jardín y las zonas exteriores. Todos los alojamientos son para no fumadores.",
+        "FI": "",
+        "FR": "Aumara El Cid est un hébergement paisible sur la Costa Blanca, entouré de nature et d'espaces extérieurs. Les chalets disposent de la climatisation, du Wi-Fi, d'une salle de bain privée et d'une kitchenette avec réfrigérateur, micro-ondes, bouilloire, cafetière, évier et vaisselle. Les voyageurs peuvent profiter de la piscine partagée, du jardin et des espaces extérieurs. Tous les hébergements sont non-fumeurs.",
+        "HE": "",
+        "HY": "",
+        "IS": "",
+        "IT": "Aumara El Cid è una struttura tranquilla sulla Costa Blanca, circondata dalla natura e da spazi esterni. Gli chalet dispongono di aria condizionata, Wi-Fi, bagno privato e angolo cottura con frigorifero, microonde, bollitore, macchina da caffè, lavello e utensili. Gli ospiti possono utilizzare la piscina condivisa, il giardino e gli spazi esterni. Tutti gli alloggi sono non fumatori.",
+        "LT": "",
+        "LV": "",
+        "NL": "Aumara El Cid is een rustige accommodatie aan de Costa Blanca, omgeven door natuur en buitenruimte. De chalets hebben airconditioning, wifi, een eigen badkamer en een kitchenette met koelkast, magnetron, waterkoker, koffiezetapparaat, gootsteen en keukengerei. Gasten kunnen gebruikmaken van het gedeelde zwembad, de tuin en de buitenruimtes. Alle accommodaties zijn rookvrij.",
+        "NO": "",
+        "PL": "",
+        "PT": "Aumara El Cid é um alojamento tranquilo na Costa Blanca, rodeado de natureza e espaços exteriores. Os chalés dispõem de ar condicionado, Wi-Fi, casa de banho privativa e kitchenette com frigorífico, micro-ondas, chaleira, máquina de café, lava-loiça e utensílios. Os hóspedes podem desfrutar da piscina partilhada, do jardim e das áreas exteriores. Todos os alojamentos são para não fumadores.",
+        "RU": "Aumara El Cid — спокойное место для отдыха на Коста-Бланке, окружённое природой и открытыми зонами. В шале есть кондиционер, Wi-Fi, собственная ванная комната и мини-кухня с холодильником, микроволновой печью, чайником, кофеваркой, мойкой и посудой. Гости могут пользоваться общим бассейном, садом и открытыми зонами. Во всех помещениях проживание для некурящих.",
+        "SK": "",
+        "SV": ""
+      },
+      "propertyDescriptionText": {
+        "BG": "",
+        "CA": "",
+        "CS": "",
+        "DA": "",
+        "DE": "Aumara El Cid ist eine ruhige Unterkunft an der Costa Blanca, umgeben von Natur und Außenbereichen. Die Chalets verfügen über Klimaanlage, WLAN, ein eigenes Bad und eine Küchenzeile mit Kühlschrank, Mikrowelle, Wasserkocher, Kaffeemaschine, Spüle und Geschirr. Gästen stehen der Gemeinschaftspool, der Garten und die Außenbereiche zur Verfügung. Alle Unterkünfte sind Nichtraucherunterkünfte.",
+        "EN": "Aumara El Cid is a peaceful Costa Blanca stay surrounded by nature and outdoor space. The chalets offer air conditioning, Wi-Fi, a private bathroom and a kitchenette with a refrigerator, microwave, kettle, coffee maker, sink and utensils. Guests can enjoy the shared pool, garden and outdoor areas. All accommodation is non-smoking.",
+        "ES": "Aumara El Cid es un alojamiento tranquilo en la Costa Blanca, rodeado de naturaleza y zonas exteriores. Los chalets disponen de aire acondicionado, Wi-Fi, baño privado y una zona de cocina con nevera, microondas, hervidor, cafetera, fregadero y menaje. Los huéspedes pueden disfrutar de la piscina compartida, el jardín y las zonas exteriores. Todos los alojamientos son para no fumadores.",
+        "FI": "",
+        "FR": "Aumara El Cid est un hébergement paisible sur la Costa Blanca, entouré de nature et d'espaces extérieurs. Les chalets disposent de la climatisation, du Wi-Fi, d'une salle de bain privée et d'une kitchenette avec réfrigérateur, micro-ondes, bouilloire, cafetière, évier et vaisselle. Les voyageurs peuvent profiter de la piscine partagée, du jardin et des espaces extérieurs. Tous les hébergements sont non-fumeurs.",
+        "HE": "",
+        "HY": "",
+        "IS": "",
+        "IT": "Aumara El Cid è una struttura tranquilla sulla Costa Blanca, circondata dalla natura e da spazi esterni. Gli chalet dispongono di aria condizionata, Wi-Fi, bagno privato e angolo cottura con frigorifero, microonde, bollitore, macchina da caffè, lavello e utensili. Gli ospiti possono utilizzare la piscina condivisa, il giardino e gli spazi esterni. Tutti gli alloggi sono non fumatori.",
+        "LT": "",
+        "LV": "",
+        "NL": "Aumara El Cid is een rustige accommodatie aan de Costa Blanca, omgeven door natuur en buitenruimte. De chalets hebben airconditioning, wifi, een eigen badkamer en een kitchenette met koelkast, magnetron, waterkoker, koffiezetapparaat, gootsteen en keukengerei. Gasten kunnen gebruikmaken van het gedeelde zwembad, de tuin en de buitenruimtes. Alle accommodaties zijn rookvrij.",
+        "NO": "",
+        "PL": "",
+        "PT": "Aumara El Cid é um alojamento tranquilo na Costa Blanca, rodeado de natureza e espaços exteriores. Os chalés dispõem de ar condicionado, Wi-Fi, casa de banho privativa e kitchenette com frigorífico, micro-ondas, chaleira, máquina de café, lava-loiça e utensílios. Os hóspedes podem desfrutar da piscina partilhada, do jardim e das áreas exteriores. Todos os alojamentos são para não fumadores.",
+        "RU": "Aumara El Cid — спокойное место для отдыха на Коста-Бланке, окружённое природой и открытыми зонами. В шале есть кондиционер, Wi-Fi, собственная ванная комната и мини-кухня с холодильником, микроволновой печью, чайником, кофеваркой, мойкой и посудой. Гости могут пользоваться общим бассейном, садом и открытыми зонами. Во всех помещениях проживание для некурящих.",
+        "SK": "",
+        "SV": ""
+      }
+    }
+  },
+  "before": {
+    "roomIds": {
+      "674465": {
+        "airbnb": {
+          "accessText": {
+            "ES": ""
+          },
+          "houseRulesText": {
+            "ES": ""
+          },
+          "interactionText": {
+            "ES": ""
+          },
+          "name": {
+            "ES": ""
+          },
+          "notesText": {
+            "ES": ""
+          },
+          "spaceText": {
+            "ES": ""
+          },
+          "summaryText": {
+            "ES": ""
+          }
+        },
+        "texts": {
+          "contentDescriptionText": {
+            "BG": "",
+            "CA": "",
+            "CS": "",
+            "DA": "",
+            "DE": "",
+            "EN": "",
+            "ES": "",
+            "FI": "",
+            "FR": "",
+            "HE": "",
+            "HY": "",
+            "IS": "",
+            "IT": "",
+            "LT": "",
+            "LV": "",
+            "NL": "",
+            "NO": "",
+            "PL": "",
+            "PT": "",
+            "RU": "",
+            "SK": "",
+            "SV": ""
+          },
+          "contentHeadlineText": {
+            "BG": "",
+            "CA": "",
+            "CS": "",
+            "DA": "",
+            "DE": "",
+            "EN": "",
+            "ES": "",
+            "FI": "",
+            "FR": "",
+            "HE": "",
+            "HY": "",
+            "IS": "",
+            "IT": "",
+            "LT": "",
+            "LV": "",
+            "NL": "",
+            "NO": "",
+            "PL": "",
+            "PT": "",
+            "RU": "",
+            "SK": "",
+            "SV": ""
+          },
+          "displayName": {
+            "BG": "",
+            "CA": "",
+            "CS": "",
+            "DA": "",
+            "DE": "",
+            "EN": "",
+            "ES": "",
+            "FI": "",
+            "FR": "",
+            "HE": "",
+            "HY": "",
+            "IS": "",
+            "IT": "",
+            "LT": "",
+            "LV": "",
+            "NL": "",
+            "NO": "",
+            "PL": "",
+            "PT": "",
+            "RU": "",
+            "SK": "",
+            "SV": ""
+          },
+          "roomDescription1": {
+            "BG": "",
+            "CA": "",
+            "CS": "",
+            "DA": "",
+            "DE": "",
+            "EN": "",
+            "ES": "",
+            "FI": "",
+            "FR": "",
+            "HE": "",
+            "HY": "",
+            "IS": "",
+            "IT": "",
+            "LT": "",
+            "LV": "",
+            "NL": "",
+            "NO": "",
+            "PL": "",
+            "PT": "",
+            "RU": "",
+            "SK": "",
+            "SV": ""
+          }
+        }
+      },
+      "674466": {
+        "airbnb": {
+          "accessText": {
+            "ES": ""
+          },
+          "houseRulesText": {
+            "ES": ""
+          },
+          "interactionText": {
+            "ES": ""
+          },
+          "name": {
+            "ES": ""
+          },
+          "notesText": {
+            "ES": ""
+          },
+          "spaceText": {
+            "ES": ""
+          },
+          "summaryText": {
+            "ES": ""
+          }
+        },
+        "texts": {
+          "contentDescriptionText": {
+            "BG": "",
+            "CA": "",
+            "CS": "",
+            "DA": "",
+            "DE": "",
+            "EN": "",
+            "ES": "",
+            "FI": "",
+            "FR": "",
+            "HE": "",
+            "HY": "",
+            "IS": "",
+            "IT": "",
+            "LT": "",
+            "LV": "",
+            "NL": "",
+            "NO": "",
+            "PL": "",
+            "PT": "",
+            "RU": "",
+            "SK": "",
+            "SV": ""
+          },
+          "contentHeadlineText": {
+            "BG": "",
+            "CA": "",
+            "CS": "",
+            "DA": "",
+            "DE": "",
+            "EN": "",
+            "ES": "",
+            "FI": "",
+            "FR": "",
+            "HE": "",
+            "HY": "",
+            "IS": "",
+            "IT": "",
+            "LT": "",
+            "LV": "",
+            "NL": "",
+            "NO": "",
+            "PL": "",
+            "PT": "",
+            "RU": "",
+            "SK": "",
+            "SV": ""
+          },
+          "displayName": {
+            "BG": "",
+            "CA": "",
+            "CS": "",
+            "DA": "",
+            "DE": "",
+            "EN": "",
+            "ES": "",
+            "FI": "",
+            "FR": "",
+            "HE": "",
+            "HY": "",
+            "IS": "",
+            "IT": "",
+            "LT": "",
+            "LV": "",
+            "NL": "",
+            "NO": "",
+            "PL": "",
+            "PT": "",
+            "RU": "",
+            "SK": "",
+            "SV": ""
+          },
+          "roomDescription1": {
+            "BG": "",
+            "CA": "",
+            "CS": "",
+            "DA": "",
+            "DE": "",
+            "EN": "",
+            "ES": "",
+            "FI": "",
+            "FR": "",
+            "HE": "",
+            "HY": "",
+            "IS": "",
+            "IT": "",
+            "LT": "",
+            "LV": "",
+            "NL": "",
+            "NO": "",
+            "PL": "",
+            "PT": "",
+            "RU": "",
+            "SK": "",
+            "SV": ""
+          }
+        }
+      }
+    },
+    "texts": {
+      "headlineText": {
+        "BG": "",
+        "CA": "",
+        "CS": "",
+        "DA": "",
+        "DE": "",
+        "EN": "",
+        "ES": "",
+        "FI": "",
+        "FR": "",
+        "HE": "",
+        "HY": "",
+        "IS": "",
+        "IT": "",
+        "LT": "",
+        "LV": "",
+        "NL": "",
+        "NO": "",
+        "PL": "",
+        "PT": "",
+        "RU": "",
+        "SK": "",
+        "SV": ""
+      },
+      "houseRules": {
+        "BG": "",
+        "CA": "",
+        "CS": "",
+        "DA": "",
+        "DE": "",
+        "EN": "",
+        "ES": "",
+        "FI": "",
+        "FR": "",
+        "HE": "",
+        "HY": "",
+        "IS": "",
+        "IT": "",
+        "LT": "",
+        "LV": "",
+        "NL": "",
+        "NO": "",
+        "PL": "",
+        "PT": "",
+        "RU": "",
+        "SK": "",
+        "SV": ""
+      },
+      "locationDescription": {
+        "BG": "",
+        "CA": "",
+        "CS": "",
+        "DA": "",
+        "DE": "",
+        "EN": "",
+        "ES": "",
+        "FI": "",
+        "FR": "",
+        "HE": "",
+        "HY": "",
+        "IS": "",
+        "IT": "",
+        "LT": "",
+        "LV": "",
+        "NL": "",
+        "NO": "",
+        "PL": "",
+        "PT": "",
+        "RU": "",
+        "SK": "",
+        "SV": ""
+      },
+      "propertyDescription1": {
+        "BG": "",
+        "CA": "",
+        "CS": "",
+        "DA": "",
+        "DE": "",
+        "EN": "",
+        "ES": "",
+        "FI": "",
+        "FR": "",
+        "HE": "",
+        "HY": "",
+        "IS": "",
+        "IT": "",
+        "LT": "",
+        "LV": "",
+        "NL": "",
+        "NO": "",
+        "PL": "",
+        "PT": "",
+        "RU": "",
+        "SK": "",
+        "SV": ""
+      },
+      "propertyDescriptionBookingPage1": {
+        "BG": "",
+        "CA": "",
+        "CS": "",
+        "DA": "",
+        "DE": "",
+        "EN": "",
+        "ES": "",
+        "FI": "",
+        "FR": "",
+        "HE": "",
+        "HY": "",
+        "IS": "",
+        "IT": "",
+        "LT": "",
+        "LV": "",
+        "NL": "",
+        "NO": "",
+        "PL": "",
+        "PT": "",
+        "RU": "",
+        "SK": "",
+        "SV": ""
+      },
+      "propertyDescriptionText": {
+        "BG": "",
+        "CA": "",
+        "CS": "",
+        "DA": "",
+        "DE": "",
+        "EN": "",
+        "ES": "",
+        "FI": "",
+        "FR": "",
+        "HE": "",
+        "HY": "",
+        "IS": "",
+        "IT": "",
+        "LT": "",
+        "LV": "",
+        "NL": "",
+        "NO": "",
+        "PL": "",
+        "PT": "",
+        "RU": "",
+        "SK": "",
+        "SV": ""
+      }
+    }
+  },
+  "finished_at_utc": "2026-08-24T23:07:48.139072+00:00",
+  "mismatches": [],
+  "property_id": 324882,
+  "requested": {
+    "roomIds": {
+      "674465": {
+        "airbnb": {
+          "accessText": {
+            "ES": "Los huéspedes tienen acceso a su chalet y a las zonas comunes exteriores, incluida la piscina compartida y el jardín."
+          },
+          "houseRulesText": {
+            "ES": "Alojamiento para no fumadores. Respeta las zonas comunes y utiliza la piscina y los espacios exteriores de forma responsable."
+          },
+          "interactionText": {
+            "ES": "El equipo está disponible para ayudar durante la estancia cuando sea necesario."
+          },
+          "name": {
+            "ES": "Chalet · Aumara El Cid"
+          },
+          "notesText": {
+            "ES": "La piscina y las zonas exteriores son compartidas con otros huéspedes. Todos los alojamientos son para no fumadores."
+          },
+          "spaceText": {
+            "ES": "Chalet privado con baño y zona de cocina compacta equipada con nevera, microondas, hervidor, cafetera, fregadero y menaje."
+          },
+          "summaryText": {
+            "ES": "Chalet privado con aire acondicionado, Wi-Fi, baño privado y zona de cocina con nevera, microondas, hervidor, cafetera, fregadero y menaje. Acceso a piscina compartida, jardín y zonas exteriores. Alojamiento para no fumadores."
+          }
+        },
+        "texts": {
+          "contentDescriptionText": {
+            "DE": "Privates Chalet mit Klimaanlage, WLAN, eigenem Bad und Küchenzeile mit Kühlschrank, Mikrowelle, Wasserkocher, Kaffeemaschine, Spüle und Geschirr. Zugang zum Gemeinschaftspool, Garten und den Außenbereichen. Nichtraucherunterkunft.",
+            "EN": "Private Chalet with air conditioning, Wi-Fi, a private bathroom and a kitchenette with a refrigerator, microwave, kettle, coffee maker, sink and utensils. Access to the shared pool, garden and outdoor areas. Non-smoking accommodation.",
+            "ES": "Chalet privado con aire acondicionado, Wi-Fi, baño privado y zona de cocina con nevera, microondas, hervidor, cafetera, fregadero y menaje. Acceso a piscina compartida, jardín y zonas exteriores. Alojamiento para no fumadores.",
+            "FR": "Chalet privé avec climatisation, Wi-Fi, salle de bain privée et kitchenette avec réfrigérateur, micro-ondes, bouilloire, cafetière, évier et vaisselle. Accès à la piscine partagée, au jardin et aux espaces extérieurs. Hébergement non-fumeur.",
+            "IT": "Chalet privato con aria condizionata, Wi-Fi, bagno privato e angolo cottura con frigorifero, microonde, bollitore, macchina da caffè, lavello e utensili. Accesso alla piscina condivisa, al giardino e agli spazi esterni. Alloggio non fumatori.",
+            "NL": "Privé Chalet met airconditioning, wifi, eigen badkamer en kitchenette met koelkast, magnetron, waterkoker, koffiezetapparaat, gootsteen en keukengerei. Toegang tot het gedeelde zwembad, de tuin en buitenruimtes. Rookvrije accommodatie.",
+            "PT": "Chalet privado com ar condicionado, Wi-Fi, casa de banho privativa e kitchenette com frigorífico, micro-ondas, chaleira, máquina de café, lava-loiça e utensílios. Acesso à piscina partilhada, ao jardim e às áreas exteriores. Alojamento para não fumadores.",
+            "RU": "Chalet: отдельное шале с кондиционером, Wi-Fi, собственной ванной комнатой и мини-кухней с холодильником, микроволновой печью, чайником, кофеваркой, мойкой и посудой. Доступ к общему бассейну, саду и открытым зонам. Размещение для некурящих."
+          },
+          "contentHeadlineText": {
+            "DE": "Chalet",
+            "EN": "Chalet",
+            "ES": "Chalet",
+            "FR": "Chalet",
+            "IT": "Chalet",
+            "NL": "Chalet",
+            "PT": "Chalet",
+            "RU": "Chalet"
+          },
+          "displayName": {
+            "DE": "Chalet",
+            "EN": "Chalet",
+            "ES": "Chalet",
+            "FR": "Chalet",
+            "IT": "Chalet",
+            "NL": "Chalet",
+            "PT": "Chalet",
+            "RU": "Chalet"
+          },
+          "roomDescription1": {
+            "DE": "Privates Chalet mit Klimaanlage, WLAN, eigenem Bad und Küchenzeile mit Kühlschrank, Mikrowelle, Wasserkocher, Kaffeemaschine, Spüle und Geschirr. Zugang zum Gemeinschaftspool, Garten und den Außenbereichen. Nichtraucherunterkunft.",
+            "EN": "Private Chalet with air conditioning, Wi-Fi, a private bathroom and a kitchenette with a refrigerator, microwave, kettle, coffee maker, sink and utensils. Access to the shared pool, garden and outdoor areas. Non-smoking accommodation.",
+            "ES": "Chalet privado con aire acondicionado, Wi-Fi, baño privado y zona de cocina con nevera, microondas, hervidor, cafetera, fregadero y menaje. Acceso a piscina compartida, jardín y zonas exteriores. Alojamiento para no fumadores.",
+            "FR": "Chalet privé avec climatisation, Wi-Fi, salle de bain privée et kitchenette avec réfrigérateur, micro-ondes, bouilloire, cafetière, évier et vaisselle. Accès à la piscine partagée, au jardin et aux espaces extérieurs. Hébergement non-fumeur.",
+            "IT": "Chalet privato con aria condizionata, Wi-Fi, bagno privato e angolo cottura con frigorifero, microonde, bollitore, macchina da caffè, lavello e utensili. Accesso alla piscina condivisa, al giardino e agli spazi esterni. Alloggio non fumatori.",
+            "NL": "Privé Chalet met airconditioning, wifi, eigen badkamer en kitchenette met koelkast, magnetron, waterkoker, koffiezetapparaat, gootsteen en keukengerei. Toegang tot het gedeelde zwembad, de tuin en buitenruimtes. Rookvrije accommodatie.",
+            "PT": "Chalet privado com ar condicionado, Wi-Fi, casa de banho privativa e kitchenette com frigorífico, micro-ondas, chaleira, máquina de café, lava-loiça e utensílios. Acesso à piscina partilhada, ao jardim e às áreas exteriores. Alojamento para não fumadores.",
+            "RU": "Chalet: отдельное шале с кондиционером, Wi-Fi, собственной ванной комнатой и мини-кухней с холодильником, микроволновой печью, чайником, кофеваркой, мойкой и посудой. Доступ к общему бассейну, саду и открытым зонам. Размещение для некурящих."
+          }
+        }
+      },
+      "674466": {
+        "airbnb": {
+          "accessText": {
+            "ES": "Los huéspedes tienen acceso a su chalet y a las zonas comunes exteriores, incluida la piscina compartida y el jardín."
+          },
+          "houseRulesText": {
+            "ES": "Alojamiento para no fumadores. Respeta las zonas comunes y utiliza la piscina y los espacios exteriores de forma responsable."
+          },
+          "interactionText": {
+            "ES": "El equipo está disponible para ayudar durante la estancia cuando sea necesario."
+          },
+          "name": {
+            "ES": "Chalet Superior · Aumara El Cid"
+          },
+          "notesText": {
+            "ES": "La piscina y las zonas exteriores son compartidas con otros huéspedes. Todos los alojamientos son para no fumadores."
+          },
+          "spaceText": {
+            "ES": "Chalet privado con baño y zona de cocina compacta equipada con nevera, microondas, hervidor, cafetera, fregadero y menaje."
+          },
+          "summaryText": {
+            "ES": "Superior Chalet privado con aire acondicionado, Wi-Fi, baño privado y zona de cocina con nevera, microondas, hervidor, cafetera, fregadero y menaje. Acceso a piscina compartida, jardín y zonas exteriores. Alojamiento para no fumadores."
+          }
+        },
+        "texts": {
+          "contentDescriptionText": {
+            "DE": "Privates Superior Chalet mit Klimaanlage, WLAN, eigenem Bad und Küchenzeile mit Kühlschrank, Mikrowelle, Wasserkocher, Kaffeemaschine, Spüle und Geschirr. Zugang zum Gemeinschaftspool, Garten und den Außenbereichen. Nichtraucherunterkunft.",
+            "EN": "Private Superior Chalet with air conditioning, Wi-Fi, a private bathroom and a kitchenette with a refrigerator, microwave, kettle, coffee maker, sink and utensils. Access to the shared pool, garden and outdoor areas. Non-smoking accommodation.",
+            "ES": "Superior Chalet privado con aire acondicionado, Wi-Fi, baño privado y zona de cocina con nevera, microondas, hervidor, cafetera, fregadero y menaje. Acceso a piscina compartida, jardín y zonas exteriores. Alojamiento para no fumadores.",
+            "FR": "Superior Chalet privé avec climatisation, Wi-Fi, salle de bain privée et kitchenette avec réfrigérateur, micro-ondes, bouilloire, cafetière, évier et vaisselle. Accès à la piscine partagée, au jardin et aux espaces extérieurs. Hébergement non-fumeur.",
+            "IT": "Superior Chalet privato con aria condizionata, Wi-Fi, bagno privato e angolo cottura con frigorifero, microonde, bollitore, macchina da caffè, lavello e utensili. Accesso alla piscina condivisa, al giardino e agli spazi esterni. Alloggio non fumatori.",
+            "NL": "Privé Superior Chalet met airconditioning, wifi, eigen badkamer en kitchenette met koelkast, magnetron, waterkoker, koffiezetapparaat, gootsteen en keukengerei. Toegang tot het gedeelde zwembad, de tuin en buitenruimtes. Rookvrije accommodatie.",
+            "PT": "Superior Chalet privado com ar condicionado, Wi-Fi, casa de banho privativa e kitchenette com frigorífico, micro-ondas, chaleira, máquina de café, lava-loiça e utensílios. Acesso à piscina partilhada, ao jardim e às áreas exteriores. Alojamento para não fumadores.",
+            "RU": "Superior Chalet: отдельное шале с кондиционером, Wi-Fi, собственной ванной комнатой и мини-кухней с холодильником, микроволновой печью, чайником, кофеваркой, мойкой и посудой. Доступ к общему бассейну, саду и открытым зонам. Размещение для некурящих."
+          },
+          "contentHeadlineText": {
+            "DE": "Superior Chalet",
+            "EN": "Superior Chalet",
+            "ES": "Chalet Superior",
+            "FR": "Superior Chalet",
+            "IT": "Superior Chalet",
+            "NL": "Superior Chalet",
+            "PT": "Chalet Superior",
+            "RU": "Superior Chalet"
+          },
+          "displayName": {
+            "DE": "Superior Chalet",
+            "EN": "Superior Chalet",
+            "ES": "Chalet Superior",
+            "FR": "Superior Chalet",
+            "IT": "Superior Chalet",
+            "NL": "Superior Chalet",
+            "PT": "Chalet Superior",
+            "RU": "Superior Chalet"
+          },
+          "roomDescription1": {
+            "DE": "Privates Superior Chalet mit Klimaanlage, WLAN, eigenem Bad und Küchenzeile mit Kühlschrank, Mikrowelle, Wasserkocher, Kaffeemaschine, Spüle und Geschirr. Zugang zum Gemeinschaftspool, Garten und den Außenbereichen. Nichtraucherunterkunft.",
+            "EN": "Private Superior Chalet with air conditioning, Wi-Fi, a private bathroom and a kitchenette with a refrigerator, microwave, kettle, coffee maker, sink and utensils. Access to the shared pool, garden and outdoor areas. Non-smoking accommodation.",
+            "ES": "Superior Chalet privado con aire acondicionado, Wi-Fi, baño privado y zona de cocina con nevera, microondas, hervidor, cafetera, fregadero y menaje. Acceso a piscina compartida, jardín y zonas exteriores. Alojamiento para no fumadores.",
+            "FR": "Superior Chalet privé avec climatisation, Wi-Fi, salle de bain privée et kitchenette avec réfrigérateur, micro-ondes, bouilloire, cafetière, évier et vaisselle. Accès à la piscine partagée, au jardin et aux espaces extérieurs. Hébergement non-fumeur.",
+            "IT": "Superior Chalet privato con aria condizionata, Wi-Fi, bagno privato e angolo cottura con frigorifero, microonde, bollitore, macchina da caffè, lavello e utensili. Accesso alla piscina condivisa, al giardino e agli spazi esterni. Alloggio non fumatori.",
+            "NL": "Privé Superior Chalet met airconditioning, wifi, eigen badkamer en kitchenette met koelkast, magnetron, waterkoker, koffiezetapparaat, gootsteen en keukengerei. Toegang tot het gedeelde zwembad, de tuin en buitenruimtes. Rookvrije accommodatie.",
+            "PT": "Superior Chalet privado com ar condicionado, Wi-Fi, casa de banho privativa e kitchenette com frigorífico, micro-ondas, chaleira, máquina de café, lava-loiça e utensílios. Acesso à piscina partilhada, ao jardim e às áreas exteriores. Alojamento para não fumadores.",
+            "RU": "Superior Chalet: отдельное шале с кондиционером, Wi-Fi, собственной ванной комнатой и мини-кухней с холодильником, микроволновой печью, чайником, кофеваркой, мойкой и посудой. Доступ к общему бассейну, саду и открытым зонам. Размещение для некурящих."
+          }
+        }
+      }
+    },
+    "texts": {
+      "headlineText": {
+        "DE": "Ruhige Chalets mit Gemeinschaftspool an der Costa Blanca",
+        "EN": "Peaceful chalets with a shared pool on the Costa Blanca",
+        "ES": "Chalets tranquilos con piscina compartida en la Costa Blanca",
+        "FR": "Chalets paisibles avec piscine partagée sur la Costa Blanca",
+        "IT": "Chalet tranquilli con piscina condivisa sulla Costa Blanca",
+        "NL": "Rustige chalets met gedeeld zwembad aan de Costa Blanca",
+        "PT": "Chalés tranquilos com piscina partilhada na Costa Blanca",
+        "RU": "Спокойные шале с общим бассейном на Коста-Бланке"
+      },
+      "houseRules": {
+        "DE": "Nichtraucherunterkunft. Bitte respektieren Sie die Gemeinschaftsbereiche und nutzen Sie Pool und Außenbereiche verantwortungsvoll.",
+        "EN": "Non-smoking accommodation. Please respect shared areas and use the pool and outdoor spaces responsibly.",
+        "ES": "Alojamiento para no fumadores. Respeta las zonas comunes y utiliza la piscina y los espacios exteriores de forma responsable.",
+        "FR": "Hébergement non-fumeur. Merci de respecter les espaces communs et d’utiliser la piscine et les espaces extérieurs de manière responsable.",
+        "IT": "Alloggio non fumatori. Si prega di rispettare le aree comuni e di utilizzare la piscina e gli spazi esterni in modo responsabile.",
+        "NL": "Rookvrije accommodatie. Respecteer de gedeelde ruimtes en gebruik het zwembad en de buitenruimtes op verantwoorde wijze.",
+        "PT": "Alojamento para não fumadores. Respeite as áreas comuns e utilize a piscina e os espaços exteriores de forma responsável.",
+        "RU": "Размещение для некурящих. Пожалуйста, бережно относитесь к общим зонам и ответственно пользуйтесь бассейном и открытыми пространствами."
+      },
+      "locationDescription": {
+        "DE": "Eine ruhige Lage an der Costa Blanca zum Entspannen und Genießen der Natur und Außenbereiche.",
+        "EN": "A peaceful Costa Blanca setting for relaxing and enjoying nature and the outdoor areas.",
+        "ES": "Un entorno tranquilo de la Costa Blanca, pensado para descansar y disfrutar de la naturaleza y de las zonas exteriores.",
+        "FR": "Un cadre paisible sur la Costa Blanca pour se détendre et profiter de la nature et des espaces extérieurs.",
+        "IT": "Un ambiente tranquillo sulla Costa Blanca, ideale per rilassarsi e godersi la natura e gli spazi esterni.",
+        "NL": "Een rustige omgeving aan de Costa Blanca om te ontspannen en van de natuur en buitenruimtes te genieten.",
+        "PT": "Um ambiente tranquilo na Costa Blanca para descansar e aproveitar a natureza e as áreas exteriores.",
+        "RU": "Спокойная обстановка на Коста-Бланке для отдыха на природе и на открытом воздухе."
+      },
+      "propertyDescription1": {
+        "DE": "Aumara El Cid ist eine ruhige Unterkunft an der Costa Blanca, umgeben von Natur und Außenbereichen. Die Chalets verfügen über Klimaanlage, WLAN, ein eigenes Bad und eine Küchenzeile mit Kühlschrank, Mikrowelle, Wasserkocher, Kaffeemaschine, Spüle und Geschirr. Gästen stehen der Gemeinschaftspool, der Garten und die Außenbereiche zur Verfügung. Alle Unterkünfte sind Nichtraucherunterkünfte.",
+        "EN": "Aumara El Cid is a peaceful Costa Blanca stay surrounded by nature and outdoor space. The chalets offer air conditioning, Wi-Fi, a private bathroom and a kitchenette with a refrigerator, microwave, kettle, coffee maker, sink and utensils. Guests can enjoy the shared pool, garden and outdoor areas. All accommodation is non-smoking.",
+        "ES": "Aumara El Cid es un alojamiento tranquilo en la Costa Blanca, rodeado de naturaleza y zonas exteriores. Los chalets disponen de aire acondicionado, Wi-Fi, baño privado y una zona de cocina con nevera, microondas, hervidor, cafetera, fregadero y menaje. Los huéspedes pueden disfrutar de la piscina compartida, el jardín y las zonas exteriores. Todos los alojamientos son para no fumadores.",
+        "FR": "Aumara El Cid est un hébergement paisible sur la Costa Blanca, entouré de nature et d'espaces extérieurs. Les chalets disposent de la climatisation, du Wi-Fi, d'une salle de bain privée et d'une kitchenette avec réfrigérateur, micro-ondes, bouilloire, cafetière, évier et vaisselle. Les voyageurs peuvent profiter de la piscine partagée, du jardin et des espaces extérieurs. Tous les hébergements sont non-fumeurs.",
+        "IT": "Aumara El Cid è una struttura tranquilla sulla Costa Blanca, circondata dalla natura e da spazi esterni. Gli chalet dispongono di aria condizionata, Wi-Fi, bagno privato e angolo cottura con frigorifero, microonde, bollitore, macchina da caffè, lavello e utensili. Gli ospiti possono utilizzare la piscina condivisa, il giardino e gli spazi esterni. Tutti gli alloggi sono non fumatori.",
+        "NL": "Aumara El Cid is een rustige accommodatie aan de Costa Blanca, omgeven door natuur en buitenruimte. De chalets hebben airconditioning, wifi, een eigen badkamer en een kitchenette met koelkast, magnetron, waterkoker, koffiezetapparaat, gootsteen en keukengerei. Gasten kunnen gebruikmaken van het gedeelde zwembad, de tuin en de buitenruimtes. Alle accommodaties zijn rookvrij.",
+        "PT": "Aumara El Cid é um alojamento tranquilo na Costa Blanca, rodeado de natureza e espaços exteriores. Os chalés dispõem de ar condicionado, Wi-Fi, casa de banho privativa e kitchenette com frigorífico, micro-ondas, chaleira, máquina de café, lava-loiça e utensílios. Os hóspedes podem desfrutar da piscina partilhada, do jardim e das áreas exteriores. Todos os alojamentos são para não fumadores.",
+        "RU": "Aumara El Cid — спокойное место для отдыха на Коста-Бланке, окружённое природой и открытыми зонами. В шале есть кондиционер, Wi-Fi, собственная ванная комната и мини-кухня с холодильником, микроволновой печью, чайником, кофеваркой, мойкой и посудой. Гости могут пользоваться общим бассейном, садом и открытыми зонами. Во всех помещениях проживание для некурящих."
+      },
+      "propertyDescriptionBookingPage1": {
+        "DE": "Aumara El Cid ist eine ruhige Unterkunft an der Costa Blanca, umgeben von Natur und Außenbereichen. Die Chalets verfügen über Klimaanlage, WLAN, ein eigenes Bad und eine Küchenzeile mit Kühlschrank, Mikrowelle, Wasserkocher, Kaffeemaschine, Spüle und Geschirr. Gästen stehen der Gemeinschaftspool, der Garten und die Außenbereiche zur Verfügung. Alle Unterkünfte sind Nichtraucherunterkünfte.",
+        "EN": "Aumara El Cid is a peaceful Costa Blanca stay surrounded by nature and outdoor space. The chalets offer air conditioning, Wi-Fi, a private bathroom and a kitchenette with a refrigerator, microwave, kettle, coffee maker, sink and utensils. Guests can enjoy the shared pool, garden and outdoor areas. All accommodation is non-smoking.",
+        "ES": "Aumara El Cid es un alojamiento tranquilo en la Costa Blanca, rodeado de naturaleza y zonas exteriores. Los chalets disponen de aire acondicionado, Wi-Fi, baño privado y una zona de cocina con nevera, microondas, hervidor, cafetera, fregadero y menaje. Los huéspedes pueden disfrutar de la piscina compartida, el jardín y las zonas exteriores. Todos los alojamientos son para no fumadores.",
+        "FR": "Aumara El Cid est un hébergement paisible sur la Costa Blanca, entouré de nature et d'espaces extérieurs. Les chalets disposent de la climatisation, du Wi-Fi, d'une salle de bain privée et d'une kitchenette avec réfrigérateur, micro-ondes, bouilloire, cafetière, évier et vaisselle. Les voyageurs peuvent profiter de la piscine partagée, du jardin et des espaces extérieurs. Tous les hébergements sont non-fumeurs.",
+        "IT": "Aumara El Cid è una struttura tranquilla sulla Costa Blanca, circondata dalla natura e da spazi esterni. Gli chalet dispongono di aria condizionata, Wi-Fi, bagno privato e angolo cottura con frigorifero, microonde, bollitore, macchina da caffè, lavello e utensili. Gli ospiti possono utilizzare la piscina condivisa, il giardino e gli spazi esterni. Tutti gli alloggi sono non fumatori.",
+        "NL": "Aumara El Cid is een rustige accommodatie aan de Costa Blanca, omgeven door natuur en buitenruimte. De chalets hebben airconditioning, wifi, een eigen badkamer en een kitchenette met koelkast, magnetron, waterkoker, koffiezetapparaat, gootsteen en keukengerei. Gasten kunnen gebruikmaken van het gedeelde zwembad, de tuin en de buitenruimtes. Alle accommodaties zijn rookvrij.",
+        "PT": "Aumara El Cid é um alojamento tranquilo na Costa Blanca, rodeado de natureza e espaços exteriores. Os chalés dispõem de ar condicionado, Wi-Fi, casa de banho privativa e kitchenette com frigorífico, micro-ondas, chaleira, máquina de café, lava-loiça e utensílios. Os hóspedes podem desfrutar da piscina partilhada, do jardim e das áreas exteriores. Todos os alojamentos são para não fumadores.",
+        "RU": "Aumara El Cid — спокойное место для отдыха на Коста-Бланке, окружённое природой и открытыми зонами. В шале есть кондиционер, Wi-Fi, собственная ванная комната и мини-кухня с холодильником, микроволновой печью, чайником, кофеваркой, мойкой и посудой. Гости могут пользоваться общим бассейном, садом и открытыми зонами. Во всех помещениях проживание для некурящих."
+      },
+      "propertyDescriptionText": {
+        "DE": "Aumara El Cid ist eine ruhige Unterkunft an der Costa Blanca, umgeben von Natur und Außenbereichen. Die Chalets verfügen über Klimaanlage, WLAN, ein eigenes Bad und eine Küchenzeile mit Kühlschrank, Mikrowelle, Wasserkocher, Kaffeemaschine, Spüle und Geschirr. Gästen stehen der Gemeinschaftspool, der Garten und die Außenbereiche zur Verfügung. Alle Unterkünfte sind Nichtraucherunterkünfte.",
+        "EN": "Aumara El Cid is a peaceful Costa Blanca stay surrounded by nature and outdoor space. The chalets offer air conditioning, Wi-Fi, a private bathroom and a kitchenette with a refrigerator, microwave, kettle, coffee maker, sink and utensils. Guests can enjoy the shared pool, garden and outdoor areas. All accommodation is non-smoking.",
+        "ES": "Aumara El Cid es un alojamiento tranquilo en la Costa Blanca, rodeado de naturaleza y zonas exteriores. Los chalets disponen de aire acondicionado, Wi-Fi, baño privado y una zona de cocina con nevera, microondas, hervidor, cafetera, fregadero y menaje. Los huéspedes pueden disfrutar de la piscina compartida, el jardín y las zonas exteriores. Todos los alojamientos son para no fumadores.",
+        "FR": "Aumara El Cid est un hébergement paisible sur la Costa Blanca, entouré de nature et d'espaces extérieurs. Les chalets disposent de la climatisation, du Wi-Fi, d'une salle de bain privée et d'une kitchenette avec réfrigérateur, micro-ondes, bouilloire, cafetière, évier et vaisselle. Les voyageurs peuvent profiter de la piscine partagée, du jardin et des espaces extérieurs. Tous les hébergements sont non-fumeurs.",
+        "IT": "Aumara El Cid è una struttura tranquilla sulla Costa Blanca, circondata dalla natura e da spazi esterni. Gli chalet dispongono di aria condizionata, Wi-Fi, bagno privato e angolo cottura con frigorifero, microonde, bollitore, macchina da caffè, lavello e utensili. Gli ospiti possono utilizzare la piscina condivisa, il giardino e gli spazi esterni. Tutti gli alloggi sono non fumatori.",
+        "NL": "Aumara El Cid is een rustige accommodatie aan de Costa Blanca, omgeven door natuur en buitenruimte. De chalets hebben airconditioning, wifi, een eigen badkamer en een kitchenette met koelkast, magnetron, waterkoker, koffiezetapparaat, gootsteen en keukengerei. Gasten kunnen gebruikmaken van het gedeelde zwembad, de tuin en de buitenruimtes. Alle accommodaties zijn rookvrij.",
+        "PT": "Aumara El Cid é um alojamento tranquilo na Costa Blanca, rodeado de natureza e espaços exteriores. Os chalés dispõem de ar condicionado, Wi-Fi, casa de banho privativa e kitchenette com frigorífico, micro-ondas, chaleira, máquina de café, lava-loiça e utensílios. Os hóspedes podem desfrutar da piscina partilhada, do jardim e das áreas exteriores. Todos os alojamentos são para não fumadores.",
+        "RU": "Aumara El Cid — спокойное место для отдыха на Коста-Бланке, окружённое природой и открытыми зонами. В шале есть кондиционер, Wi-Fi, собственная ванная комната и мини-кухня с холодильником, микроволновой печью, чайником, кофеваркой, мойкой и посудой. Гости могут пользоваться общим бассейном, садом и открытыми зонами. Во всех помещениях проживание для некурящих."
+      }
+    }
+  },
+  "schema": "aumara.beds24-content-restore.v1",
+  "secret_exposed": false,
+  "started_at_utc": "2026-08-24T23:07:42.198265+00:00",
+  "status": "SUCCESS",
+  "write_response": {
+    "setPropertyContent": [
+      {
+        "texts": {
+          "headlineText": {
+            "DE": {
+              "success": true,
+              "val": "Ruhige Chalets mit Gemeinschaftspool an der Costa Blanca"
+            },
+            "EN": {
+              "success": true,
+              "val": "Peaceful chalets with a shared pool on the Costa Blanca"
+            },
+            "ES": {
+              "success": true,
+              "val": "Chalets tranquilos con piscina compartida en la Costa Blanca"
+            },
+            "FR": {
+              "success": true,
+              "val": "Chalets paisibles avec piscine partagée sur la Costa Blanca"
+            },
+            "IT": {
+              "success": true,
+              "val": "Chalet tranquilli con piscina condivisa sulla Costa Blanca"
+            },
+            "NL": {
+              "success": true,
+              "val": "Rustige chalets met gedeeld zwembad aan de Costa Blanca"
+            },
+            "PT": {
+              "success": true,
+              "val": "Chalés tranquilos com piscina partilhada na Costa Blanca"
+            },
+            "RU": {
+              "success": true,
+              "val": "Спокойные шале с общим бассейном на Коста-Бланке"
+            }
+          },
+          "houseRules": {
+            "DE": {
+              "success": true,
+              "val": "Nichtraucherunterkunft. Bitte respektieren Sie die Gemeinschaftsbereiche und nutzen Sie Pool und Außenbereiche verantwortungsvoll."
+            },
+            "EN": {
+              "success": true,
+              "val": "Non-smoking accommodation. Please respect shared areas and use the pool and outdoor spaces responsibly."
+            },
+            "ES": {
+              "success": true,
+              "val": "Alojamiento para no fumadores. Respeta las zonas comunes y utiliza la piscina y los espacios exteriores de forma responsable."
+            },
+            "FR": {
+              "success": true,
+              "val": "Hébergement non-fumeur. Merci de respecter les espaces communs et d’utiliser la piscine et les espaces extérieurs de manière responsable."
+            },
+            "IT": {
+              "success": true,
+              "val": "Alloggio non fumatori. Si prega di rispettare le aree comuni e di utilizzare la piscina e gli spazi esterni in modo responsabile."
+            },
+            "NL": {
+              "success": true,
+              "val": "Rookvrije accommodatie. Respecteer de gedeelde ruimtes en gebruik het zwembad en de buitenruimtes op verantwoorde wijze."
+            },
+            "PT": {
+              "success": true,
+              "val": "Alojamento para não fumadores. Respeite as áreas comuns e utilize a piscina e os espaços exteriores de forma responsável."
+            },
+            "RU": {
+              "success": true,
+              "val": "Размещение для некурящих. Пожалуйста, бережно относитесь к общим зонам и ответственно пользуйтесь бассейном и открытыми пространствами."
+            }
+          },
+          "locationDescription": {
+            "DE": {
+              "success": true,
+              "val": "Eine ruhige Lage an der Costa Blanca zum Entspannen und Genießen der Natur und Außenbereiche."
+            },
+            "EN": {
+              "success": true,
+              "val": "A peaceful Costa Blanca setting for relaxing and enjoying nature and the outdoor areas."
+            },
+            "ES": {
+              "success": true,
+              "val": "Un entorno tranquilo de la Costa Blanca, pensado para descansar y disfrutar de la naturaleza y de las zonas exteriores."
+            },
+            "FR": {
+              "success": true,
+              "val": "Un cadre paisible sur la Costa Blanca pour se détendre et profiter de la nature et des espaces extérieurs."
+            },
+            "IT": {
+              "success": true,
+              "val": "Un ambiente tranquillo sulla Costa Blanca, ideale per rilassarsi e godersi la natura e gli spazi esterni."
+            },
+            "NL": {
+              "success": true,
+              "val": "Een rustige omgeving aan de Costa Blanca om te ontspannen en van de natuur en buitenruimtes te genieten."
+            },
+            "PT": {
+              "success": true,
+              "val": "Um ambiente tranquilo na Costa Blanca para descansar e aproveitar a natureza e as áreas exteriores."
+            },
+            "RU": {
+              "success": true,
+              "val": "Спокойная обстановка на Коста-Бланке для отдыха на природе и на открытом воздухе."
+            }
+          },
+          "propertyDescription1": {
+            "DE": {
+              "success": true,
+              "val": "Aumara El Cid ist eine ruhige Unterkunft an der Costa Blanca, umgeben von Natur und Außenbereichen. Die Chalets verfügen über Klimaanlage, WLAN, ein eigenes Bad und eine Küchenzeile mit Kühlschrank, Mikrowelle, Wasserkocher, Kaffeemaschine, Spüle und Geschirr. Gästen stehen der Gemeinschaftspool, der Garten und die Außenbereiche zur Verfügung. Alle Unterkünfte sind Nichtraucherunterkünfte."
+            },
+            "EN": {
+              "success": true,
+              "val": "Aumara El Cid is a peaceful Costa Blanca stay surrounded by nature and outdoor space. The chalets offer air conditioning, Wi-Fi, a private bathroom and a kitchenette with a refrigerator, microwave, kettle, coffee maker, sink and utensils. Guests can enjoy the shared pool, garden and outdoor areas. All accommodation is non-smoking."
+            },
+            "ES": {
+              "success": true,
+              "val": "Aumara El Cid es un alojamiento tranquilo en la Costa Blanca, rodeado de naturaleza y zonas exteriores. Los chalets disponen de aire acondicionado, Wi-Fi, baño privado y una zona de cocina con nevera, microondas, hervidor, cafetera, fregadero y menaje. Los huéspedes pueden disfrutar de la piscina compartida, el jardín y las zonas exteriores. Todos los alojamientos son para no fumadores."
+            },
+            "FR": {
+              "success": true,
+              "val": "Aumara El Cid est un hébergement paisible sur la Costa Blanca, entouré de nature et d'espaces extérieurs. Les chalets disposent de la climatisation, du Wi-Fi, d'une salle de bain privée et d'une kitchenette avec réfrigérateur, micro-ondes, bouilloire, cafetière, évier et vaisselle. Les voyageurs peuvent profiter de la piscine partagée, du jardin et des espaces extérieurs. Tous les hébergements sont non-fumeurs."
+            },
+            "IT": {
+              "success": true,
+              "val": "Aumara El Cid è una struttura tranquilla sulla Costa Blanca, circondata dalla natura e da spazi esterni. Gli chalet dispongono di aria condizionata, Wi-Fi, bagno privato e angolo cottura con frigorifero, microonde, bollitore, macchina da caffè, lavello e utensili. Gli ospiti possono utilizzare la piscina condivisa, il giardino e gli spazi esterni. Tutti gli alloggi sono non fumatori."
+            },
+            "NL": {
+              "success": true,
+              "val": "Aumara El Cid is een rustige accommodatie aan de Costa Blanca, omgeven door natuur en buitenruimte. De chalets hebben airconditioning, wifi, een eigen badkamer en een kitchenette met koelkast, magnetron, waterkoker, koffiezetapparaat, gootsteen en keukengerei. Gasten kunnen gebruikmaken van het gedeelde zwembad, de tuin en de buitenruimtes. Alle accommodaties zijn rookvrij."
+            },
+            "PT": {
+              "success": true,
+              "val": "Aumara El Cid é um alojamento tranquilo na Costa Blanca, rodeado de natureza e espaços exteriores. Os chalés dispõem de ar condicionado, Wi-Fi, casa de banho privativa e kitchenette com frigorífico, micro-ondas, chaleira, máquina de café, lava-loiça e utensílios. Os hóspedes podem desfrutar da piscina partilhada, do jardim e das áreas exteriores. Todos os alojamentos são para não fumadores."
+            },
+            "RU": {
+              "success": true,
+              "val": "Aumara El Cid — спокойное место для отдыха на Коста-Бланке, окружённое природой и открытыми зонами. В шале есть кондиционер, Wi-Fi, собственная ванная комната и мини-кухня с холодильником, микроволновой печью, чайником, кофеваркой, мойкой и посудой. Гости могут пользоваться общим бассейном, садом и открытыми зонами. Во всех помещениях проживание для некурящих."
+            }
+          },
+          "propertyDescriptionBookingPage1": {
+            "DE": {
+              "success": true,
+              "val": "Aumara El Cid ist eine ruhige Unterkunft an der Costa Blanca, umgeben von Natur und Außenbereichen. Die Chalets verfügen über Klimaanlage, WLAN, ein eigenes Bad und eine Küchenzeile mit Kühlschrank, Mikrowelle, Wasserkocher, Kaffeemaschine, Spüle und Geschirr. Gästen stehen der Gemeinschaftspool, der Garten und die Außenbereiche zur Verfügung. Alle Unterkünfte sind Nichtraucherunterkünfte."
+            },
+            "EN": {
+              "success": true,
+              "val": "Aumara El Cid is a peaceful Costa Blanca stay surrounded by nature and outdoor space. The chalets offer air conditioning, Wi-Fi, a private bathroom and a kitchenette with a refrigerator, microwave, kettle, coffee maker, sink and utensils. Guests can enjoy the shared pool, garden and outdoor areas. All accommodation is non-smoking."
+            },
+            "ES": {
+              "success": true,
+              "val": "Aumara El Cid es un alojamiento tranquilo en la Costa Blanca, rodeado de naturaleza y zonas exteriores. Los chalets disponen de aire acondicionado, Wi-Fi, baño privado y una zona de cocina con nevera, microondas, hervidor, cafetera, fregadero y menaje. Los huéspedes pueden disfrutar de la piscina compartida, el jardín y las zonas exteriores. Todos los alojamientos son para no fumadores."
+            },
+            "FR": {
+              "success": true,
+              "val": "Aumara El Cid est un hébergement paisible sur la Costa Blanca, entouré de nature et d'espaces extérieurs. Les chalets disposent de la climatisation, du Wi-Fi, d'une salle de bain privée et d'une kitchenette avec réfrigérateur, micro-ondes, bouilloire, cafetière, évier et vaisselle. Les voyageurs peuvent profiter de la piscine partagée, du jardin et des espaces extérieurs. Tous les hébergements sont non-fumeurs."
+            },
+            "IT": {
+              "success": true,
+              "val": "Aumara El Cid è una struttura tranquilla sulla Costa Blanca, circondata dalla natura e da spazi esterni. Gli chalet dispongono di aria condizionata, Wi-Fi, bagno privato e angolo cottura con frigorifero, microonde, bollitore, macchina da caffè, lavello e utensili. Gli ospiti possono utilizzare la piscina condivisa, il giardino e gli spazi esterni. Tutti gli alloggi sono non fumatori."
+            },
+            "NL": {
+              "success": true,
+              "val": "Aumara El Cid is een rustige accommodatie aan de Costa Blanca, omgeven door natuur en buitenruimte. De chalets hebben airconditioning, wifi, een eigen badkamer en een kitchenette met koelkast, magnetron, waterkoker, koffiezetapparaat, gootsteen en keukengerei. Gasten kunnen gebruikmaken van het gedeelde zwembad, de tuin en de buitenruimtes. Alle accommodaties zijn rookvrij."
+            },
+            "PT": {
+              "success": true,
+              "val": "Aumara El Cid é um alojamento tranquilo na Costa Blanca, rodeado de natureza e espaços exteriores. Os chalés dispõem de ar condicionado, Wi-Fi, casa de banho privativa e kitchenette com frigorífico, micro-ondas, chaleira, máquina de café, lava-loiça e utensílios. Os hóspedes podem desfrutar da piscina partilhada, do jardim e das áreas exteriores. Todos os alojamentos são para não fumadores."
+            },
+            "RU": {
+              "success": true,
+              "val": "Aumara El Cid — спокойное место для отдыха на Коста-Бланке, окружённое природой и открытыми зонами. В шале есть кондиционер, Wi-Fi, собственная ванная комната и мини-кухня с холодильником, микроволновой печью, чайником, кофеваркой, мойкой и посудой. Гости могут пользоваться общим бассейном, садом и открытыми зонами. Во всех помещениях проживание для некурящих."
+            }
+          },
+          "propertyDescriptionText": {
+            "DE": {
+              "success": true,
+              "val": "Aumara El Cid ist eine ruhige Unterkunft an der Costa Blanca, umgeben von Natur und Außenbereichen. Die Chalets verfügen über Klimaanlage, WLAN, ein eigenes Bad und eine Küchenzeile mit Kühlschrank, Mikrowelle, Wasserkocher, Kaffeemaschine, Spüle und Geschirr. Gästen stehen der Gemeinschaftspool, der Garten und die Außenbereiche zur Verfügung. Alle Unterkünfte sind Nichtraucherunterkünfte."
+            },
+            "EN": {
+              "success": true,
+              "val": "Aumara El Cid is a peaceful Costa Blanca stay surrounded by nature and outdoor space. The chalets offer air conditioning, Wi-Fi, a private bathroom and a kitchenette with a refrigerator, microwave, kettle, coffee maker, sink and utensils. Guests can enjoy the shared pool, garden and outdoor areas. All accommodation is non-smoking."
+            },
+            "ES": {
+              "success": true,
+              "val": "Aumara El Cid es un alojamiento tranquilo en la Costa Blanca, rodeado de naturaleza y zonas exteriores. Los chalets disponen de aire acondicionado, Wi-Fi, baño privado y una zona de cocina con nevera, microondas, hervidor, cafetera, fregadero y menaje. Los huéspedes pueden disfrutar de la piscina compartida, el jardín y las zonas exteriores. Todos los alojamientos son para no fumadores."
+            },
+            "FR": {
+              "success": true,
+              "val": "Aumara El Cid est un hébergement paisible sur la Costa Blanca, entouré de nature et d'espaces extérieurs. Les chalets disposent de la climatisation, du Wi-Fi, d'une salle de bain privée et d'une kitchenette avec réfrigérateur, micro-ondes, bouilloire, cafetière, évier et vaisselle. Les voyageurs peuvent profiter de la piscine partagée, du jardin et des espaces extérieurs. Tous les hébergements sont non-fumeurs."
+            },
+            "IT": {
+              "success": true,
+              "val": "Aumara El Cid è una struttura tranquilla sulla Costa Blanca, circondata dalla natura e da spazi esterni. Gli chalet dispongono di aria condizionata, Wi-Fi, bagno privato e angolo cottura con frigorifero, microonde, bollitore, macchina da caffè, lavello e utensili. Gli ospiti possono utilizzare la piscina condivisa, il giardino e gli spazi esterni. Tutti gli alloggi sono non fumatori."
+            },
+            "NL": {
+              "success": true,
+              "val": "Aumara El Cid is een rustige accommodatie aan de Costa Blanca, omgeven door natuur en buitenruimte. De chalets hebben airconditioning, wifi, een eigen badkamer en een kitchenette met koelkast, magnetron, waterkoker, koffiezetapparaat, gootsteen en keukengerei. Gasten kunnen gebruikmaken van het gedeelde zwembad, de tuin en de buitenruimtes. Alle accommodaties zijn rookvrij."
+            },
+            "PT": {
+              "success": true,
+              "val": "Aumara El Cid é um alojamento tranquilo na Costa Blanca, rodeado de natureza e espaços exteriores. Os chalés dispõem de ar condicionado, Wi-Fi, casa de banho privativa e kitchenette com frigorífico, micro-ondas, chaleira, máquina de café, lava-loiça e utensílios. Os hóspedes podem desfrutar da piscina partilhada, do jardim e das áreas exteriores. Todos os alojamentos são para não fumadores."
+            },
+            "RU": {
+              "success": true,
+              "val": "Aumara El Cid — спокойное место для отдыха на Коста-Бланке, окружённое природой и открытыми зонами. В шале есть кондиционер, Wi-Fi, собственная ванная комната и мини-кухня с холодильником, микроволновой печью, чайником, кофеваркой, мойкой и посудой. Гости могут пользоваться общим бассейном, садом и открытыми зонами. Во всех помещениях проживание для некурящих."
+            }
+          }
+        }
+      },
+      {
+        "roomIds": {
+          "674465": {
+            "airbnb": {
+              "accessText": {
+                "ES": {
+                  "success": true
+                }
+              },
+              "houseRulesText": {
+                "ES": {
+                  "success": true
+                }
+              },
+              "interactionText": {
+                "ES": {
+                  "success": true
+                }
+              },
+              "name": {
+                "ES": {
+                  "success": true
+                }
+              },
+              "notesText": {
+                "ES": {
+                  "success": true
+                }
+              },
+              "spaceText": {
+                "ES": {
+                  "success": true
+                }
+              },
+              "summaryText": {
+                "ES": {
+                  "success": true
+                }
+              }
+            },
+            "texts": {
+              "contentDescriptionText": {
+                "DE": {
+                  "success": true,
+                  "val": "Privates Chalet mit Klimaanlage, WLAN, eigenem Bad und Küchenzeile mit Kühlschrank, Mikrowelle, Wasserkocher, Kaffeemaschine, Spüle und Geschirr. Zugang zum Gemeinschaftspool, Garten und den Außenbereichen. Nichtraucherunterkunft."
+                },
+                "EN": {
+                  "success": true,
+                  "val": "Private Chalet with air conditioning, Wi-Fi, a private bathroom and a kitchenette with a refrigerator, microwave, kettle, coffee maker, sink and utensils. Access to the shared pool, garden and outdoor areas. Non-smoking accommodation."
+                },
+                "ES": {
+                  "success": true,
+                  "val": "Chalet privado con aire acondicionado, Wi-Fi, baño privado y zona de cocina con nevera, microondas, hervidor, cafetera, fregadero y menaje. Acceso a piscina compartida, jardín y zonas exteriores. Alojamiento para no fumadores."
+                },
+                "FR": {
+                  "success": true,
+                  "val": "Chalet privé avec climatisation, Wi-Fi, salle de bain privée et kitchenette avec réfrigérateur, micro-ondes, bouilloire, cafetière, évier et vaisselle. Accès à la piscine partagée, au jardin et aux espaces extérieurs. Hébergement non-fumeur."
+                },
+                "IT": {
+                  "success": true,
+                  "val": "Chalet privato con aria condizionata, Wi-Fi, bagno privato e angolo cottura con frigorifero, microonde, bollitore, macchina da caffè, lavello e utensili. Accesso alla piscina condivisa, al giardino e agli spazi esterni. Alloggio non fumatori."
+                },
+                "NL": {
+                  "success": true,
+                  "val": "Privé Chalet met airconditioning, wifi, eigen badkamer en kitchenette met koelkast, magnetron, waterkoker, koffiezetapparaat, gootsteen en keukengerei. Toegang tot het gedeelde zwembad, de tuin en buitenruimtes. Rookvrije accommodatie."
+                },
+                "PT": {
+                  "success": true,
+                  "val": "Chalet privado com ar condicionado, Wi-Fi, casa de banho privativa e kitchenette com frigorífico, micro-ondas, chaleira, máquina de café, lava-loiça e utensílios. Acesso à piscina partilhada, ao jardim e às áreas exteriores. Alojamento para não fumadores."
+                },
+                "RU": {
+                  "success": true,
+                  "val": "Chalet: отдельное шале с кондиционером, Wi-Fi, собственной ванной комнатой и мини-кухней с холодильником, микроволновой печью, чайником, кофеваркой, мойкой и посудой. Доступ к общему бассейну, саду и открытым зонам. Размещение для некурящих."
+                }
+              },
+              "contentHeadlineText": {
+                "DE": {
+                  "success": true,
+                  "val": "Chalet"
+                },
+                "EN": {
+                  "success": true,
+                  "val": "Chalet"
+                },
+                "ES": {
+                  "success": true,
+                  "val": "Chalet"
+                },
+                "FR": {
+                  "success": true,
+                  "val": "Chalet"
+                },
+                "IT": {
+                  "success": true,
+                  "val": "Chalet"
+                },
+                "NL": {
+                  "success": true,
+                  "val": "Chalet"
+                },
+                "PT": {
+                  "success": true,
+                  "val": "Chalet"
+                },
+                "RU": {
+                  "success": true,
+                  "val": "Chalet"
+                }
+              },
+              "displayName": {
+                "DE": {
+                  "success": true,
+                  "val": "Chalet"
+                },
+                "EN": {
+                  "success": true,
+                  "val": "Chalet"
+                },
+                "ES": {
+                  "success": true,
+                  "val": "Chalet"
+                },
+                "FR": {
+                  "success": true,
+                  "val": "Chalet"
+                },
+                "IT": {
+                  "success": true,
+                  "val": "Chalet"
+                },
+                "NL": {
+                  "success": true,
+                  "val": "Chalet"
+                },
+                "PT": {
+                  "success": true,
+                  "val": "Chalet"
+                },
+                "RU": {
+                  "success": true,
+                  "val": "Chalet"
+                }
+              },
+              "roomDescription1": {
+                "DE": {
+                  "success": true,
+                  "val": "Privates Chalet mit Klimaanlage, WLAN, eigenem Bad und Küchenzeile mit Kühlschrank, Mikrowelle, Wasserkocher, Kaffeemaschine, Spüle und Geschirr. Zugang zum Gemeinschaftspool, Garten und den Außenbereichen. Nichtraucherunterkunft."
+                },
+                "EN": {
+                  "success": true,
+                  "val": "Private Chalet with air conditioning, Wi-Fi, a private bathroom and a kitchenette with a refrigerator, microwave, kettle, coffee maker, sink and utensils. Access to the shared pool, garden and outdoor areas. Non-smoking accommodation."
+                },
+                "ES": {
+                  "success": true,
+                  "val": "Chalet privado con aire acondicionado, Wi-Fi, baño privado y zona de cocina con nevera, microondas, hervidor, cafetera, fregadero y menaje. Acceso a piscina compartida, jardín y zonas exteriores. Alojamiento para no fumadores."
+                },
+                "FR": {
+                  "success": true,
+                  "val": "Chalet privé avec climatisation, Wi-Fi, salle de bain privée et kitchenette avec réfrigérateur, micro-ondes, bouilloire, cafetière, évier et vaisselle. Accès à la piscine partagée, au jardin et aux espaces extérieurs. Hébergement non-fumeur."
+                },
+                "IT": {
+                  "success": true,
+                  "val": "Chalet privato con aria condizionata, Wi-Fi, bagno privato e angolo cottura con frigorifero, microonde, bollitore, macchina da caffè, lavello e utensili. Accesso alla piscina condivisa, al giardino e agli spazi esterni. Alloggio non fumatori."
+                },
+                "NL": {
+                  "success": true,
+                  "val": "Privé Chalet met airconditioning, wifi, eigen badkamer en kitchenette met koelkast, magnetron, waterkoker, koffiezetapparaat, gootsteen en keukengerei. Toegang tot het gedeelde zwembad, de tuin en buitenruimtes. Rookvrije accommodatie."
+                },
+                "PT": {
+                  "success": true,
+                  "val": "Chalet privado com ar condicionado, Wi-Fi, casa de banho privativa e kitchenette com frigorífico, micro-ondas, chaleira, máquina de café, lava-loiça e utensílios. Acesso à piscina partilhada, ao jardim e às áreas exteriores. Alojamento para não fumadores."
+                },
+                "RU": {
+                  "success": true,
+                  "val": "Chalet: отдельное шале с кондиционером, Wi-Fi, собственной ванной комнатой и мини-кухней с холодильником, микроволновой печью, чайником, кофеваркой, мойкой и посудой. Доступ к общему бассейну, саду и открытым зонам. Размещение для некурящих."
+                }
+              }
+            }
+          },
+          "674466": {
+            "airbnb": {
+              "accessText": {
+                "ES": {
+                  "success": true
+                }
+              },
+              "houseRulesText": {
+                "ES": {
+                  "success": true
+                }
+              },
+              "interactionText": {
+                "ES": {
+                  "success": true
+                }
+              },
+              "name": {
+                "ES": {
+                  "success": true
+                }
+              },
+              "notesText": {
+                "ES": {
+                  "success": true
+                }
+              },
+              "spaceText": {
+                "ES": {
+                  "success": true
+                }
+              },
+              "summaryText": {
+                "ES": {
+                  "success": true
+                }
+              }
+            },
+            "texts": {
+              "contentDescriptionText": {
+                "DE": {
+                  "success": true,
+                  "val": "Privates Superior Chalet mit Klimaanlage, WLAN, eigenem Bad und Küchenzeile mit Kühlschrank, Mikrowelle, Wasserkocher, Kaffeemaschine, Spüle und Geschirr. Zugang zum Gemeinschaftspool, Garten und den Außenbereichen. Nichtraucherunterkunft."
+                },
+                "EN": {
+                  "success": true,
+                  "val": "Private Superior Chalet with air conditioning, Wi-Fi, a private bathroom and a kitchenette with a refrigerator, microwave, kettle, coffee maker, sink and utensils. Access to the shared pool, garden and outdoor areas. Non-smoking accommodation."
+                },
+                "ES": {
+                  "success": true,
+                  "val": "Superior Chalet privado con aire acondicionado, Wi-Fi, baño privado y zona de cocina con nevera, microondas, hervidor, cafetera, fregadero y menaje. Acceso a piscina compartida, jardín y zonas exteriores. Alojamiento para no fumadores."
+                },
+                "FR": {
+                  "success": true,
+                  "val": "Superior Chalet privé avec climatisation, Wi-Fi, salle de bain privée et kitchenette avec réfrigérateur, micro-ondes, bouilloire, cafetière, évier et vaisselle. Accès à la piscine partagée, au jardin et aux espaces extérieurs. Hébergement non-fumeur."
+                },
+                "IT": {
+                  "success": true,
+                  "val": "Superior Chalet privato con aria condizionata, Wi-Fi, bagno privato e angolo cottura con frigorifero, microonde, bollitore, macchina da caffè, lavello e utensili. Accesso alla piscina condivisa, al giardino e agli spazi esterni. Alloggio non fumatori."
+                },
+                "NL": {
+                  "success": true,
+                  "val": "Privé Superior Chalet met airconditioning, wifi, eigen badkamer en kitchenette met koelkast, magnetron, waterkoker, koffiezetapparaat, gootsteen en keukengerei. Toegang tot het gedeelde zwembad, de tuin en buitenruimtes. Rookvrije accommodatie."
+                },
+                "PT": {
+                  "success": true,
+                  "val": "Superior Chalet privado com ar condicionado, Wi-Fi, casa de banho privativa e kitchenette com frigorífico, micro-ondas, chaleira, máquina de café, lava-loiça e utensílios. Acesso à piscina partilhada, ao jardim e às áreas exteriores. Alojamento para não fumadores."
+                },
+                "RU": {
+                  "success": true,
+                  "val": "Superior Chalet: отдельное шале с кондиционером, Wi-Fi, собственной ванной комнатой и мини-кухней с холодильником, микроволновой печью, чайником, кофеваркой, мойкой и посудой. Доступ к общему бассейну, саду и открытым зонам. Размещение для некурящих."
+                }
+              },
+              "contentHeadlineText": {
+                "DE": {
+                  "success": true,
+                  "val": "Superior Chalet"
+                },
+                "EN": {
+                  "success": true,
+                  "val": "Superior Chalet"
+                },
+                "ES": {
+                  "success": true,
+                  "val": "Chalet Superior"
+                },
+                "FR": {
+                  "success": true,
+                  "val": "Superior Chalet"
+                },
+                "IT": {
+                  "success": true,
+                  "val": "Superior Chalet"
+                },
+                "NL": {
+                  "success": true,
+                  "val": "Superior Chalet"
+                },
+                "PT": {
+                  "success": true,
+                  "val": "Chalet Superior"
+                },
+                "RU": {
+                  "success": true,
+                  "val": "Superior Chalet"
+                }
+              },
+              "displayName": {
+                "DE": {
+                  "success": true,
+                  "val": "Superior Chalet"
+                },
+                "EN": {
+                  "success": true,
+                  "val": "Superior Chalet"
+                },
+                "ES": {
+                  "success": true,
+                  "val": "Chalet Superior"
+                },
+                "FR": {
+                  "success": true,
+                  "val": "Superior Chalet"
+                },
+                "IT": {
+                  "success": true,
+                  "val": "Superior Chalet"
+                },
+                "NL": {
+                  "success": true,
+                  "val": "Superior Chalet"
+                },
+                "PT": {
+                  "success": true,
+                  "val": "Chalet Superior"
+                },
+                "RU": {
+                  "success": true,
+                  "val": "Superior Chalet"
+                }
+              },
+              "roomDescription1": {
+                "DE": {
+                  "success": true,
+                  "val": "Privates Superior Chalet mit Klimaanlage, WLAN, eigenem Bad und Küchenzeile mit Kühlschrank, Mikrowelle, Wasserkocher, Kaffeemaschine, Spüle und Geschirr. Zugang zum Gemeinschaftspool, Garten und den Außenbereichen. Nichtraucherunterkunft."
+                },
+                "EN": {
+                  "success": true,
+                  "val": "Private Superior Chalet with air conditioning, Wi-Fi, a private bathroom and a kitchenette with a refrigerator, microwave, kettle, coffee maker, sink and utensils. Access to the shared pool, garden and outdoor areas. Non-smoking accommodation."
+                },
+                "ES": {
+                  "success": true,
+                  "val": "Superior Chalet privado con aire acondicionado, Wi-Fi, baño privado y zona de cocina con nevera, microondas, hervidor, cafetera, fregadero y menaje. Acceso a piscina compartida, jardín y zonas exteriores. Alojamiento para no fumadores."
+                },
+                "FR": {
+                  "success": true,
+                  "val": "Superior Chalet privé avec climatisation, Wi-Fi, salle de bain privée et kitchenette avec réfrigérateur, micro-ondes, bouilloire, cafetière, évier et vaisselle. Accès à la piscine partagée, au jardin et aux espaces extérieurs. Hébergement non-fumeur."
+                },
+                "IT": {
+                  "success": true,
+                  "val": "Superior Chalet privato con aria condizionata, Wi-Fi, bagno privato e angolo cottura con frigorifero, microonde, bollitore, macchina da caffè, lavello e utensili. Accesso alla piscina condivisa, al giardino e agli spazi esterni. Alloggio non fumatori."
+                },
+                "NL": {
+                  "success": true,
+                  "val": "Privé Superior Chalet met airconditioning, wifi, eigen badkamer en kitchenette met koelkast, magnetron, waterkoker, koffiezetapparaat, gootsteen en keukengerei. Toegang tot het gedeelde zwembad, de tuin en buitenruimtes. Rookvrije accommodatie."
+                },
+                "PT": {
+                  "success": true,
+                  "val": "Superior Chalet privado com ar condicionado, Wi-Fi, casa de banho privativa e kitchenette com frigorífico, micro-ondas, chaleira, máquina de café, lava-loiça e utensílios. Acesso à piscina partilhada, ao jardim e às áreas exteriores. Alojamento para não fumadores."
+                },
+                "RU": {
+                  "success": true,
+                  "val": "Superior Chalet: отдельное шале с кондиционером, Wi-Fi, собственной ванной комнатой и мини-кухней с холодильником, микроволновой печью, чайником, кофеваркой, мойкой и посудой. Доступ к общему бассейну, саду и открытым зонам. Размещение для некурящих."
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}

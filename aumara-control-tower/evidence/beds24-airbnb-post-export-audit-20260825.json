@@ -1,0 +1,48 @@
+{
+  "blockers": [],
+  "checked_at_utc": "2026-08-25T00:26:59.980667+00:00",
+  "property_id": 324882,
+  "room_state": {
+    "674465": {
+      "cancellationPolicy": "flexible",
+      "discountDays14": 1,
+      "discountDays2": 1,
+      "discountDays21": 1,
+      "discountDays28": 1,
+      "discountDays3": 1,
+      "discountDays4": 1,
+      "discountDays5": 1,
+      "discountDays6": 1,
+      "discountDays7": 1,
+      "discountMonthly": 1,
+      "discountWeekly": 1,
+      "listingId": "1759764557896676605",
+      "listingType": "entire_home",
+      "priceStrategy": 0,
+      "propertyTypeGroup": "boutique_hotels_and_more",
+      "publish": "no"
+    },
+    "674466": {
+      "cancellationPolicy": "flexible",
+      "discountDays14": 1,
+      "discountDays2": 1,
+      "discountDays21": 1,
+      "discountDays28": 1,
+      "discountDays3": 1,
+      "discountDays4": 1,
+      "discountDays5": 1,
+      "discountDays6": 1,
+      "discountDays7": 1,
+      "discountMonthly": 1,
+      "discountWeekly": 1,
+      "listingId": "1759764847919085354",
+      "listingType": "entire_home",
+      "priceStrategy": 0,
+      "propertyTypeGroup": "boutique_hotels_and_more",
+      "publish": "no"
+    }
+  },
+  "schema": "aumara.beds24-airbnb-post-export-audit.v2",
+  "secret_exposed": false,
+  "status": "SUCCESS"
+}

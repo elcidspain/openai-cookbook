@@ -249,6 +249,30 @@ class DynamoClaimAtomicTests(unittest.TestCase):
         self.assertIn("os.environ.get('BEDS24_USER')", workflow)
         self.assertIn("os.environ.get('BEDS24_LOGIN')", workflow)
 
+    def test_shadow_workflow_branch_heredoc_delimiter_aligns_to_run_block(self) -> None:
+        workflow_lines = (
+            ROOT.parent / ".github" / "workflows" / "aumara-guest-journey-shadow.yml"
+        ).read_text(encoding="utf-8").splitlines()
+
+        run_block_indent = next(
+            len(line) - len(line.lstrip(" "))
+            for line in workflow_lines
+            if "auth_error_log=/tmp/aumara-guest-journey-shadow/auth-error.log" in line
+        )
+        heredoc_start = next(
+            len(line) - len(line.lstrip(" "))
+            for line in workflow_lines
+            if "python - <<'PY'" in line
+        )
+        heredoc_end = next(
+            len(line) - len(line.lstrip(" "))
+            for line in workflow_lines
+            if line.strip() == "PY"
+        )
+
+        self.assertEqual(heredoc_start, run_block_indent)
+        self.assertEqual(heredoc_end, run_block_indent)
+
     def test_photo_vault_dispatcher_accepts_owner_retry_comment(self) -> None:
         workflow = (
             ROOT.parent

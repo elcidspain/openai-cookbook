@@ -1,0 +1,293 @@
+{
+  "expected_total": 18,
+  "records": [
+    {
+      "bytes": 1299045,
+      "category": "common",
+      "hosted_size": [
+        2023,
+        2560
+      ],
+      "index": 1,
+      "original_size": [
+        3024,
+        3826
+      ],
+      "path": "aumara-control-tower/public/airbnb/20260825/common/01_01_FULL_no_crop.jpg",
+      "sha256": "8f79a1fd5d765e48a55fd52a7985d390b05d53d777dd93e5347bf01b7b86b4ad",
+      "source": "01_FULL_no_crop.jpg"
+    },
+    {
+      "bytes": 2068036,
+      "category": "common",
+      "hosted_size": [
+        1981,
+        2560
+      ],
+      "index": 2,
+      "original_size": [
+        3024,
+        3907
+      ],
+      "path": "aumara-control-tower/public/airbnb/20260825/common/02_02_FULL_no_crop.jpg",
+      "sha256": "6682211ed78db4c933283763ab4ab1a691fd4545c33d7490ea5ded3deb021829",
+      "source": "02_FULL_no_crop.jpg"
+    },
+    {
+      "bytes": 1298407,
+      "category": "common",
+      "hosted_size": [
+        2223,
+        2560
+      ],
+      "index": 3,
+      "original_size": [
+        4284,
+        4933
+      ],
+      "path": "aumara-control-tower/public/airbnb/20260825/common/03_03_FULL_no_crop.jpg",
+      "sha256": "03b9fc6512e0a835627ed9c1865ac66fd5db20ee14aa14b33cc82437403bf7e4",
+      "source": "03_FULL_no_crop.jpg"
+    },
+    {
+      "bytes": 2060999,
+      "category": "common",
+      "hosted_size": [
+        1970,
+        2560
+      ],
+      "index": 4,
+      "original_size": [
+        3024,
+        3929
+      ],
+      "path": "aumara-control-tower/public/airbnb/20260825/common/04_04_FULL_no_crop.jpg",
+      "sha256": "b507f9914568b5d8eacbc5e77224d400017cbd2d590ee193af2b125665435033",
+      "source": "04_FULL_no_crop.jpg"
+    },
+    {
+      "bytes": 1774969,
+      "category": "common",
+      "hosted_size": [
+        2000,
+        2560
+      ],
+      "index": 5,
+      "original_size": [
+        2998,
+        3838
+      ],
+      "path": "aumara-control-tower/public/airbnb/20260825/common/05_06_FULL_no_crop.jpg",
+      "sha256": "ec0a53389455dc64f833725c7f6d3af0aaf58dc0a79844eb33fe423897088cf6",
+      "source": "06_FULL_no_crop.jpg"
+    },
+    {
+      "bytes": 1147367,
+      "category": "common",
+      "hosted_size": [
+        2386,
+        2560
+      ],
+      "index": 6,
+      "original_size": [
+        3024,
+        3245
+      ],
+      "path": "aumara-control-tower/public/airbnb/20260825/common/06_08_FULL_no_crop.jpg",
+      "sha256": "897c76b702ce483528674b45b95898185acd3ec68f50c0833d8c08a21d3af29a",
+      "source": "08_FULL_no_crop.jpg"
+    },
+    {
+      "bytes": 1557611,
+      "category": "common",
+      "hosted_size": [
+        2000,
+        2560
+      ],
+      "index": 7,
+      "original_size": [
+        2998,
+        3838
+      ],
+      "path": "aumara-control-tower/public/airbnb/20260825/common/07_IMG_0005.jpg",
+      "sha256": "a6a6314d9ab37e985a9d7f404c18eade3c89f1516e91d8e9cf2a71f829423b5b",
+      "source": "IMG_0005.JPG"
+    },
+    {
+      "bytes": 1861955,
+      "category": "common",
+      "hosted_size": [
+        1970,
+        2560
+      ],
+      "index": 8,
+      "original_size": [
+        3024,
+        3929
+      ],
+      "path": "aumara-control-tower/public/airbnb/20260825/common/08_IMG_0006.jpg",
+      "sha256": "4b88c3e6e35a70c9bce7d3976d85385f6a0f5c7412455a264b561dbd9c1826a4",
+      "source": "IMG_0006.JPG"
+    },
+    {
+      "bytes": 1514949,
+      "category": "common",
+      "hosted_size": [
+        2110,
+        2560
+      ],
+      "index": 9,
+      "original_size": [
+        3022,
+        3667
+      ],
+      "path": "aumara-control-tower/public/airbnb/20260825/common/09_IMG_0007.jpg",
+      "sha256": "a7370292344a6f99bbe770e5fd2495981a1dd6abe61aab1b1482ebc8028f71fb",
+      "source": "IMG_0007.JPG"
+    },
+    {
+      "bytes": 1022695,
+      "category": "common",
+      "hosted_size": [
+        2386,
+        2560
+      ],
+      "index": 10,
+      "original_size": [
+        3024,
+        3245
+      ],
+      "path": "aumara-control-tower/public/airbnb/20260825/common/10_IMG_0008.jpg",
+      "sha256": "6c96e824e7ecdf0c251ea905de19a9f68fd397907bdd8e0f406c37fe79d58b77",
+      "source": "IMG_0008.JPG"
+    },
+    {
+      "bytes": 1154466,
+      "category": "common",
+      "hosted_size": [
+        2223,
+        2560
+      ],
+      "index": 11,
+      "original_size": [
+        4284,
+        4933
+      ],
+      "path": "aumara-control-tower/public/airbnb/20260825/common/11_IMG_0009.jpg",
+      "sha256": "4b83a346bcef4bb0b5dbaef86b0d2e6b60658ba5dcc3b720c75b4ede62e2ba13",
+      "source": "IMG_0009.JPG"
+    },
+    {
+      "bytes": 1001923,
+      "category": "common",
+      "hosted_size": [
+        1986,
+        2560
+      ],
+      "index": 12,
+      "original_size": [
+        3024,
+        3898
+      ],
+      "path": "aumara-control-tower/public/airbnb/20260825/common/12_IMG_0010.jpg",
+      "sha256": "c3169e7fcfe336f72e0b3faa8ff02a5847307f7ae281e0c41f08043cb77968e1",
+      "source": "IMG_0010.JPG"
+    },
+    {
+      "bytes": 1856173,
+      "category": "common",
+      "hosted_size": [
+        1981,
+        2560
+      ],
+      "index": 13,
+      "original_size": [
+        3024,
+        3907
+      ],
+      "path": "aumara-control-tower/public/airbnb/20260825/common/13_IMG_0011.jpg",
+      "sha256": "d7444ee96c31263b1dcb562fa192ebca23acb2139383011c555b13effa7aaf51",
+      "source": "IMG_0011.JPG"
+    },
+    {
+      "bytes": 1131531,
+      "category": "common",
+      "hosted_size": [
+        2023,
+        2560
+      ],
+      "index": 14,
+      "original_size": [
+        3024,
+        3826
+      ],
+      "path": "aumara-control-tower/public/airbnb/20260825/common/14_IMG_0012.jpg",
+      "sha256": "0d0836217c9c49e94e7c35c24b64e452006a3542970e4226a1b0198d6ba13172",
+      "source": "IMG_0012.JPG"
+    },
+    {
+      "bytes": 537175,
+      "category": "chalet",
+      "hosted_size": [
+        1448,
+        1086
+      ],
+      "index": 1,
+      "original_size": [
+        1448,
+        1086
+      ],
+      "path": "aumara-control-tower/public/airbnb/20260825/chalet/01_AUMARA_Chalet_Sunset_v01.jpg",
+      "sha256": "b662c97042665f41f2a4e17e0f0bb866bd9a710a6cfe3973846fcc31f3ef79a9",
+      "source": "AUMARA_Chalet_Sunset_v01.jpg"
+    },
+    {
+      "bytes": 551394,
+      "category": "chalet",
+      "hosted_size": [
+        1086,
+        1448
+      ],
+      "index": 2,
+      "original_size": [
+        1086,
+        1448
+      ],
+      "path": "aumara-control-tower/public/airbnb/20260825/chalet/02_AUMARA_Night_Forest_Chalets_v01.jpg",
+      "sha256": "8f9f404a06d701d0d741cf7abd1be6cdfc06c5c2db0bf8fb817faddf19f7c182",
+      "source": "AUMARA_Night_Forest_Chalets_v01.jpg"
+    },
+    {
+      "bytes": 410515,
+      "category": "chalet",
+      "hosted_size": [
+        1086,
+        1448
+      ],
+      "index": 3,
+      "original_size": [
+        1086,
+        1448
+      ],
+      "path": "aumara-control-tower/public/airbnb/20260825/chalet/03_AUMARA_Night_Moon_Chalets_v01.jpg",
+      "sha256": "0fc922373ec5559a0e182417b333c14a7c39121b0455d70195b19c7d04198ab6",
+      "source": "AUMARA_Night_Moon_Chalets_v01.jpg"
+    },
+    {
+      "bytes": 496840,
+      "category": "superior",
+      "hosted_size": [
+        1448,
+        1086
+      ],
+      "index": 1,
+      "original_size": [
+        1448,
+        1086
+      ],
+      "path": "aumara-control-tower/public/airbnb/20260825/superior/01_AUMARA_Superior_Chalet_Blue_Hour_v01.jpg",
+      "sha256": "3006a1e8577d51847cf74887a0770e8bb21c89791b1f1cc54cc0543eb14902f4",
+      "source": "AUMARA_Superior_Chalet_Blue_Hour_v01.jpg"
+    }
+  ]
+}

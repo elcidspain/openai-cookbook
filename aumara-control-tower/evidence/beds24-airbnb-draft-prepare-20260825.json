@@ -1,0 +1,87 @@
+{
+  "after": {
+    "674465": {
+      "listingId": "",
+      "listingType": "entire_home",
+      "propertyTypeGroup": "boutique_hotels_and_more",
+      "publish": "no"
+    },
+    "674466": {
+      "listingId": "",
+      "listingType": "entire_home",
+      "propertyTypeGroup": "boutique_hotels_and_more",
+      "publish": "no"
+    }
+  },
+  "before": {
+    "674465": {
+      "listingId": "",
+      "listingType": "entire_home",
+      "propertyTypeGroup": "",
+      "publish": "yes"
+    },
+    "674466": {
+      "listingId": "",
+      "listingType": "entire_home",
+      "propertyTypeGroup": "",
+      "publish": "yes"
+    }
+  },
+  "checked_at_utc": "2026-08-24T23:51:18.261435+00:00",
+  "decision": {
+    "propertyTypeGroup": "boutique_hotels_and_more",
+    "publish": "no",
+    "reason": "Airbnb room-type inventory supports multiple interchangeable units; House is not eligible. AUMARA rooms are pooled multi-unit room types."
+  },
+  "mismatches": [],
+  "property_id": 324882,
+  "schema": "aumara.beds24-airbnb-draft-prepare.v1",
+  "secret_exposed": false,
+  "status": "SUCCESS",
+  "wanted": {
+    "674465": {
+      "listingType": "entire_home",
+      "propertyTypeGroup": "boutique_hotels_and_more",
+      "publish": "no"
+    },
+    "674466": {
+      "listingType": "entire_home",
+      "propertyTypeGroup": "boutique_hotels_and_more",
+      "publish": "no"
+    }
+  },
+  "write_response": {
+    "setPropertyContent": [
+      {
+        "roomIds": {
+          "674465": {
+            "airbnb": {
+              "listingType": {
+                "success": true
+              },
+              "propertyTypeGroup": {
+                "success": true
+              },
+              "publish": {
+                "success": true
+              }
+            }
+          },
+          "674466": {
+            "airbnb": {
+              "listingType": {
+                "success": true
+              },
+              "propertyTypeGroup": {
+                "success": true
+              },
+              "publish": {
+                "success": true
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}
