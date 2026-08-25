@@ -125,15 +125,16 @@ def main() -> int:
             raise RuntimeError("Could not extract canonical photo-transfer Python from workflow")
         code = textwrap.dedent(match.group(1))
 
-        pattern = r"(?m)^(\s*)if isinstance\(rotated, str\) and rotated:\n\1    mask\(rotated\)"
-        replacement = (
-            r"\1if isinstance(rotated, str) and rotated:\n"
-            r"\1    mask(rotated)\n"
-            r"\1    pathlib.Path(os.environ['BEDS24_ROTATED_OUT']).write_text(rotated, encoding='utf-8')"
-        )
-        code, count = re.subn(pattern, replacement, code, count=1)
-        if count != 1:
-            raise RuntimeError("Could not install rotation persistence hook into canonical transfer")
+        if "BEDS24_ROTATED_OUT" not in code:
+            pattern = r"(?m)^(\s*)if isinstance\(rotated, str\) and rotated:\n\1    mask\(rotated\)"
+            replacement = (
+                r"\1if isinstance(rotated, str) and rotated:\n"
+                r"\1    mask(rotated)\n"
+                r"\1    pathlib.Path(os.environ['BEDS24_ROTATED_OUT']).write_text(rotated, encoding='utf-8')"
+            )
+            code, count = re.subn(pattern, replacement, code, count=1)
+            if count != 1:
+                raise RuntimeError("Could not install rotation persistence hook into canonical transfer")
 
         child_env = dict(os.environ)
         child_env["BEDS24_REFRESH_CREDENTIAL"] = credential
