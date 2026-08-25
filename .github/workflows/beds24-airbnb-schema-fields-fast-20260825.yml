@@ -1,0 +1,32 @@
+name: Beds24 Airbnb schema fields fast 2026-08-25
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/beds24-airbnb-schema-fields-fast-20260825.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Extract exact Airbnb field names from public OpenAPI
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import urllib.request
+          req=urllib.request.Request('https://beds24.com/api/v2/apiV2.yaml',headers={'User-Agent':'AUMARA-Airbnb-Schema-Fields/1.0'})
+          with urllib.request.urlopen(req,timeout=60) as r: lines=r.read().decode('utf-8','replace').splitlines()
+          terms=('checkout','checkOut','cleaning','fee','preBooking','houseManual','checkinInstructions','publish','propertyTypeGroup','listingType','pictures')
+          for i,line in enumerate(lines):
+              if any(t.lower() in line.lower() for t in terms):
+                  lo=max(0,i-1); hi=min(len(lines),i+5)
+                  print(f'--- lines {lo+1}-{hi} ---')
+                  for j in range(lo,hi): print(f'{j+1}: {lines[j]}')
+          PY
