@@ -91,7 +91,7 @@ jobs:
             rm -f "$auth_error_log"
           elif grep -q "Beds24 authentication failed with HTTP status" "$auth_error_log"; then
             echo "WARNING: Beds24 auth unavailable; emitting degraded shadow summary"
-          python - <<'PY'
+            python - <<'PY'
           import datetime as dt
           import json
           import pathlib
