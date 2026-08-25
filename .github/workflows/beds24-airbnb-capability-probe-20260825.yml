@@ -1,0 +1,121 @@
+name: Beds24 Airbnb capability probe AUMARA 2026-08-25
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/beds24-airbnb-capability-probe-20260825.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: Production
+    env:
+      BEDS24_REFRESH_CREDENTIAL: ${{ secrets.BEDS24_REFRESH_CREDENTIAL }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Inspect current auth scopes and Airbnb settings schemas
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import datetime as dt, json, os, pathlib, subprocess, urllib.error, urllib.request
+
+          BASE='https://beds24.com/api/v2'
+          refresh=(os.environ.get('BEDS24_REFRESH_CREDENTIAL') or '').strip()
+          if not refresh: raise SystemExit('BEDS24_REFRESH_CREDENTIAL missing')
+          print(f'::add-mask::{refresh}')
+
+          def req(url,headers=None):
+              r=urllib.request.Request(url,headers={'accept':'application/json','User-Agent':'AUMARA-Airbnb-Capability/1.0',**(headers or {})},method='GET')
+              try:
+                  with urllib.request.urlopen(r,timeout=60) as x: raw=x.read(); status=int(x.status)
+              except urllib.error.HTTPError as e: raw=e.read(); status=int(e.code)
+              try: body=json.loads(raw.decode('utf-8','replace')) if raw else None
+              except Exception: body={'raw':raw.decode('utf-8','replace')[:3000]}
+              return status,body
+
+          s,a=req(BASE+'/authentication/token',{'refreshToken':refresh})
+          token=(a or {}).get('token') if isinstance(a,dict) else None
+          if s!=200 or not isinstance(token,str) or not token:
+              raise SystemExit(f'token exchange failed HTTP {s}')
+          print(f'::add-mask::{token}')
+          ds,details=req(BASE+'/authentication/details',{'token':token})
+
+          # Keep only non-secret auth metadata needed to diagnose scope/account binding.
+          auth_meta={}
+          if isinstance(details,dict):
+              for k,v in details.items():
+                  lk=str(k).lower()
+                  if lk in ('token','refreshtoken','credential','password','secret'): continue
+                  if any(x in lk for x in ('scope','permission','property','account','user','organization','valid','expires','role','access')):
+                      auth_meta[k]=v
+
+          spec_url='https://beds24.com/api/v2/apiV2.yaml'
+          r=urllib.request.Request(spec_url,headers={'User-Agent':'AUMARA-Airbnb-Capability/1.0'},method='GET')
+          with urllib.request.urlopen(r,timeout=60) as x:
+              spec=x.read().decode('utf-8','replace')
+
+          lines=spec.splitlines()
+          def block(marker,max_lines=500):
+              hits=[i for i,l in enumerate(lines) if marker in l]
+              if not hits: return ''
+              i=hits[0]
+              indent=len(lines[i])-len(lines[i].lstrip())
+              end=min(len(lines),i+max_lines)
+              for j in range(i+1,end):
+                  stripped=lines[j].strip()
+                  if not stripped: continue
+                  cur=len(lines[j])-len(lines[j].lstrip())
+                  if cur<=indent and j>i+1:
+                      end=j; break
+              return '\n'.join(lines[i:end])[:50000]
+
+          excerpts={
+              'channels_settings_path':block('/channels/settings:'),
+              'airbnbSettingsGet':block('airbnbSettingsGet:'),
+              'airbnbSettingsPost':block('airbnbSettingsPost:'),
+              'airbnbSettingsPatch':block('airbnbSettingsPatch:'),
+              'airbnbSettings':block('airbnbSettings:'),
+          }
+
+          needles=['publish','checkIn','checkout','checkOut','houseManual','preBooking','pre-book','cleaning','picturesFrom','listingId','syncType','connect']
+          matches={n:[] for n in needles}
+          for idx,line in enumerate(lines):
+              low=line.lower()
+              for n in needles:
+                  if n.lower() in low:
+                      matches[n].append({'line':idx+1,'text':line.strip()[:500]})
+          matches={k:v[:50] for k,v in matches.items() if v}
+
+          evidence={
+              'schema':'aumara.beds24-airbnb-capability-probe.v1',
+              'checked_at_utc':dt.datetime.now(dt.timezone.utc).isoformat(),
+              'auth_details_http_status':ds,
+              'auth_metadata':auth_meta,
+              'schema_excerpts':excerpts,
+              'keyword_matches':matches,
+              'secret_exposed':False,
+              'status':'SUCCESS'
+          }
+          text=json.dumps(evidence,ensure_ascii=False,indent=2,sort_keys=True)
+          for secret in (refresh,token): text=text.replace(secret,'[REDACTED]')
+          out=pathlib.Path('aumara-control-tower/evidence/beds24-airbnb-capability-probe-20260825.json')
+          out.parent.mkdir(parents=True,exist_ok=True)
+          out.write_text(text+'\n',encoding='utf-8')
+          subprocess.run(['git','config','user.name','github-actions[bot]'],check=True)
+          subprocess.run(['git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com'],check=True)
+          subprocess.run(['git','add',str(out)],check=True)
+          if subprocess.run(['git','diff','--cached','--quiet'],check=False).returncode!=0:
+              subprocess.run(['git','commit','-m','Record AUMARA Airbnb API capability [skip ci]'],check=True)
+              subprocess.run(['git','pull','--rebase','origin','main'],check=True)
+              subprocess.run(['git','push','origin','HEAD:main'],check=True)
+          print(json.dumps({'status':'SUCCESS','auth_details_http_status':ds,'auth_metadata':auth_meta,'keyword_keys':sorted(matches)},ensure_ascii=False))
+          PY
