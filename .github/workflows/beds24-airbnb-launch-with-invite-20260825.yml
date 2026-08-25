@@ -1,0 +1,213 @@
+name: Beds24 Airbnb launch AUMARA via scoped invite 2026-08-25
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/beds24-airbnb-launch-with-invite-20260825.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: beds24-airbnb-launch-324882
+  cancel-in-progress: false
+
+jobs:
+  launch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: Production
+    env:
+      BEDS24_CHANNELS_INVITE_CODE: ${{ secrets.BEDS24_CHANNELS_INVITE_CODE }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Gate on channels-scoped invite code
+        id: gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          code="${BEDS24_CHANNELS_INVITE_CODE:-}"
+          if [ -z "$code" ]; then
+            echo 'ready=false' >> "$GITHUB_OUTPUT"
+            echo 'WAITING_FOR_CHANNELS_INVITE_CODE'
+            exit 0
+          fi
+          echo "::add-mask::$code"
+          echo 'ready=true' >> "$GITHUB_OUTPUT"
+
+      - name: Exchange invite, publish both AUMARA listings, and read back
+        if: steps.gate.outputs.ready == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import datetime as dt
+          import json
+          import os
+          import pathlib
+          import subprocess
+          import time
+          import urllib.error
+          import urllib.parse
+          import urllib.request
+
+          BASE='https://beds24.com/api/v2'
+          code=(os.environ.get('BEDS24_CHANNELS_INVITE_CODE') or '').strip()
+          if not code: raise SystemExit('invite code missing')
+          print(f'::add-mask::{code}')
+
+          def call(method,path,headers=None,payload=None):
+              data=None if payload is None else json.dumps(payload,ensure_ascii=False).encode('utf-8')
+              req=urllib.request.Request(
+                  BASE+path,
+                  data=data,
+                  headers={'accept':'application/json','User-Agent':'AUMARA-Airbnb-Launch/1.0',**(headers or {}),**({'Content-Type':'application/json'} if data else {})},
+                  method=method,
+              )
+              try:
+                  with urllib.request.urlopen(req,timeout=60) as r:
+                      raw=r.read(); status=int(r.status)
+              except urllib.error.HTTPError as e:
+                  raw=e.read(); status=int(e.code)
+              try: body=json.loads(raw.decode('utf-8','replace')) if raw else None
+              except Exception: body={'raw':raw.decode('utf-8','replace')[:3000]}
+              return status,body
+
+          setup_status,setup=call('GET','/authentication/setup',{'code':code})
+          token=(setup or {}).get('token') if isinstance(setup,dict) else None
+          refresh=(setup or {}).get('refreshToken') if isinstance(setup,dict) else None
+          if token: print(f'::add-mask::{token}')
+          if refresh: print(f'::add-mask::{refresh}')
+          if setup_status!=200 or not isinstance(token,str) or not token:
+              raise SystemExit(f'invite exchange failed HTTP {setup_status}: {str(setup)[:1000]}')
+
+          common={
+              'publish': True,
+              'propertyTypeGroup': 'houses',
+              'listingType': 'entireHome',
+              'updateAddress': True,
+              'checkinType': 'host',
+              'instantBook': 'everyone',
+              'cancellationPolicy': 'flexible',
+              'priceStrategy': 'perDayPricing',
+              'datesWithNoPrice': 'makeUnavailable',
+              'maxDaysInAdvance': 365,
+              'advanceNoticeHours': 0,
+          }
+          chalet={
+              **common,
+              'id': 674465,
+              'checkinInstructions': 'El check-in se realiza en Aumara El Cid. El equipo estará disponible para recibirte y ayudarte con el acceso al chalet. El día de llegada recibirás la información final de acceso y contacto. Si tu hora prevista cambia, avísanos por el chat de Airbnb.',
+              'houseManual': 'Bienvenido a Aumara El Cid. El chalet dispone de Wi-Fi, aire acondicionado, baño privado y zona de cocina compacta con nevera, microondas, hervidor, cafetera, fregadero y menaje. La piscina, el jardín y las zonas exteriores son compartidos con otros huéspedes. Respeta las horas de descanso y las zonas comunes. Todos los alojamientos son para no fumadores.',
+              'preBookingMessage': 'Gracias por elegir Aumara El Cid. Antes de reservar, confirma el número total de huéspedes y revisa las normas de la casa. La piscina y las zonas exteriores son compartidas. Todos los alojamientos son para no fumadores.',
+          }
+          superior={
+              **common,
+              'id': 674466,
+              'checkinInstructions': 'El check-in se realiza en Aumara El Cid. El equipo estará disponible para recibirte y ayudarte con el acceso al Chalet Superior. El día de llegada recibirás la información final de acceso y contacto. Si tu hora prevista cambia, avísanos por el chat de Airbnb.',
+              'houseManual': 'Bienvenido a Aumara El Cid. El Chalet Superior dispone de dos dormitorios, dos baños, Wi-Fi, aire acondicionado y zona de cocina con nevera, microondas, hervidor, cafetera, fregadero y menaje. La piscina, el jardín y las zonas exteriores son compartidos con otros huéspedes. Respeta las horas de descanso y las zonas comunes. Todos los alojamientos son para no fumadores.',
+              'preBookingMessage': 'Gracias por elegir Aumara El Cid. Antes de reservar, confirma el número total de huéspedes y revisa las normas de la casa. La piscina y las zonas exteriores son compartidas. Todos los alojamientos son para no fumadores.',
+          }
+          payload=[{'channel':'airbnb','properties':[{'id':324882,'roomTypes':[chalet,superior]}]}]
+
+          post_status,post_body=call('POST','/channels/settings',{'token':token},payload)
+          if not 200 <= post_status < 300:
+              raise SystemExit(f'channel settings POST failed HTTP {post_status}: {str(post_body)[:1500]}')
+          time.sleep(4)
+
+          qs=urllib.parse.urlencode([('propertyId','324882'),('roomId','674465'),('roomId','674466'),('channel','airbnb')],doseq=True)
+          get_status,get_body=call('GET','/channels/settings?'+qs,{'token':token})
+          if not 200 <= get_status < 300:
+              raise SystemExit(f'channel settings readback failed HTTP {get_status}: {str(get_body)[:1500]}')
+          time.sleep(3)
+
+          users_status,users_body=call('GET','/channels/airbnb/users',{'token':token})
+          listing_reads=[]
+          if 200 <= users_status < 300:
+              rows=[]
+              if isinstance(users_body,list): rows=users_body
+              elif isinstance(users_body,dict):
+                  for k in ('data','users'):
+                      if isinstance(users_body.get(k),list): rows=users_body[k]; break
+              for row in rows[:10]:
+                  if not isinstance(row,dict): continue
+                  uid=row.get('id') or row.get('airbnbUserId') or row.get('userId')
+                  if uid is None: continue
+                  q=urllib.parse.urlencode({'airbnbUserId':str(uid)})
+                  ls,lb=call('GET','/channels/airbnb/listings?'+q,{'token':token})
+                  listing_reads.append({'airbnb_user_id':str(uid),'http_status':ls,'response':lb})
+                  time.sleep(2)
+
+          # Extract only launch-critical readback fields and never persist tokens.
+          readback_rooms={}
+          data=[]
+          if isinstance(get_body,dict) and isinstance(get_body.get('data'),list): data=get_body['data']
+          elif isinstance(get_body,list): data=get_body
+          for channel_obj in data:
+              if not isinstance(channel_obj,dict) or channel_obj.get('channel')!='airbnb': continue
+              for prop in channel_obj.get('properties') or []:
+                  if not isinstance(prop,dict) or str(prop.get('id'))!='324882': continue
+                  for room in prop.get('roomTypes') or []:
+                      if not isinstance(room,dict): continue
+                      rid=str(room.get('id'))
+                      if rid in ('674465','674466'):
+                          readback_rooms[rid]={k:room.get(k) for k in ('id','enabled','airbnbListingId','connect','publish','propertyTypeGroup','listingType','checkinType','checkinInstructions','houseManual','preBookingMessage','instantBook','cancellationPolicy','priceStrategy','datesWithNoPrice','maxDaysInAdvance','advanceNoticeHours')}
+
+          mismatches=[]
+          for rid in ('674465','674466'):
+              r=readback_rooms.get(rid) or {}
+              expected={'publish':True,'propertyTypeGroup':'houses','listingType':'entireHome','checkinType':'host','instantBook':'everyone','cancellationPolicy':'flexible','priceStrategy':'perDayPricing','datesWithNoPrice':'makeUnavailable'}
+              for key,want in expected.items():
+                  if r.get(key)!=want: mismatches.append({'roomId':rid,'field':key,'wanted':want,'got':r.get(key)})
+              for key in ('checkinInstructions','houseManual','preBookingMessage'):
+                  if not str(r.get(key) or '').strip(): mismatches.append({'roomId':rid,'field':key,'wanted':'non-empty','got':r.get(key)})
+
+          # Sanitize listing responses recursively.
+          def sanitize(v):
+              if isinstance(v,dict):
+                  out={}
+                  for k,x in v.items():
+                      if any(t in str(k).lower() for t in ('token','secret','password','credential','apikey')): out[k]='[REDACTED]'
+                      else: out[k]=sanitize(x)
+                  return out
+              if isinstance(v,list): return [sanitize(x) for x in v[:200]]
+              return v
+
+          evidence={
+              'schema':'aumara.beds24-airbnb-launch.v1',
+              'checked_at_utc':dt.datetime.now(dt.timezone.utc).isoformat(),
+              'property_id':324882,
+              'room_ids':[674465,674466],
+              'settings_post_http_status':post_status,
+              'settings_post_response':sanitize(post_body),
+              'settings_readback_http_status':get_status,
+              'readback_rooms':readback_rooms,
+              'mismatches':mismatches,
+              'airbnb_users_http_status':users_status,
+              'airbnb_listing_reads':sanitize(listing_reads),
+              'status':'SUCCESS' if not mismatches else 'READBACK_MISMATCH',
+              'secret_exposed':False,
+          }
+          text=json.dumps(evidence,ensure_ascii=False,indent=2,sort_keys=True)
+          for secret in (code,token,refresh or ''):
+              if secret: text=text.replace(secret,'[REDACTED]')
+          out=pathlib.Path('aumara-control-tower/evidence/beds24-airbnb-launch-20260825.json')
+          out.parent.mkdir(parents=True,exist_ok=True)
+          out.write_text(text+'\n',encoding='utf-8')
+
+          subprocess.run(['git','config','user.name','github-actions[bot]'],check=True)
+          subprocess.run(['git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com'],check=True)
+          subprocess.run(['git','add',str(out)],check=True)
+          if subprocess.run(['git','diff','--cached','--quiet'],check=False).returncode!=0:
+              subprocess.run(['git','commit','-m',f'Record AUMARA Airbnb launch {evidence["status"]} [skip ci]'],check=True)
+              subprocess.run(['git','pull','--rebase','origin','main'],check=True)
+              subprocess.run(['git','push','origin','HEAD:main'],check=True)
+
+          print(json.dumps({'status':evidence['status'],'readback_rooms':readback_rooms,'mismatches':mismatches,'airbnb_users_http_status':users_status},ensure_ascii=False))
+          if mismatches: raise SystemExit(4)
+          PY
