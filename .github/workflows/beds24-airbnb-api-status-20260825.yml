@@ -1,0 +1,204 @@
+name: Beds24 Airbnb API status AUMARA 2026-08-25
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/beds24-airbnb-api-status-20260825.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: beds24-airbnb-api-status-324882
+  cancel-in-progress: true
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: Production
+    env:
+      BEDS24_REFRESH_CREDENTIAL: ${{ secrets.BEDS24_REFRESH_CREDENTIAL }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read Airbnb channel status and POST action schema
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import datetime as dt
+          import json
+          import os
+          import pathlib
+          import subprocess
+          import time
+          import urllib.error
+          import urllib.parse
+          import urllib.request
+
+          BASE='https://beds24.com/api/v2'
+          PROPERTY_ID='324882'
+          ROOM_IDS=('674465','674466')
+          TARGET_LISTINGS={'674465':'1759764557896676605','674466':'1759764847919085354'}
+          refresh=(os.environ.get('BEDS24_REFRESH_CREDENTIAL') or '').strip()
+          if not refresh:
+              raise SystemExit('BEDS24_REFRESH_CREDENTIAL missing in Production')
+          print(f'::add-mask::{refresh}')
+
+          def call(method,path,headers=None,data=None):
+              url=path if path.startswith('http') else BASE+path
+              req=urllib.request.Request(
+                  url,
+                  data=data,
+                  headers={'accept':'application/json','User-Agent':'AUMARA-Airbnb-Status/1.0',**(headers or {})},
+                  method=method,
+              )
+              try:
+                  with urllib.request.urlopen(req,timeout=60) as r:
+                      raw=r.read(); status=int(r.status)
+              except urllib.error.HTTPError as e:
+                  raw=e.read(); status=int(e.code)
+              except urllib.error.URLError as e:
+                  return 0, {'network_error':str(e.reason)}
+              try:
+                  body=json.loads(raw.decode('utf-8','replace')) if raw else None
+              except Exception:
+                  body={'raw':raw.decode('utf-8','replace')[:3000]}
+              return status,body
+
+          def sanitize(v,depth=0):
+              if depth>10: return '[DEPTH_LIMIT]'
+              if isinstance(v,dict):
+                  out={}
+                  for k,x in v.items():
+                      lk=str(k).lower()
+                      if any(t in lk for t in ('token','secret','password','credential','apikey','api_key')):
+                          out[str(k)]='[REDACTED]'
+                      else:
+                          out[str(k)]=sanitize(x,depth+1)
+                  return out
+              if isinstance(v,list): return [sanitize(x,depth+1) for x in v[:200]]
+              if isinstance(v,str): return v[:4000]
+              return v
+
+          # Canonical API auth: refresh credential -> short-lived bearer token.
+          s,auth=call('GET','/authentication/token',{'refreshToken':refresh})
+          token=(auth or {}).get('token') if isinstance(auth,dict) else None
+          if s!=200 or not isinstance(token,str) or not token:
+              raise SystemExit(f'Beds24 token exchange failed HTTP {s}: {str(sanitize(auth))[:1200]}')
+          print(f'::add-mask::{token}')
+          time.sleep(2)
+
+          ds,details=call('GET','/authentication/details',{'token':token})
+          time.sleep(2)
+          us,users=call('GET','/channels/airbnb/users',{'token':token})
+          time.sleep(2)
+
+          user_rows=[]
+          if isinstance(users,list): user_rows=users
+          elif isinstance(users,dict):
+              for key in ('data','users'):
+                  if isinstance(users.get(key),list): user_rows=users[key]; break
+
+          listing_reads=[]
+          for row in user_rows[:10]:
+              if not isinstance(row,dict): continue
+              uid=row.get('id') or row.get('userId') or row.get('airbnbUserId')
+              if uid is None: continue
+              attempts=[]
+              for query_key in ('airbnbUserId','userId','id'):
+                  qs=urllib.parse.urlencode({query_key:str(uid)})
+                  ls,lb=call('GET','/channels/airbnb/listings?'+qs,{'token':token})
+                  attempts.append({'query_key':query_key,'http_status':ls,'response':sanitize(lb)})
+                  if 200<=ls<300: break
+                  time.sleep(2)
+              listing_reads.append({'airbnb_user_id':str(uid),'attempts':attempts})
+              time.sleep(2)
+
+          settings_attempts=[]
+          queries=[
+              [('propertyId',PROPERTY_ID),('roomId',ROOM_IDS[0]),('roomId',ROOM_IDS[1]),('channel','airbnb')],
+              [('propertyId',PROPERTY_ID),('roomIds',','.join(ROOM_IDS)),('channel','airbnb')],
+              [('propertyId',PROPERTY_ID),('channel','airbnb')],
+          ]
+          for pairs in queries:
+              qs=urllib.parse.urlencode(pairs,doseq=True)
+              ss,sb=call('GET','/channels/settings?'+qs,{'token':token})
+              settings_attempts.append({'query':pairs,'http_status':ss,'response':sanitize(sb)})
+              if 200<=ss<300: break
+              time.sleep(2)
+
+          # Read the public OpenAPI document and extract only the Airbnb POST operation + referenced schemas.
+          spec_status=0; spec_text=''; spec_diag=None
+          try:
+              req=urllib.request.Request('https://beds24.com/api/v2/apiV2.yaml',headers={'User-Agent':'AUMARA-Airbnb-Schema/1.0'},method='GET')
+              with urllib.request.urlopen(req,timeout=60) as r:
+                  spec_status=int(r.status); spec_text=r.read().decode('utf-8','replace')
+          except Exception as e:
+              spec_diag=str(e)
+
+          operation_excerpt=''
+          if spec_text:
+              lines=spec_text.splitlines()
+              start=None
+              for i,line in enumerate(lines):
+                  if line.startswith('  /channels/airbnb:') or line.startswith('/channels/airbnb:'):
+                      start=i; break
+              if start is not None:
+                  end=min(len(lines),start+260)
+                  for j in range(start+1,min(len(lines),start+800)):
+                      if lines[j].startswith('  /') and j>start+1:
+                          end=j; break
+                  operation_excerpt='\n'.join(lines[start:end])[:30000]
+
+          # Determine whether our two listing ids are visible in returned listing payloads.
+          flattened=json.dumps(listing_reads,ensure_ascii=False)
+          listing_visibility={rid:(lid in flattened) for rid,lid in TARGET_LISTINGS.items()}
+
+          evidence={
+              'schema':'aumara.beds24-airbnb-api-status.v1',
+              'checked_at_utc':dt.datetime.now(dt.timezone.utc).isoformat(),
+              'property_id':int(PROPERTY_ID),
+              'room_ids':list(ROOM_IDS),
+              'target_listings':TARGET_LISTINGS,
+              'auth_details_http_status':ds,
+              'auth_details':sanitize(details),
+              'airbnb_users_http_status':us,
+              'airbnb_users':sanitize(users),
+              'airbnb_listing_reads':listing_reads,
+              'listing_visibility':listing_visibility,
+              'channel_settings_attempts':settings_attempts,
+              'openapi_http_status':spec_status,
+              'openapi_airbnb_post_excerpt':operation_excerpt,
+              'openapi_diagnostic':spec_diag,
+              'status':'SUCCESS',
+              'secret_exposed':False,
+          }
+          text=json.dumps(evidence,ensure_ascii=False,indent=2,sort_keys=True)
+          for secret in (refresh,token): text=text.replace(secret,'[REDACTED]')
+          out=pathlib.Path('aumara-control-tower/evidence/beds24-airbnb-api-status-20260825.json')
+          out.parent.mkdir(parents=True,exist_ok=True)
+          out.write_text(text+'\n',encoding='utf-8')
+
+          subprocess.run(['git','config','user.name','github-actions[bot]'],check=True)
+          subprocess.run(['git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com'],check=True)
+          subprocess.run(['git','add',str(out)],check=True)
+          if subprocess.run(['git','diff','--cached','--quiet'],check=False).returncode!=0:
+              subprocess.run(['git','commit','-m','Record AUMARA Airbnb API status [skip ci]'],check=True)
+              subprocess.run(['git','pull','--rebase','origin','main'],check=True)
+              subprocess.run(['git','push','origin','HEAD:main'],check=True)
+
+          print(json.dumps({
+              'status':'SUCCESS',
+              'auth_details_http_status':ds,
+              'airbnb_users_http_status':us,
+              'listing_visibility':listing_visibility,
+              'settings_http_statuses':[x['http_status'] for x in settings_attempts],
+              'openapi_http_status':spec_status,
+          },ensure_ascii=False))
+          PY
