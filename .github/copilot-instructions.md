@@ -29,6 +29,19 @@ This repository contains runnable examples, notebooks, and reference articles fo
 - Do not change Gmail, Beds24, monitoring, deployment, access, payments, legal, tax, or external messaging without explicit task-specific authorization.
 - Follow `docs/AI_EXECUTION_POLICY.md` and `docs/CHECKPOINT_PROTOCOL.md` for AI-assisted execution.
 
+## AUMARA Beds24 authentication canon
+
+For AUMARA / EL CID Beds24 automation, use API credentials as the default and authoritative authentication path.
+
+- **Beds24 API v2 / bearer-token path:** use `BEDS24_REFRESH_CREDENTIAL` through the existing refresh/token exchange flow. Treat this value only as a Beds24 API refresh credential; never repurpose it as an encryption key, KEK, password vault key, or browser-login secret.
+- **Beds24 legacy JSON/content endpoints:** when an existing endpoint still uses legacy authentication, use `BEDS24_API_KEY` together with `BEDS24_PROP_KEY`.
+- **Do not use `BEDS24_PASSWORD` or `BEDS24_USERNAME` as an automation fallback.** They are not part of the canonical API execution path. Do not reset, rotate, request, or troubleshoot the Beds24 password unless the task explicitly requires an interactive Beds24 control-panel login and separately authorizes credential changes.
+- If a requested Beds24 operation is not exposed through the available API path, stop with a precise `UI-only` blocker instead of attempting password/browser fallback.
+- Do not tell the operator to change Beds24 credentials merely because an API operation failed. First inspect the existing token/refresh flow and the exact endpoint/auth mode already used by the project.
+- Preserve credential names exactly as configured in GitHub Secrets/Environment; never print or commit secret values.
+
+This section is the canonical project instruction for Beds24 authentication and overrides older ad-hoc browser-login workflows or password-based fallbacks.
+
 ## Pull request expectations
 
 - Use concise, imperative commit messages.
