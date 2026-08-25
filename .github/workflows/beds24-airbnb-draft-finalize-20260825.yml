@@ -160,3 +160,5 @@ jobs:
           print(json.dumps({'status':evidence['status'],'updated_rooms':updated,'blockers':blockers},ensure_ascii=False))
           if evidence['status']!='SUCCESS': raise SystemExit(1)
           PY
+
+# manual trigger 2026-08-25T01:00Z
