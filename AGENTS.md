@@ -47,6 +47,19 @@ All AI-assisted executions must follow
 - Leave a compact checkpoint that reduces the context required by the next
   execution.
 
+## AUMARA Beds24 Authentication Canon
+
+- Default Beds24 automation authentication is API-based, not browser/password-based.
+- For API v2 bearer-token operations, use `BEDS24_REFRESH_CREDENTIAL` through the existing refresh/token exchange flow.
+- Treat `BEDS24_REFRESH_CREDENTIAL` only as a Beds24 API refresh credential. Never repurpose it as a KEK, encryption key, password-vault key, or browser-login secret.
+- For existing legacy JSON/content endpoints that require legacy auth, use `BEDS24_API_KEY` together with `BEDS24_PROP_KEY`.
+- Do not use `BEDS24_PASSWORD` or `BEDS24_USERNAME` as an automation fallback and do not request/reset/rotate them unless the task explicitly requires interactive Beds24 control-panel login and separately authorizes credential changes.
+- If an operation is UI-only, report the exact UI-only blocker; do not silently fall back to browser login.
+- Before claiming credentials are broken, inspect the established endpoint/auth mode and current token/refresh flow.
+- Never print or commit secret values.
+
+This section overrides older ad-hoc Beds24 browser-login/password fallbacks for AUMARA / EL CID automation.
+
 ## Metadata & Publication Workflow
 
 New or relocated content must have an entry in `registry.yaml` with an accurate path, date, and tag set so the static site generator includes it. When collaborating, coordinate author slugs in `authors.yaml` to avoid duplicates, and run `python -m yaml lint registry.yaml` (or your preferred YAML linter) to catch syntax errors before submitting.
