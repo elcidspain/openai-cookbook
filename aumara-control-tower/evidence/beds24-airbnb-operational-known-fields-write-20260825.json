@@ -1,0 +1,70 @@
+{
+  "after": {
+    "674465": {
+      "checkInText": "El check-in se realiza en Aumara El Cid. El equipo estará disponible para recibirte y ayudarte con el acceso al chalet. El día de llegada recibirás la información final de acceso y contacto. Si tu hora prevista cambia, avísanos por el chat de Airbnb.",
+      "cleaningFee": "20.00",
+      "custom": "CLEANINGFEE 20",
+      "houseManualText": "Bienvenido a Aumara El Cid. El chalet dispone de Wi-Fi, aire acondicionado, baño privado y zona de cocina compacta con nevera, microondas, hervidor, cafetera, fregadero y menaje. La piscina, el jardín y las zonas exteriores son compartidos con otros huéspedes. Respeta las horas de descanso y las zonas comunes. Todos los alojamientos son para no fumadores."
+    },
+    "674466": {
+      "checkInText": "El check-in se realiza en Aumara El Cid. El equipo estará disponible para recibirte y ayudarte con el acceso al Chalet Superior. El día de llegada recibirás la información final de acceso y contacto. Si tu hora prevista cambia, avísanos por el chat de Airbnb.",
+      "cleaningFee": "20.00",
+      "custom": "CLEANINGFEE 20",
+      "houseManualText": "Bienvenido a Aumara El Cid. El Chalet Superior dispone de dos dormitorios, dos baños, Wi-Fi, aire acondicionado y zona de cocina con nevera, microondas, hervidor, cafetera, fregadero y menaje. La piscina, el jardín y las zonas exteriores son compartidos con otros huéspedes. Respeta las horas de descanso y las zonas comunes. Todos los alojamientos son para no fumadores."
+    }
+  },
+  "checked_at_utc": "2026-08-25T19:51:25.112467+00:00",
+  "mismatches": [],
+  "property_id": 324882,
+  "schema": "aumara.beds24-airbnb-operational-known-fields-write.v1",
+  "secret_exposed": false,
+  "status": "SUCCESS",
+  "wanted": {
+    "674465": {
+      "checkInText": "El check-in se realiza en Aumara El Cid. El equipo estará disponible para recibirte y ayudarte con el acceso al chalet. El día de llegada recibirás la información final de acceso y contacto. Si tu hora prevista cambia, avísanos por el chat de Airbnb.",
+      "cleaningFee": "20.00",
+      "custom": "CLEANINGFEE 20",
+      "houseManualText": "Bienvenido a Aumara El Cid. El chalet dispone de Wi-Fi, aire acondicionado, baño privado y zona de cocina compacta con nevera, microondas, hervidor, cafetera, fregadero y menaje. La piscina, el jardín y las zonas exteriores son compartidos con otros huéspedes. Respeta las horas de descanso y las zonas comunes. Todos los alojamientos son para no fumadores."
+    },
+    "674466": {
+      "checkInText": "El check-in se realiza en Aumara El Cid. El equipo estará disponible para recibirte y ayudarte con el acceso al Chalet Superior. El día de llegada recibirás la información final de acceso y contacto. Si tu hora prevista cambia, avísanos por el chat de Airbnb.",
+      "cleaningFee": "20.00",
+      "custom": "CLEANINGFEE 20",
+      "houseManualText": "Bienvenido a Aumara El Cid. El Chalet Superior dispone de dos dormitorios, dos baños, Wi-Fi, aire acondicionado y zona de cocina con nevera, microondas, hervidor, cafetera, fregadero y menaje. La piscina, el jardín y las zonas exteriores son compartidos con otros huéspedes. Respeta las horas de descanso y las zonas comunes. Todos los alojamientos son para no fumadores."
+    }
+  },
+  "write_response": {
+    "setPropertyContent": [
+      {
+        "roomIds": {
+          "674465": {
+            "airbnb": {
+              "checkInText": {
+                "success": true
+              },
+              "custom": {
+                "success": true
+              },
+              "houseManualText": {
+                "success": true
+              }
+            }
+          },
+          "674466": {
+            "airbnb": {
+              "checkInText": {
+                "success": true
+              },
+              "custom": {
+                "success": true
+              },
+              "houseManualText": {
+                "success": true
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}
