@@ -4,6 +4,22 @@
       "listingId": "1759764557896676605",
       "listingType": "private_room",
       "picturesFrom": "r",
+      "propertyTypeGroup": "houses",
+      "publish": "yes"
+    },
+    "674466": {
+      "listingId": "1759764847919085354",
+      "listingType": "private_room",
+      "picturesFrom": "r",
+      "propertyTypeGroup": "houses",
+      "publish": "yes"
+    }
+  },
+  "before": {
+    "674465": {
+      "listingId": "1759764557896676605",
+      "listingType": "private_room",
+      "picturesFrom": "r",
       "propertyTypeGroup": "boutique_hotels_and_more",
       "publish": "yes"
     },
@@ -15,25 +31,9 @@
       "publish": "yes"
     }
   },
-  "before": {
-    "674465": {
-      "listingId": "1759764557896676605",
-      "listingType": "private_room",
-      "picturesFrom": "p",
-      "propertyTypeGroup": "boutique_hotels_and_more",
-      "publish": "yes"
-    },
-    "674466": {
-      "listingId": "1759764847919085354",
-      "listingType": "private_room",
-      "picturesFrom": "p",
-      "propertyTypeGroup": "boutique_hotels_and_more",
-      "publish": "yes"
-    }
-  },
-  "checked_at_utc": "2026-08-25T23:10:56.994443+00:00",
+  "checked_at_utc": "2026-08-25T23:36:04.149820+00:00",
   "decision": {
-    "propertyTypeGroup": "boutique_hotels_and_more",
+    "propertyTypeGroup": "houses",
     "publish": "yes",
     "reason": "Beds24 roomType chalet now matches Airbnb propertyTypeGroup houses; publish is enabled for both corrected listings."
   },
@@ -46,13 +46,13 @@
     "674465": {
       "listingType": "private_room",
       "picturesFrom": "r",
-      "propertyTypeGroup": "boutique_hotels_and_more",
+      "propertyTypeGroup": "houses",
       "publish": "yes"
     },
     "674466": {
       "listingType": "private_room",
       "picturesFrom": "r",
-      "propertyTypeGroup": "boutique_hotels_and_more",
+      "propertyTypeGroup": "houses",
       "publish": "yes"
     }
   },
