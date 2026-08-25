@@ -1,0 +1,68 @@
+name: Beds24 Airbnb capability fast AUMARA 2026-08-25
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/beds24-airbnb-capability-fast-20260825.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: Production
+    env:
+      BEDS24_REFRESH_CREDENTIAL: ${{ secrets.BEDS24_REFRESH_CREDENTIAL }}
+    steps:
+      - name: Print sanitized auth metadata and exact Airbnb settings schema
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, re, urllib.error, urllib.request
+          refresh=(os.environ.get('BEDS24_REFRESH_CREDENTIAL') or '').strip()
+          if not refresh: raise SystemExit('refresh credential missing')
+          print(f'::add-mask::{refresh}')
+          def call(url,headers=None):
+              req=urllib.request.Request(url,headers={'accept':'application/json','User-Agent':'AUMARA-Capability-Fast/1.0',**(headers or {})},method='GET')
+              try:
+                  with urllib.request.urlopen(req,timeout=60) as r: raw=r.read(); status=int(r.status)
+              except urllib.error.HTTPError as e: raw=e.read(); status=int(e.code)
+              try: body=json.loads(raw.decode('utf-8','replace')) if raw else None
+              except Exception: body={'raw':raw.decode('utf-8','replace')[:2000]}
+              return status,body
+          s,a=call('https://beds24.com/api/v2/authentication/token',{'refreshToken':refresh})
+          token=(a or {}).get('token') if isinstance(a,dict) else None
+          if s!=200 or not token: raise SystemExit(f'token exchange HTTP {s}')
+          print(f'::add-mask::{token}')
+          ds,d=call('https://beds24.com/api/v2/authentication/details',{'token':token})
+          safe={}
+          if isinstance(d,dict):
+              for k,v in d.items():
+                  lk=k.lower()
+                  if k in ('token','refreshToken'): continue
+                  if any(x in lk for x in ('scope','permission','property','account','user','organization','valid','expire','role','access')):
+                      safe[k]=v
+          print('AUTH_META='+json.dumps(safe,ensure_ascii=False))
+          req=urllib.request.Request('https://beds24.com/api/v2/apiV2.yaml',headers={'User-Agent':'AUMARA-Capability-Fast/1.0'},method='GET')
+          with urllib.request.urlopen(req,timeout=60) as r: spec=r.read().decode('utf-8','replace')
+          lines=spec.splitlines()
+          def extract(marker,limit=260):
+              for i,line in enumerate(lines):
+                  if marker in line:
+                      base=len(line)-len(line.lstrip())
+                      out=[line]
+                      for j in range(i+1,min(len(lines),i+limit)):
+                          ln=lines[j]
+                          if ln.strip() and len(ln)-len(ln.lstrip())<=base: break
+                          out.append(ln)
+                      return '\n'.join(out)
+              return 'NOT_FOUND'
+          for marker in ('/channels/settings:','airbnbSettingsPost:','airbnbSettingsGet:'):
+              print('---'+marker+'---')
+              print(extract(marker))
+          PY
