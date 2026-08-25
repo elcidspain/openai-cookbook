@@ -1,0 +1,88 @@
+name: Beds24 Airbnb settings publish AUMARA 2026-08-25
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/beds24-airbnb-settings-publish-attempt-20260825.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: beds24-airbnb-settings-publish-324882
+  cancel-in-progress: false
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: Production
+    env:
+      BEDS24_REFRESH_CREDENTIAL: ${{ secrets.BEDS24_REFRESH_CREDENTIAL }}
+    steps:
+      - name: POST exact AUMARA Airbnb settings and verify readback
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, time, urllib.error, urllib.parse, urllib.request
+          BASE='https://beds24.com/api/v2'
+          refresh=(os.environ.get('BEDS24_REFRESH_CREDENTIAL') or '').strip()
+          if not refresh: raise SystemExit('BEDS24_REFRESH_CREDENTIAL missing')
+          print(f'::add-mask::{refresh}')
+
+          def call(method,path,headers=None,payload=None):
+              data=None if payload is None else json.dumps(payload,ensure_ascii=False).encode('utf-8')
+              req=urllib.request.Request(BASE+path,data=data,headers={'accept':'application/json','User-Agent':'AUMARA-Airbnb-Publish/1.0',**(headers or {}),**({'Content-Type':'application/json'} if data else {})},method=method)
+              try:
+                  with urllib.request.urlopen(req,timeout=60) as r: raw=r.read(); status=int(r.status)
+              except urllib.error.HTTPError as e: raw=e.read(); status=int(e.code)
+              try: body=json.loads(raw.decode('utf-8','replace')) if raw else None
+              except Exception: body={'raw':raw.decode('utf-8','replace')[:2000]}
+              return status,body
+
+          s,a=call('GET','/authentication/token',{'refreshToken':refresh})
+          token=(a or {}).get('token') if isinstance(a,dict) else None
+          if s!=200 or not token: raise SystemExit(f'token exchange failed HTTP {s}')
+          print(f'::add-mask::{token}')
+
+          common={
+              'publish': True,
+              'propertyTypeGroup': 'houses',
+              'listingType': 'entireHome',
+              'updateAddress': True,
+              'checkinType': 'host',
+              'instantBook': 'everyone',
+              'cancellationPolicy': 'flexible',
+              'priceStrategy': 'perDayPricing',
+              'datesWithNoPrice': 'makeUnavailable',
+              'maxDaysInAdvance': 365,
+              'advanceNoticeHours': 0,
+          }
+          chalet={
+              **common,
+              'id': 674465,
+              'checkinInstructions': 'El check-in se realiza en Aumara El Cid. El equipo estará disponible para recibirte y ayudarte con el acceso al chalet. El día de llegada recibirás la información final de acceso y contacto. Si tu hora prevista cambia, avísanos por el chat de Airbnb.',
+              'houseManual': 'Bienvenido a Aumara El Cid. El chalet dispone de Wi-Fi, aire acondicionado, baño privado y zona de cocina compacta con nevera, microondas, hervidor, cafetera, fregadero y menaje. La piscina, el jardín y las zonas exteriores son compartidos con otros huéspedes. Respeta las horas de descanso y las zonas comunes. Todos los alojamientos son para no fumadores.',
+              'preBookingMessage': 'Gracias por elegir Aumara El Cid. Antes de reservar, confirma el número total de huéspedes y revisa las normas de la casa. La piscina y las zonas exteriores son compartidas. Todos los alojamientos son para no fumadores.',
+          }
+          superior={
+              **common,
+              'id': 674466,
+              'checkinInstructions': 'El check-in se realiza en Aumara El Cid. El equipo estará disponible para recibirte y ayudarte con el acceso al Chalet Superior. El día de llegada recibirás la información final de acceso y contacto. Si tu hora prevista cambia, avísanos por el chat de Airbnb.',
+              'houseManual': 'Bienvenido a Aumara El Cid. El Chalet Superior dispone de dos dormitorios, dos baños, Wi-Fi, aire acondicionado y zona de cocina con nevera, microondas, hervidor, cafetera, fregadero y menaje. La piscina, el jardín y las zonas exteriores son compartidos con otros huéspedes. Respeta las horas de descanso y las zonas comunes. Todos los alojamientos son para no fumadores.',
+              'preBookingMessage': 'Gracias por elegir Aumara El Cid. Antes de reservar, confirma el número total de huéspedes y revisa las normas de la casa. La piscina y las zonas exteriores son compartidas. Todos los alojamientos son para no fumadores.',
+          }
+          payload=[{'channel':'airbnb','properties':[{'id':324882,'roomTypes':[chalet,superior]}]}]
+          ps,pb=call('POST','/channels/settings',{'token':token},payload)
+          print('POST_RESULT='+json.dumps({'http_status':ps,'body':pb},ensure_ascii=False))
+          if not (200 <= ps < 300):
+              raise SystemExit(2)
+          time.sleep(3)
+          qs=urllib.parse.urlencode([('propertyId','324882'),('roomId','674465'),('roomId','674466'),('channel','airbnb')],doseq=True)
+          gs,gb=call('GET','/channels/settings?'+qs,{'token':token})
+          print('GET_READBACK='+json.dumps({'http_status':gs,'body':gb},ensure_ascii=False))
+          if not (200 <= gs < 300): raise SystemExit(3)
+          PY
