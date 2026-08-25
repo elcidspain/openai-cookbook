@@ -1,0 +1,45 @@
+name: Beds24 V2 Airbnb settings probe AUMARA 2026-08-25
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/beds24-v2-airbnb-settings-probe-20260825.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: Production
+    env:
+      BEDS24_REFRESH_CREDENTIAL: ${{ secrets.BEDS24_REFRESH_CREDENTIAL }}
+    steps:
+      - name: Read Airbnb channel settings via V2
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, urllib.error, urllib.parse, urllib.request
+          refresh=(os.environ.get('BEDS24_REFRESH_CREDENTIAL') or '').strip()
+          if not refresh: raise SystemExit('BEDS24_REFRESH_CREDENTIAL missing')
+          print(f'::add-mask::{refresh}')
+          def call(method,url,headers=None,data=None):
+            req=urllib.request.Request(url,data=data,headers=headers or {},method=method)
+            try:
+              with urllib.request.urlopen(req,timeout=60) as r: body=r.read(); status=r.status
+            except urllib.error.HTTPError as e: body=e.read(); status=e.code
+            try: payload=json.loads(body.decode('utf-8','replace')) if body else None
+            except Exception: payload={'raw':body.decode('utf-8','replace')[:2000]}
+            return int(status),payload
+          s,a=call('GET','https://beds24.com/api/v2/authentication/token',{'accept':'application/json','refreshToken':refresh})
+          if s!=200 or not isinstance(a,dict) or not a.get('token'): raise SystemExit(f'auth failed HTTP {s}: {str(a)[:1200]}')
+          token=a['token']; print(f'::add-mask::{token}')
+          qs=urllib.parse.urlencode([('propertyId','324882'),('roomId','674465'),('roomId','674466'),('channel','airbnb')])
+          s,p=call('GET','https://beds24.com/api/v2/channels/settings?'+qs,{'accept':'application/json','token':token})
+          print(json.dumps({'status_code':s,'payload':p},ensure_ascii=False))
+          if not 200 <= s < 300: raise SystemExit(1)
+          PY
