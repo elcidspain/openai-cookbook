@@ -1,37 +1,37 @@
 {
   "after": {
     "674465": {
-      "listingId": "",
+      "listingId": "1759764557896676605",
       "listingType": "entire_home",
-      "propertyTypeGroup": "boutique_hotels_and_more",
+      "propertyTypeGroup": "houses",
       "publish": "no"
     },
     "674466": {
-      "listingId": "",
+      "listingId": "1759764847919085354",
       "listingType": "entire_home",
-      "propertyTypeGroup": "boutique_hotels_and_more",
+      "propertyTypeGroup": "houses",
       "publish": "no"
     }
   },
   "before": {
     "674465": {
-      "listingId": "",
+      "listingId": "1759764557896676605",
       "listingType": "entire_home",
-      "propertyTypeGroup": "",
+      "propertyTypeGroup": "houses",
       "publish": "yes"
     },
     "674466": {
-      "listingId": "",
+      "listingId": "1759764847919085354",
       "listingType": "entire_home",
-      "propertyTypeGroup": "",
+      "propertyTypeGroup": "houses",
       "publish": "yes"
     }
   },
-  "checked_at_utc": "2026-08-24T23:51:18.261435+00:00",
+  "checked_at_utc": "2026-08-25T22:18:23.632637+00:00",
   "decision": {
-    "propertyTypeGroup": "boutique_hotels_and_more",
+    "propertyTypeGroup": "houses",
     "publish": "no",
-    "reason": "Airbnb room-type inventory supports multiple interchangeable units; House is not eligible. AUMARA rooms are pooled multi-unit room types."
+    "reason": "Beds24 roomType chalet belongs to Airbnb propertyTypeGroup houses; listingType entire_home remains consistent while publish stays no for revalidation."
   },
   "mismatches": [],
   "property_id": 324882,
@@ -41,12 +41,12 @@
   "wanted": {
     "674465": {
       "listingType": "entire_home",
-      "propertyTypeGroup": "boutique_hotels_and_more",
+      "propertyTypeGroup": "houses",
       "publish": "no"
     },
     "674466": {
       "listingType": "entire_home",
-      "propertyTypeGroup": "boutique_hotels_and_more",
+      "propertyTypeGroup": "houses",
       "publish": "no"
     }
   },
