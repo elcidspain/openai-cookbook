@@ -1,0 +1,242 @@
+name: Beds24 Airbnb live bridge AUMARA 2026-08-25
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/beds24-airbnb-live-bridge-20260825.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: beds24-airbnb-live-bridge-324882
+  cancel-in-progress: false
+
+jobs:
+  bridge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    environment: Production
+    env:
+      BEDS24_VAULT_KEK: ${{ secrets.BEDS24_REFRESH_CREDENTIAL }}
+      PROPERTY_ID: '324882'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install secure browser runtime
+        run: |
+          pip install 'playwright>=1.55,<2' cryptography
+          playwright install --with-deps chromium
+      - name: Fill Airbnb operational content and push Update
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import base64, datetime as dt, hashlib, json, os, pathlib, re, subprocess, sys, time, urllib.error, urllib.request
+          from cryptography.fernet import Fernet
+          from cryptography.hazmat.primitives import hashes, serialization
+          from cryptography.hazmat.primitives.asymmetric import padding
+          from playwright.sync_api import sync_playwright
+
+          PROPERTY_ID='324882'
+          ROOMS=('674465','674466')
+          LISTINGS={'674465':'1759764557896676605','674466':'1759764847919085354'}
+          USERNAME='EL CID / AUMARA'
+          ROOT=pathlib.Path('aumara-control-tower/evidence/beds24-ui-handshake')
+          CFG=pathlib.Path('aumara-control-tower/config/airbnb_operational_content_20260825.json')
+          OUT=pathlib.Path('aumara-control-tower/evidence/beds24-airbnb-live-bridge-20260825.json')
+          BRIDGE_PATH=f'aumara-control-tower/evidence/beds24-ui-bridge/login-link-{os.environ.get("GITHUB_SHA","")}.enc'
+          KEK=(os.environ.get('BEDS24_VAULT_KEK') or '').strip()
+          if not KEK: raise SystemExit('Production KEK missing')
+          print(f'::add-mask::{KEK}')
+
+          fkey=base64.urlsafe_b64encode(hashlib.sha256(('AUMARA_BEDS24_UI_HANDSHAKE_V1\0'+KEK).encode()).digest())
+          private_pem=Fernet(fkey).decrypt((ROOT/'private.enc').read_text().strip().encode())
+          private=serialization.load_pem_private_key(private_pem,password=None)
+          pwd_ct=base64.b64decode((ROOT/'password.enc').read_text().strip())
+          password=private.decrypt(pwd_ct,padding.OAEP(mgf=padding.MGF1(algorithm=hashes.SHA256()),algorithm=hashes.SHA256(),label=None)).decode().strip()
+          if not password: raise SystemExit('Decrypted Beds24 password empty')
+          print(f'::add-mask::{password}')
+          cfg=json.loads(CFG.read_text(encoding='utf-8'))
+
+          report={'schema':'aumara.beds24-airbnb-live-bridge.v1','started_at_utc':dt.datetime.now(dt.timezone.utc).isoformat(),'property_id':324882,'rooms':{},'updates':[],'connection_status':{},'login_bridge_used':False,'status':'STARTING','secret_exposed':False}
+          def save():
+            OUT.parent.mkdir(parents=True,exist_ok=True)
+            OUT.write_text(json.dumps(report,ensure_ascii=False,indent=2,sort_keys=True)+'\n',encoding='utf-8')
+          def fail(stage,msg):
+            report.update(status='FAILED',stage=stage,diagnostic=msg); save(); print(f'ERROR [{stage}]: {msg}',file=sys.stderr); raise SystemExit(1)
+
+          def poll_login_link():
+            raw=f'https://raw.githubusercontent.com/elcidspain/openai-cookbook/main/{BRIDGE_PATH}'
+            deadline=time.time()+360
+            while time.time()<deadline:
+              try:
+                req=urllib.request.Request(raw+f'?t={int(time.time())}',headers={'Cache-Control':'no-cache','User-Agent':'AUMARA-Control-Tower/1.0'})
+                with urllib.request.urlopen(req,timeout=15) as r:
+                  enc=r.read().decode().strip()
+                if enc:
+                  url=private.decrypt(base64.b64decode(enc),padding.OAEP(mgf=padding.MGF1(algorithm=hashes.SHA256()),algorithm=hashes.SHA256(),label=None)).decode().strip()
+                  if not re.match(r'^https://beds24\.com/control2\.php\?logincode=\d+$',url): fail('login_bridge','Decrypted bridge payload is not a Beds24 login URL')
+                  print(f'::add-mask::{url}')
+                  return url
+              except urllib.error.HTTPError as e:
+                if e.code != 404: print(f'bridge poll HTTP {e.code}',flush=True)
+              except Exception as e:
+                print(f'bridge poll waiting: {type(e).__name__}',flush=True)
+              time.sleep(5)
+            fail('login_bridge','Timed out waiting for encrypted fresh Beds24 login link')
+
+          def select_option_containing(page,needle):
+            for select in page.locator('select').all():
+              try: opts=select.locator('option').evaluate_all("els => els.map(o => ({text:(o.textContent||'').trim(),value:o.value||''}))")
+              except Exception: continue
+              hit=next((o for o in opts if needle in o['text'] or needle in o['value']),None)
+              if hit:
+                if select.input_value()!=hit['value']:
+                  select.select_option(hit['value']); page.wait_for_timeout(1800)
+                return True
+            return False
+
+          def field_near(page,label):
+            # Prefer table rows, then div blocks, and choose a visible text control in the same label container.
+            for selector in ('tr','div'):
+              candidates=page.locator(selector).filter(has_text=label)
+              for i in range(min(candidates.count(),40)):
+                box=candidates.nth(i)
+                ctrls=box.locator("textarea, input[type='text'], input:not([type])")
+                for j in range(ctrls.count()):
+                  c=ctrls.nth(j)
+                  try:
+                    if c.is_visible(): return c
+                  except Exception: pass
+            # Fallback: label text node then first following control before the next Save.
+            txt=page.get_by_text(label,exact=False).first
+            if txt.count():
+              c=txt.locator("xpath=following::*[self::textarea or (self::input and (@type='text' or not(@type)))][1]")
+              if c.count() and c.is_visible(): return c
+            return None
+
+          def fill_required(page,label,value):
+            c=field_near(page,label)
+            if c is None: fail('field_lookup',f'Field not found: {label}')
+            c.fill(value)
+            return {'label':label,'name':c.get_attribute('name') or '', 'id':c.get_attribute('id') or ''}
+
+          def save_after(page,label):
+            txt=page.get_by_text(label,exact=False).first
+            if txt.count():
+              b=txt.locator("xpath=following::*[(self::button or self::input or self::a) and (normalize-space(.)='Save' or @value='Save')][1]")
+              if b.count() and b.is_visible():
+                b.click(); page.wait_for_timeout(2500); return True
+            b=page.locator("button:has-text('Save'), input[value='Save'], a:has-text('Save')").first
+            if b.count() and b.is_visible(): b.click(); page.wait_for_timeout(2500); return True
+            return False
+
+          def open_specific(page,room_id):
+            page.goto('https://beds24.com/control3.php?pagetype=synchroniserairbnbroom',wait_until='domcontentloaded',timeout=60000); page.wait_for_timeout(1800)
+            select_option_containing(page,PROPERTY_ID)
+            page.wait_for_timeout(700)
+            if not select_option_containing(page,room_id): fail('room_select',f'Could not select room {room_id}')
+            page.wait_for_timeout(1600)
+            body=page.locator('body').inner_text()
+            if room_id not in body: print(f'warning: room id {room_id} not visible after selector',flush=True)
+
+          def set_room_content(page,room_id):
+            rcfg=cfg['rooms'][room_id]
+            open_specific(page,room_id)
+            filled=[]
+            # Listing-details operational content.
+            filled.append(fill_required(page,'Check-in Instructions',rcfg['check_in_instructions']))
+            filled.append(fill_required(page,'House Manual',rcfg['house_manual']))
+            if not save_after(page,'House Manual'): fail('save',f'Could not save listing details for {room_id}')
+            # Check-out instructions.
+            open_specific(page,room_id)
+            co=rcfg['checkout']
+            labels=[('Return keys',co['return_keys']),('Turn things off',co['turn_things_off']),('Take out trash',co['take_out_trash']),('Lock up',co['lock_up']),('Gather towels',co['gather_towels']),('Additional instructions',co['additional_instructions'])]
+            for label,value in labels: filled.append(fill_required(page,label,value))
+            if not save_after(page,'Additional instructions'): fail('save',f'Could not save checkout instructions for {room_id}')
+            # Booking rule pre-booking message.
+            open_specific(page,room_id)
+            filled.append(fill_required(page,'Pre-booking Message',rcfg['pre_booking_message']))
+            if not save_after(page,'Pre-booking Message'): fail('save',f'Could not save pre-booking message for {room_id}')
+            report['rooms'][room_id]={'filled':filled,'cleaning_fee_eur':20}
+            save()
+
+          def open_mapping(page):
+            page.goto('https://beds24.com/control3.php?pagetype=synchroniserairbnbmap',wait_until='domcontentloaded',timeout=60000); page.wait_for_timeout(1800)
+            select_option_containing(page,PROPERTY_ID); page.wait_for_timeout(1200)
+
+          def row_for(page,room_id,listing_id):
+            rows=page.locator('tr')
+            row=rows.filter(has_text=room_id).first
+            if row.count(): return row
+            row=rows.filter(has_text=listing_id).first
+            if row.count(): return row
+            return None
+
+          with sync_playwright() as p:
+            browser=p.chromium.launch(headless=True)
+            page=browser.new_page(viewport={'width':1600,'height':1200})
+            page.set_default_timeout(30000)
+            page.on('dialog',lambda d:d.accept())
+            page.goto('https://beds24.com/control3.php',wait_until='domcontentloaded',timeout=60000)
+            user=page.locator("input[name='username'], input[name='user'], input[autocomplete='username'], input[type='email']").first
+            if not user.count(): user=page.locator("input[type='text']").first
+            pw=page.locator("input[name='password'], input[autocomplete='current-password'], input[type='password']").first
+            if not user.count() or not pw.count(): fail('login_form','Beds24 login fields not found')
+            user.fill(USERNAME); pw.fill(password)
+            submit=page.locator("button[type='submit'], input[type='submit'], #loginButton, button:has-text('Log in'), button:has-text('Login'), button:has-text('Sign in')").first
+            if not submit.count(): fail('login_form','Beds24 login button not found')
+            submit.click(); page.wait_for_timeout(3500)
+            if page.locator("input[type='password']").count():
+              report['login_bridge_used']=True; report['stage']='AWAITING_FRESH_LOGIN_LINK'; save(); print(f'AWAITING_LOGIN_LINK {BRIDGE_PATH}',flush=True)
+              link=poll_login_link(); page.goto(link,wait_until='domcontentloaded',timeout=60000); page.wait_for_timeout(3500)
+            if page.locator("input[type='password']").count(): fail('login','Beds24 session still not authorized after fresh login link')
+            report['stage']='AUTHENTICATED'; save()
+
+            for rid in ROOMS: set_room_content(page,rid)
+
+            open_mapping(page)
+            for rid in ROOMS:
+              listing=LISTINGS[rid]
+              row=row_for(page,rid,listing)
+              if row is None or not row.count(): fail('mapping',f'Mapping row missing for {rid}/{listing}')
+              text=row.inner_text()
+              if 'Everything' not in text: fail('sync_type',f'Everything not selected for {rid}')
+              update=row.locator("button:has-text('Update'), a:has-text('Update'), input[value='Update']").first
+              if not update.count(): fail('mapping',f'Update button missing for {rid}')
+              update.click(); page.wait_for_timeout(6500)
+              report['updates'].append({'room_id':rid,'listing_id':listing,'at_utc':dt.datetime.now(dt.timezone.utc).isoformat()}); save()
+              open_mapping(page)
+
+            # Read connection status after content update.
+            for rid in ROOMS:
+              listing=LISTINGS[rid]
+              row=row_for(page,rid,listing)
+              if row is None or not row.count(): fail('mapping',f'Mapping row missing on status check for {rid}')
+              check=row.locator("button:has-text('Check Connection Status'), a:has-text('Check Connection Status'), input[value*='Check Connection Status']").first
+              if check.count():
+                check.click(); page.wait_for_timeout(4500)
+                report['connection_status'][rid]=(page.locator('body').inner_text() or '')[-5000:]
+                open_mapping(page)
+              else:
+                report['connection_status'][rid]='CONTROL_NOT_FOUND'
+            browser.close()
+
+          report['status']='SUCCESS'; report['completed_at_utc']=dt.datetime.now(dt.timezone.utc).isoformat(); report.pop('stage',None); save()
+          # Commit evidence only; the login link itself is one-time and remains encrypted.
+          subprocess.run(['git','config','user.name','github-actions[bot]'],check=True)
+          subprocess.run(['git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com'],check=True)
+          subprocess.run(['git','add',str(OUT)],check=True)
+          if subprocess.run(['git','diff','--cached','--quiet'],check=False).returncode!=0:
+            subprocess.run(['git','commit','-m','Record AUMARA Airbnb live bridge result [skip ci]'],check=True)
+            subprocess.run(['git','pull','--rebase','origin','main'],check=True)
+            subprocess.run(['git','push','origin','HEAD:main'],check=True)
+          print(json.dumps({'status':report['status'],'rooms':list(report['rooms']),'updates':report['updates'],'bridge_used':report['login_bridge_used']},ensure_ascii=False))
+          PY
