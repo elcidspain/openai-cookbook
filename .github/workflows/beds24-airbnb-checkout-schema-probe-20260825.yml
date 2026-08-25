@@ -1,0 +1,56 @@
+name: Beds24 Airbnb checkout schema probe AUMARA 2026-08-25
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/beds24-airbnb-checkout-schema-probe-20260825.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: Production
+    env:
+      BEDS24_API_KEY: ${{ secrets.BEDS24_API_KEY }}
+      BEDS24_PROP_KEY: ${{ secrets.BEDS24_PROP_KEY }}
+    steps:
+      - name: Probe intended fields on Superior and inspect response
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, time, urllib.error, urllib.request
+          api=(os.environ.get('BEDS24_API_KEY') or '').strip(); prop=(os.environ.get('BEDS24_PROP_KEY') or '').strip()
+          if not api or not prop: raise SystemExit('Beds24 credentials missing')
+          print(f'::add-mask::{api}'); print(f'::add-mask::{prop}')
+          auth={'apiKey':api,'propKey':prop}
+          values={
+            'preBookingMessage':'Gracias por elegir Aumara El Cid. Antes de reservar, confirma el número total de huéspedes y revisa las normas de la casa. La piscina y las zonas exteriores son compartidas. Todos los alojamientos son para no fumadores.',
+            'checkOutReturnKeys':'Deja las llaves según las indicaciones recibidas durante el check-in.',
+            'checkOutTurnThingsOff':'Apaga luces, aire acondicionado y otros equipos eléctricos antes de salir.',
+            'checkOutTakeOutTrash':'Deposita la basura en los contenedores indicados para la propiedad.',
+            'checkOutLockUp':'Cierra puertas y ventanas al salir y deja el Chalet Superior correctamente cerrado.',
+            'checkOutGatherTowels':'Deja las toallas usadas juntas en el baño.',
+            'checkOutAdditionalInstructions':'El check-out es antes de las 12:00. Revisa que no queden objetos personales y avisa por Airbnb cuando hayas salido.'
+          }
+          def post(path,payload):
+            req=urllib.request.Request('https://api.beds24.com/json/'+path,data=json.dumps(payload,ensure_ascii=False).encode(),headers={'Content-Type':'application/json','Accept':'application/json'},method='POST')
+            try:
+              with urllib.request.urlopen(req,timeout=60) as r: body=r.read(); status=r.status
+            except urllib.error.HTTPError as e: body=e.read(); status=e.code
+            try: data=json.loads(body.decode('utf-8','replace')) if body else {}
+            except Exception: data={'raw':body.decode('utf-8','replace')[:2000]}
+            if not 200 <= int(status) < 300: raise SystemExit(f'{path} HTTP {status}: {str(data)[:1500]}')
+            return data
+          wr=post('setPropertyContent',{'authentication':auth,'setPropertyContent':[{'action':'modify','roomIds':{'674466':{'airbnb':values}}}]})
+          time.sleep(5)
+          root=(post('getPropertyContent',{'authentication':auth,'bookingData':False,'images':False,'roomIds':True,'texts':True,'includeAirbnb':True,'includeVrbo':False}).get('getPropertyContent') or [{}])[0]
+          air=((root.get('roomIds') or {}).get('674466') or {}).get('airbnb') or {}
+          interesting={k:v for k,v in air.items() if any(x in k.lower() for x in ('check','book','return','trash','towel','lock','turn','instruction'))}
+          print(json.dumps({'write_response':wr,'interesting_after':interesting,'airbnb_keys':sorted(air.keys())},ensure_ascii=False))
+          PY
