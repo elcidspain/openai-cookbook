@@ -299,6 +299,10 @@ class DynamoClaimAtomicTests(unittest.TestCase):
             "'AUMARA control: run Beds24 photo vault sync':'beds24-photo-sync-vault-controller.yml'",
             workflow,
         )
+        self.assertIn(
+            "'AUMARA control: sync Beds24 photos from vault':'beds24-photo-sync-vault-controller.yml'",
+            workflow,
+        )
 
     def test_photo_vault_controller_accepts_registered_retry_title(self) -> None:
         workflow = (
@@ -311,6 +315,23 @@ class DynamoClaimAtomicTests(unittest.TestCase):
             "github.event.issue.title == 'AUMARA control: run Beds24 photo vault sync'",
             workflow,
         )
+        self.assertIn(
+            "github.event.issue.title == 'AUMARA control: sync Beds24 photos from vault'",
+            workflow,
+        )
+
+    def test_update_photo_workflow_supports_refresh_vault_rotation(self) -> None:
+        workflow = (
+            ROOT.parent
+            / ".github"
+            / "workflows"
+            / "update-beds24-photos.yml"
+        ).read_text(encoding="utf-8")
+        self.assertIn("BEDS24_REFRESH_CREDENTIAL: ${{ secrets.BEDS24_REFRESH_CREDENTIAL }}", workflow)
+        self.assertIn("https://beds24.com/api/v2/authentication/token", workflow)
+        self.assertIn("if isinstance(rotated, str) and rotated:", workflow)
+        self.assertIn("BEDS24_ROTATED_OUT", workflow)
+        self.assertIn('name: Upload 10 approved photos to property 324882', workflow)
 
     def test_shadow_workflow_tolerates_auth_drift_with_degraded_summary(self) -> None:
         workflow = (

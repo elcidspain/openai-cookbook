@@ -17,6 +17,7 @@ jobs:
     timeout-minutes: 25
     environment: Production
     env:
+      BEDS24_REFRESH_CREDENTIAL: ${{ secrets.BEDS24_REFRESH_CREDENTIAL }}
       BEDS24_API_KEY: ${{ secrets.BEDS24_API_KEY }}
       BEDS24_PROP_KEY: ${{ secrets.BEDS24_PROP_KEY }}
       PROPERTY_ID: "324882"
@@ -53,16 +54,26 @@ jobs:
 
           api_key = (os.environ.get("BEDS24_API_KEY") or "").strip().strip('"').strip("'")
           prop_key = (os.environ.get("BEDS24_PROP_KEY") or "").strip().strip('"').strip("'")
+          refresh_credential = (
+              os.environ.get("BEDS24_REFRESH_CREDENTIAL")
+              or os.environ.get("BEDS24_REFRESH_TOKEN")
+              or ""
+          ).strip().strip('"').strip("'")
+          access_token = ""
+          auth_mode = ""
+          rotated = ""
 
           def mask(v: str):
               if v: print(f"::add-mask::{v}", flush=True)
-          mask(api_key); mask(prop_key)
+          mask(api_key); mask(prop_key); mask(refresh_credential)
 
           evidence: dict[str, Any] = {
               "checked_at_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
               "property_id": PROPERTY_ID,
-              "auth_mode": "api_prop_keys",
-              "credential_present": bool(api_key and prop_key),
+              "auth_mode": None,
+              "credential_present": bool((api_key and prop_key) or refresh_credential),
+              "token_exchange_http_status": None,
+              "rotated_refresh_received": False,
               "downloaded_files": [],
               "write_attempts": [],
               "picture_count_before": None,
@@ -76,9 +87,19 @@ jobs:
               evidence["status"]="FAILED"; evidence["failure_stage"]=stage; evidence["diagnostic"]=msg; save_evidence()
               print(f"ERROR [{stage}]: {msg}", file=sys.stderr); raise SystemExit(1)
 
-          def request_json(url, payload):
-              data=json.dumps(payload).encode()
-              req=urllib.request.Request(url, data=data, headers={"Content-Type":"application/json","Accept":"application/json","User-Agent":"AUMARA-V1/1.0"}, method="POST")
+          def request_json(url, payload=None, headers=None, method=None):
+              data=None if payload is None else json.dumps(payload).encode()
+              req=urllib.request.Request(
+                  url,
+                  data=data,
+                  headers={
+                      "Accept":"application/json",
+                      "User-Agent":"AUMARA-V1/1.0",
+                      **({"Content-Type":"application/json"} if data is not None else {}),
+                      **(headers or {}),
+                  },
+                  method=method or ("POST" if data is not None else "GET"),
+              )
               try:
                   with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
                       raw=r.read(); status=int(r.status)
@@ -89,6 +110,36 @@ jobs:
               except:
                   body={}
               return status, body
+
+          def build_v1_auth_attempts():
+              if api_key and prop_key:
+                  return [
+                      ("api_prop_keys", {"authentication": {"apiKey": api_key, "propKey": prop_key}}, {}),
+                  ]
+              return [
+                  ("access_token_payload", {"authentication": {"token": access_token}}, {}),
+                  ("access_token_header", {}, {"token": access_token}),
+              ]
+
+          def v1_call(path, payload):
+              last_status = 0
+              last_body = {}
+              last_kind = "unknown"
+              for auth_kind, auth_payload, auth_headers in build_v1_auth_attempts():
+                  merged = dict(payload)
+                  merged.update(auth_payload)
+                  status, body = request_json(
+                      f"https://api.beds24.com/json/{path}",
+                      merged,
+                      headers=auth_headers,
+                      method="POST",
+                  )
+                  last_status = status
+                  last_body = body
+                  last_kind = auth_kind
+                  if 200 <= status < 300:
+                      return status, body, auth_kind
+              return last_status, last_body, last_kind
 
           def download_drive_file(file_id: str, dest: pathlib.Path):
               cj=http.cookiejar.CookieJar()
@@ -115,11 +166,51 @@ jobs:
                       continue
               raise RuntimeError("Google Drive download failed")
 
-          if not api_key or not prop_key:
-              fail("credential","BEDS24_API_KEY or BEDS24_PROP_KEY empty in Production secrets")
+          if api_key and prop_key:
+              auth_mode = "api_prop_keys"
+          elif refresh_credential:
+              details_status, details_body = request_json(
+                  "https://beds24.com/api/v2/authentication/details",
+                  headers={"token": refresh_credential},
+                  method="GET",
+              )
+              if (
+                  200 <= details_status < 300
+                  and isinstance(details_body, dict)
+                  and details_body.get("validToken") is True
+              ):
+                  access_token = refresh_credential
+                  auth_mode = "access_token"
+              else:
+                  exchange_status, exchange_body = request_json(
+                      "https://beds24.com/api/v2/authentication/token",
+                      headers={"refreshToken": refresh_credential},
+                      method="GET",
+                  )
+                  evidence["token_exchange_http_status"] = exchange_status
+                  candidate = exchange_body.get("token") if isinstance(exchange_body, dict) else None
+                  rotated = exchange_body.get("refreshToken") if isinstance(exchange_body, dict) else None
+                  if not (
+                      200 <= exchange_status < 300
+                      and isinstance(candidate, str)
+                      and candidate
+                  ):
+                      fail("credential", f"Beds24 refresh credential did not return access token (HTTP {exchange_status})")
+                  access_token = candidate.strip()
+                  auth_mode = "refresh_token"
+              if isinstance(rotated, str) and rotated:
+                  mask(rotated)
+                  evidence["rotated_refresh_received"] = True
+                  rotated_out = (os.environ.get("BEDS24_ROTATED_OUT") or "").strip()
+                  if rotated_out:
+                      pathlib.Path(rotated_out).write_text(rotated, encoding="utf-8")
+          else:
+              fail("credential","No Beds24 credentials found (need API+PROP keys or BEDS24_REFRESH_CREDENTIAL)")
+          evidence["auth_mode"] = auth_mode
 
           # BEFORE count via getPropertyContent V1
-          status, body = request_json("https://api.beds24.com/json/getPropertyContent", {"authentication":{"apiKey":api_key,"propKey":prop_key},"propId":int(PROPERTY_ID)})
+          status, body, before_auth_kind = v1_call("getPropertyContent", {"propId":int(PROPERTY_ID)})
+          evidence["before_read_auth"] = before_auth_kind
           # try to count pictures in response
           before = 0
           try:
@@ -146,19 +237,27 @@ jobs:
           for fname, _ in PHOTO_MANIFEST:
               path=DOWNLOAD_DIR/fname
               b64=base64.b64encode(path.read_bytes()).decode()
-              # Beds24 V1 setPropertyContent format: authentication, propId, images with name and data
-              payload={
-                  "authentication":{"apiKey":api_key,"propKey":prop_key},
-                  "propId": int(PROPERTY_ID),
-                  "images": [{"name": fname, "data": b64}]
-              }
-              # Try setPropertyContent
+              payload={"propId": int(PROPERTY_ID), "images": [{"name": fname, "data": b64}]}
+              # Try setPropertyContent paths and all relevant auth shapes.
               for endpoint in ["https://api.beds24.com/json/setPropertyContent","https://api.beds24.com/json/setProperty"]:
-                  s, resp = request_json(endpoint, payload)
-                  evidence["write_attempts"].append({"filename":fname,"url":endpoint,"http_status":s,"response_keys":list(resp.keys())[:20] if isinstance(resp, dict) else str(resp)[:300]})
-                  save_evidence()
-                  if 200 <= s < 300:
-                      accepted+=1
+                  wrote = False
+                  for auth_kind, auth_payload, auth_headers in build_v1_auth_attempts():
+                      write_payload = dict(payload)
+                      write_payload.update(auth_payload)
+                      s, resp = request_json(endpoint, write_payload, headers=auth_headers, method="POST")
+                      evidence["write_attempts"].append({
+                          "filename":fname,
+                          "url":endpoint,
+                          "auth_kind":auth_kind,
+                          "http_status":s,
+                          "response_keys":list(resp.keys())[:20] if isinstance(resp, dict) else str(resp)[:300]
+                      })
+                      save_evidence()
+                      if 200 <= s < 300:
+                          accepted+=1
+                          wrote = True
+                          break
+                  if wrote:
                       break
                   # small delay to avoid block
               import time; time.sleep(2)
@@ -166,12 +265,20 @@ jobs:
           evidence["accepted_count"]=accepted
 
           # AFTER count
-          status2, body2 = request_json("https://api.beds24.com/json/getPropertyContent", {"authentication":{"apiKey":api_key,"propKey":prop_key},"propId":int(PROPERTY_ID)})
-          evidence["picture_count_after"]=evidence["picture_count_before"]
+          status2, body2, after_auth_kind = v1_call("getPropertyContent", {"propId":int(PROPERTY_ID)})
+          evidence["after_read_auth"] = after_auth_kind
+          after = 0
+          try:
+              if isinstance(body2, dict):
+                  txt2=json.dumps(body2).lower()
+                  after = txt2.count("picture") + txt2.count("image")
+          except:
+              pass
+          evidence["picture_count_after"]=after
           save_evidence()
 
           if accepted < 10:
-              fail("upload", f"V1 accepted only {accepted}/10. Check BEDS24_API_KEY/PROP_KEY and Beds24 property 324882 access. Attempts: {evidence['write_attempts'][-3:]}")
+              fail("upload", f"Beds24 accepted only {accepted}/10 using {auth_mode}. Check property 324882 auth scope. Attempts: {evidence['write_attempts'][-3:]}")
 
           evidence["status"]="SUCCESS"
           save_evidence()
