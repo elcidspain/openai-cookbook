@@ -20,96 +20,96 @@ jobs:
     timeout-minutes: 10
     environment: Production
     env:
-      BEDS24_REFRESH_TOKEN: ${{ secrets.BEDS24_REFRESH_CREDENTIAL }}
       BEDS24_API_KEY: ${{ secrets.BEDS24_API_KEY }}
       BEDS24_PROP_KEY: ${{ secrets.BEDS24_PROP_KEY }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Audit exported Airbnb listings without modifying channel state
+      - name: Read back exported Airbnb listings without modifying channel state
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          import datetime as dt, json, os, pathlib, subprocess, urllib.error, urllib.parse, urllib.request
+          import datetime as dt, json, os, pathlib, subprocess, urllib.error, urllib.request
 
-          refresh=(os.environ.get('BEDS24_REFRESH_TOKEN') or '').strip()
           api=(os.environ.get('BEDS24_API_KEY') or '').strip()
           prop=(os.environ.get('BEDS24_PROP_KEY') or '').strip()
-          for secret in (refresh,api,prop):
-              if secret: print(f'::add-mask::{secret}')
-          if not refresh: raise SystemExit('BEDS24_REFRESH_CREDENTIAL missing')
+          if not api or not prop:
+              raise SystemExit('Beds24 V1 content credentials missing in Production')
+          print(f'::add-mask::{api}')
+          print(f'::add-mask::{prop}')
 
-          def call(method,url,headers=None,data=None):
-              req=urllib.request.Request(url,data=data,headers=headers or {},method=method)
-              try:
-                  with urllib.request.urlopen(req,timeout=90) as r:
-                      body=r.read(); status=int(r.status)
-              except urllib.error.HTTPError as e:
-                  body=e.read(); status=int(e.code)
-              try: parsed=json.loads(body.decode('utf-8','replace')) if body else None
-              except Exception: parsed={'raw':body.decode('utf-8','replace')[:1000]}
-              return status, parsed
-
-          status, auth=call('GET','https://beds24.com/api/v2/authentication/token',headers={'accept':'application/json','refreshToken':refresh})
-          if status!=200 or not isinstance(auth,dict) or not auth.get('token'):
-              raise SystemExit(f'Beds24 V2 auth failed HTTP {status}: {str(auth)[:500]}')
-          token=auth['token']; print(f'::add-mask::{token}')
-
-          status, users=call('GET','https://beds24.com/api/v2/channels/airbnb/users',headers={'accept':'application/json','token':token})
+          payload=json.dumps({
+              'authentication':{'apiKey':api,'propKey':prop},
+              'bookingData':False,
+              'images':False,
+              'roomIds':True,
+              'texts':True,
+              'includeAirbnb':True,
+              'includeVrbo':False
+          }).encode()
+          req=urllib.request.Request(
+              'https://api.beds24.com/json/getPropertyContent',
+              data=payload,
+              headers={'Content-Type':'application/json','Accept':'application/json'},
+              method='POST')
+          try:
+              with urllib.request.urlopen(req,timeout=90) as r:
+                  body=r.read(); status=int(r.status)
+          except urllib.error.HTTPError as e:
+              body=e.read(); status=int(e.code)
+          try: data=json.loads(body.decode('utf-8','replace')) if body else {}
+          except Exception: data={}
           if not 200 <= status < 300:
-              raise SystemExit(f'Airbnb users read failed HTTP {status}: {str(users)[:500]}')
+              raise SystemExit(f'getPropertyContent HTTP {status}: {str(data)[:1000]}')
 
-          user_rows=[]
-          if isinstance(users,dict):
-              candidate=users.get('data') or users.get('users') or []
-              if isinstance(candidate,list): user_rows=candidate
-          elif isinstance(users,list):
-              user_rows=users
-
-          listing_reads=[]
-          for row in user_rows:
-              if not isinstance(row,dict): continue
-              uid=row.get('id') or row.get('airbnbUserId') or row.get('userId')
-              if uid is None: continue
-              attempts=[]
-              for key in ('airbnbUserId','userId'):
-                  url='https://beds24.com/api/v2/channels/airbnb/listings?'+urllib.parse.urlencode({key:str(uid)})
-                  s,p=call('GET',url,headers={'accept':'application/json','token':token})
-                  attempts.append({'query_key':key,'status':s,'payload':p})
-                  if 200 <= s < 300: break
-              listing_reads.append({'airbnb_user_id':str(uid),'attempts':attempts})
-
-          v1=None
-          if api and prop:
-              payload=json.dumps({'authentication':{'apiKey':api,'propKey':prop},'bookingData':False,'images':False,'roomIds':True,'texts':True,'includeAirbnb':True,'includeVrbo':False}).encode()
-              s,v1=call('POST','https://api.beds24.com/json/getPropertyContent',headers={'Content-Type':'application/json','Accept':'application/json'},data=payload)
-              if not 200 <= s < 300:
-                  v1={'error':f'HTTP {s}','payload':v1}
+          rows=data.get('getPropertyContent') if isinstance(data,dict) else None
+          if not isinstance(rows,list) or not rows or not isinstance(rows[0],dict):
+              raise SystemExit('Unexpected getPropertyContent response')
+          root=rows[0]
 
           room_state={}
-          try:
-              root=(v1.get('getPropertyContent') or [])[0]
-              for rid in ('674465','674466'):
-                  airbnb=((root.get('roomIds') or {}).get(rid) or {}).get('airbnb') or {}
-                  room_state[rid]={k:airbnb.get(k) for k in ('listingId','publish','propertyTypeGroup','listingType','priceStategy','cancellationPolicy')}
-          except Exception:
-              room_state={}
+          blockers=[]
+          for rid in ('674465','674466'):
+              room=((root.get('roomIds') or {}).get(rid) or {})
+              airbnb=room.get('airbnb') or {}
+              state={
+                  'listingId':airbnb.get('listingId'),
+                  'publish':airbnb.get('publish'),
+                  'propertyTypeGroup':airbnb.get('propertyTypeGroup'),
+                  'listingType':airbnb.get('listingType'),
+                  'priceStrategy':airbnb.get('priceStategy'),
+                  'cancellationPolicy':airbnb.get('cancellationPolicy'),
+                  'discountDays2':airbnb.get('discountDays2'),
+                  'discountDays3':airbnb.get('discountDays3'),
+                  'discountDays4':airbnb.get('discountDays4'),
+                  'discountDays5':airbnb.get('discountDays5'),
+                  'discountDays6':airbnb.get('discountDays6'),
+                  'discountDays7':airbnb.get('discountDays7'),
+                  'discountDays14':airbnb.get('discountDays14'),
+                  'discountDays21':airbnb.get('discountDays21'),
+                  'discountDays28':airbnb.get('discountDays28'),
+                  'discountWeekly':airbnb.get('discountWeekly'),
+                  'discountMonthly':airbnb.get('discountMonthly')
+              }
+              room_state[rid]=state
+              if not str(state['listingId'] or '').strip(): blockers.append({'roomId':rid,'field':'listingId','got':state['listingId']})
+              if str(state['publish']).lower()!='no': blockers.append({'roomId':rid,'field':'publish','got':state['publish']})
+              if str(state['propertyTypeGroup']).lower()!='boutique_hotels_and_more': blockers.append({'roomId':rid,'field':'propertyTypeGroup','got':state['propertyTypeGroup']})
+              if str(state['listingType']).lower()!='entire_home': blockers.append({'roomId':rid,'field':'listingType','got':state['listingType']})
 
           evidence={
-              'schema':'aumara.beds24-airbnb-post-export-audit.v1',
+              'schema':'aumara.beds24-airbnb-post-export-audit.v2',
               'checked_at_utc':dt.datetime.now(dt.timezone.utc).isoformat(),
               'property_id':324882,
               'room_state':room_state,
-              'airbnb_users':users,
-              'airbnb_listing_reads':listing_reads,
-              'status':'SUCCESS',
+              'blockers':blockers,
+              'status':'SUCCESS' if not blockers else 'BLOCKED',
               'secret_exposed':False
           }
           text=json.dumps(evidence,ensure_ascii=False,indent=2,sort_keys=True)
-          for secret in (refresh,api,prop,token):
-              if secret: text=text.replace(secret,'[REDACTED]')
+          for secret in (api,prop): text=text.replace(secret,'[REDACTED]')
           out=pathlib.Path('aumara-control-tower/evidence/beds24-airbnb-post-export-audit-20260825.json')
           out.parent.mkdir(parents=True,exist_ok=True)
           out.write_text(text+'\n',encoding='utf-8')
@@ -118,8 +118,11 @@ jobs:
           subprocess.run(['git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com'],check=True)
           subprocess.run(['git','add',str(out)],check=True)
           if subprocess.run(['git','diff','--cached','--quiet'],check=False).returncode != 0:
-              subprocess.run(['git','commit','-m','Record AUMARA Airbnb post-export audit [skip ci]'],check=True)
+              subprocess.run(['git','commit','-m',f'Record AUMARA Airbnb post-export audit {evidence["status"]} [skip ci]'],check=True)
               subprocess.run(['git','pull','--rebase','origin','main'],check=True)
               subprocess.run(['git','push','origin','HEAD:main'],check=True)
-          print(json.dumps({'status':'SUCCESS','room_state':room_state,'airbnb_users_found':len(user_rows),'listing_reads':len(listing_reads)},ensure_ascii=False))
+
+          print(json.dumps({'status':evidence['status'],'room_state':room_state,'blockers':blockers},ensure_ascii=False))
+          if blockers:
+              raise SystemExit(2)
           PY
