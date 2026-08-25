@@ -1,0 +1,66 @@
+name: Beds24 Airbnb field probe AUMARA 2026-08-25
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/beds24-airbnb-field-probe-20260825.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: Production
+    env:
+      BEDS24_API_KEY: ${{ secrets.BEDS24_API_KEY }}
+      BEDS24_PROP_KEY: ${{ secrets.BEDS24_PROP_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Read exact Airbnb content field names
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import datetime as dt, json, os, pathlib, subprocess, urllib.error, urllib.request
+          api=(os.environ.get('BEDS24_API_KEY') or '').strip()
+          prop=(os.environ.get('BEDS24_PROP_KEY') or '').strip()
+          if not api or not prop: raise SystemExit('Beds24 credentials missing')
+          print(f'::add-mask::{api}'); print(f'::add-mask::{prop}')
+          payload={'authentication':{'apiKey':api,'propKey':prop},'bookingData':False,'images':False,'roomIds':True,'texts':True,'includeAirbnb':True,'includeVrbo':False}
+          req=urllib.request.Request('https://api.beds24.com/json/getPropertyContent',data=json.dumps(payload).encode(),headers={'Content-Type':'application/json','Accept':'application/json'},method='POST')
+          try:
+              with urllib.request.urlopen(req,timeout=90) as r: raw=r.read(); status=int(r.status)
+          except urllib.error.HTTPError as e: raw=e.read(); status=int(e.code)
+          data=json.loads(raw.decode('utf-8','replace')) if raw else {}
+          if not 200 <= status < 300: raise SystemExit(f'HTTP {status}: {str(data)[:1200]}')
+          root=(data.get('getPropertyContent') or [{}])[0]
+          out={'schema':'aumara.beds24-airbnb-field-probe.v1','checked_at_utc':dt.datetime.now(dt.timezone.utc).isoformat(),'rooms':{},'secret_exposed':False}
+          for rid in ('674465','674466'):
+              room=(root.get('roomIds') or {}).get(rid) or {}
+              air=room.get('airbnb') or {}
+              interesting={}
+              for k,v in air.items():
+                  lk=k.lower()
+                  if any(t in lk for t in ('check','house','book','clean','manual','key','trash','towel','lock','turn','instruction','pre')):
+                      interesting[k]=v
+              out['rooms'][rid]={'room_cleaningFee':room.get('cleaningFee'),'airbnb_keys':sorted(air.keys()),'interesting':interesting}
+          path=pathlib.Path('aumara-control-tower/evidence/beds24-airbnb-field-probe-20260825.json')
+          path.parent.mkdir(parents=True,exist_ok=True)
+          text=json.dumps(out,ensure_ascii=False,indent=2,sort_keys=True)
+          for secret in (api,prop): text=text.replace(secret,'[REDACTED]')
+          path.write_text(text+'\n',encoding='utf-8')
+          subprocess.run(['git','config','user.name','github-actions[bot]'],check=True)
+          subprocess.run(['git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com'],check=True)
+          subprocess.run(['git','add',str(path)],check=True)
+          if subprocess.run(['git','diff','--cached','--quiet'],check=False).returncode!=0:
+              subprocess.run(['git','commit','-m','Record AUMARA Airbnb field probe [skip ci]'],check=True)
+              subprocess.run(['git','pull','--rebase','origin','main'],check=True)
+              subprocess.run(['git','push','origin','HEAD:main'],check=True)
+          print(json.dumps({'status':'SUCCESS','rooms':{r:{'keys':out['rooms'][r]['airbnb_keys'],'interesting':out['rooms'][r]['interesting']} for r in out['rooms']}},ensure_ascii=False))
+          PY
