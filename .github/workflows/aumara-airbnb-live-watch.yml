@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
-      - name: Wait for both Airbnb listings to become public
+      - name: Observe public Airbnb endpoints without declaring listing state
         shell: bash
         run: |
           set -euo pipefail
@@ -22,24 +22,20 @@ jobs:
           SUPERIOR='https://www.airbnb.com/rooms/1759764847919085354'
 
           for attempt in $(seq 1 20); do
-            chalet_code=$(curl -A 'Mozilla/5.0' -L -sS -o /dev/null -w '%{http_code}' --max-time 20 "$CHALET" || true)
-            superior_code=$(curl -A 'Mozilla/5.0' -L -sS -o /dev/null -w '%{http_code}' --max-time 20 "$SUPERIOR" || true)
-            echo "attempt=${attempt} chalet=${chalet_code} superior=${superior_code}"
+            chalet_code=$(curl -A 'Mozilla/5.0' -L -sS -o /tmp/chalet.html -w '%{http_code}' --max-time 20 "$CHALET" || true)
+            superior_code=$(curl -A 'Mozilla/5.0' -L -sS -o /tmp/superior.html -w '%{http_code}' --max-time 20 "$SUPERIOR" || true)
+            echo "attempt=${attempt} chalet_http=${chalet_code} superior_http=${superior_code}"
 
-            if [[ "$chalet_code" == '200' && "$superior_code" == '200' ]]; then
-              echo 'Both Airbnb listings are public.'
-              exit 0
-            fi
-
+            # HTTP 200 alone is NOT proof that Airbnb has published a listing.
+            # Airbnb can serve an application shell for a listing still marked In progress.
+            # Canonical publication truth is the authenticated Airbnb host listing state.
             sleep 30
           done
 
-          echo 'Timed out waiting for both Airbnb listings to return HTTP 200.' >&2
-          exit 1
+          echo 'Endpoint observation complete; authenticated host status is required for LIVE verification.'
 
-      - name: Record live cutover on issue 83
-        if: success()
+      - name: Record observation only
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh issue comment 83 --repo "$GITHUB_REPOSITORY" --body $'Airbnb live cutover VERIFIED by automated public endpoint watch:\n\n- Chalet 1759764557896676605: HTTP 200\n- Superior Chalet 1759764847919085354: HTTP 200\n- Both listings are publicly reachable.\n\nAUMARA Airbnb cutover is complete.'
+          gh issue comment 83 --repo "$GITHUB_REPOSITORY" --body $'Airbnb endpoint observation completed. HTTP status is informational only and is no longer treated as proof of publication. Canonical LIVE gate: authenticated Airbnb host listing state must show **Listed** for both AUMARA listings. Do not close this issue while either listing shows **In progress**.'
