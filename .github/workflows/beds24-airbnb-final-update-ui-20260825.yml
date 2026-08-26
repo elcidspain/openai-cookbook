@@ -1,276 +1,85 @@
-name: Beds24 Airbnb final content update AUMARA 2026-08-25
+name: Push corrected AUMARA Chalet to Airbnb 2026-08-26
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
     paths:
       - '.github/workflows/beds24-airbnb-final-update-ui-20260825.yml'
-  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: beds24-airbnb-final-update-324882
-  cancel-in-progress: false
+  group: beds24-airbnb-chalet-push-324882
+  cancel-in-progress: true
 
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     environment: Production
     env:
       BEDS24_USERNAME: ${{ secrets.BEDS24_USERNAME }}
       BEDS24_PASSWORD: ${{ secrets.BEDS24_PASSWORD }}
-      USER_CONFIRMED_AT: '2026-08-25T03:44:00+02:00'
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-
       - name: Install browser runtime
         run: |
           pip install 'playwright>=1.55,<2'
           playwright install --with-deps chromium
-
-      - name: Push verified Beds24 content to both Airbnb listings
+      - name: Click Update for Chalet only and verify Beds24 response
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          import datetime as dt
-          import json
-          import os
-          import pathlib
-          import re
-          import subprocess
-          import sys
-          from urllib.parse import parse_qsl, urlsplit, urlunsplit
-          from playwright.sync_api import sync_playwright, TimeoutError as PwTimeout
-
-          PROPERTY_ID = '324882'
-          TARGETS = {
-              '674465': '1759764557896676605',
-              '674466': '1759764847919085354',
-          }
-          username = (os.getenv('BEDS24_USERNAME') or '').strip() or 'EL CID / AUMARA'
-          password = (os.getenv('BEDS24_PASSWORD') or '').strip()
-          confirmed = (os.getenv('USER_CONFIRMED_AT') or '').strip()
-          if password:
-              print(f'::add-mask::{password}')
-
-          evidence_dir = pathlib.Path('aumara-control-tower/evidence')
-          evidence_dir.mkdir(parents=True, exist_ok=True)
-          evidence_path = evidence_dir / 'beds24-airbnb-final-update-ui-20260825.json'
-          report = {
-              'schema': 'aumara.beds24-airbnb-final-update-ui.v1',
-              'property_id': int(PROPERTY_ID),
-              'user_confirmed_at': confirmed,
-              'checked_at_utc': dt.datetime.now(dt.timezone.utc).isoformat(),
-              'targets': TARGETS,
-              'clicked': [],
-              'write_responses': [],
-              'visible_errors': [],
-              'status': 'STARTING',
-              'secret_exposed': False,
-          }
-
-          def save():
-              evidence_path.write_text(json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + '\n', encoding='utf-8')
-
-          def fail(stage, message):
-              report.update(status='FAILED', stage=stage, diagnostic=message)
-              save()
-              print(f'ERROR [{stage}]: {message}', file=sys.stderr)
-              raise SystemExit(1)
-
-          def safe_url(value):
-              parts = urlsplit(value)
-              keys = sorted({k for k, _ in parse_qsl(parts.query, keep_blank_values=True)})
-              return urlunsplit((parts.scheme, parts.netloc, parts.path, '&'.join(f'{k}=[REDACTED]' for k in keys), ''))[:500]
-
-          if not confirmed:
-              fail('authorization', 'Explicit user confirmation marker missing')
-          if not password:
-              fail('credentials', 'Production secret BEDS24_PASSWORD is empty')
-
+          import json, os, sys
+          from playwright.sync_api import sync_playwright
+          RID='674465'; LID='1759764557896676605'; PID='324882'
+          user=(os.getenv('BEDS24_USERNAME') or '').strip() or 'EL CID / AUMARA'; pw=(os.getenv('BEDS24_PASSWORD') or '').strip()
+          if not pw: raise SystemExit('BEDS24_PASSWORD missing')
+          print(f'::add-mask::{user}'); print(f'::add-mask::{pw}')
           with sync_playwright() as p:
-              browser = p.chromium.launch(headless=True)
-              page = browser.new_page(viewport={'width': 1600, 'height': 1200})
-              page.set_default_timeout(30000)
-              page.on('dialog', lambda dialog: dialog.accept())
-
-              def record_response(response):
-                  if response.request.method in ('POST', 'PUT', 'PATCH'):
-                      report['write_responses'].append({
-                          'method': response.request.method,
-                          'status': response.status,
-                          'url': safe_url(response.url),
-                      })
-              page.on('response', record_response)
-
-              def login():
-                  page.goto('https://beds24.com/control3.php', wait_until='domcontentloaded', timeout=60000)
-                  user = page.locator("input[name='username'], input[name='user'], input[name='email'], input[autocomplete='username'], input[type='email']").first
-                  if not user.count():
-                      user = page.locator("input[type='text']").first
-                  secret = page.locator("input[name='password'], input[autocomplete='current-password'], input[type='password']").first
-                  if not user.count() or not secret.count():
-                      fail('login_form', 'Beds24 login fields not found')
-                  user.fill(username)
-                  secret.fill(password)
-                  submit = page.locator("button[type='submit'], input[type='submit'], #loginButton, button:has-text('Log in'), button:has-text('Login'), button:has-text('Sign in')").first
-                  if not submit.count():
-                      fail('login_form', 'Beds24 login button not found')
-                  submit.click()
-                  page.wait_for_timeout(4000)
-                  if 'login' in page.url.lower() or page.locator("input[type='password']").count():
-                      fail('login', 'Beds24 rejected control-panel login')
-
-              def mapping_page():
-                  candidates = [
-                      'https://beds24.com/control3.php?pagetype=synchroniserairbnbmap',
-                      'https://beds24.com/control3.php?pagetype=synchroniserairbnbmapping',
-                  ]
-                  loaded = False
-                  for url in candidates:
-                      page.goto(url, wait_until='domcontentloaded', timeout=60000)
-                      page.wait_for_timeout(1800)
-                      body = page.locator('body').inner_text()
-                      if 'Airbnb' in body and ('Mapping' in body or 'mapping' in body.lower()):
-                          loaded = True
-                          break
-                  if not loaded:
-                      # Derive Mapping URL from the working Airbnb navigation instead of guessing further.
-                      page.goto('https://beds24.com/control3.php?pagetype=synchroniserairbnbview', wait_until='domcontentloaded', timeout=60000)
-                      page.wait_for_timeout(1200)
-                      links = page.locator('a').evaluate_all("els => els.map(a => ({text:(a.innerText||'').trim(), href:a.href||''}))")
-                      hit = next((x['href'] for x in links if x['text'].strip().lower() == 'mapping'), None)
-                      if not hit:
-                          fail('mapping_nav', 'Airbnb Mapping link not found from View Content')
-                      page.goto(hit, wait_until='domcontentloaded', timeout=60000)
-                      page.wait_for_timeout(1800)
-
-                  # Select the exact property if the page exposes a property selector.
-                  for select in page.locator('select').all():
-                      try:
-                          options = select.locator('option').evaluate_all("els => els.map(o => ({text:(o.textContent||'').trim(), value:o.value||''}))")
-                      except Exception:
-                          continue
-                      match = next((o for o in options if PROPERTY_ID in o['text'] or PROPERTY_ID in o['value']), None)
-                      if match:
-                          current = select.input_value()
-                          if current != match['value']:
-                              select.select_option(match['value'])
-                              page.wait_for_timeout(2500)
-                          break
-
-                  body = page.locator('body').inner_text()
-                  if PROPERTY_ID not in body and 'Aumara El Cid' not in body and 'AUMARA' not in body:
-                      fail('property_gate', 'Mapping page is not visibly scoped to property 324882 / AUMARA')
-                  return body
-
-              def row_for(room_id, listing_id):
-                  rows = page.locator('tr')
-                  for needle in (room_id, listing_id):
-                      row = rows.filter(has_text=needle).first
-                      if row.count():
-                          return row
-                  # Some Beds24 views use div-based rows.
-                  for needle in (room_id, listing_id):
-                      node = page.get_by_text(needle, exact=False).first
-                      if node.count():
-                          anc = node.locator("xpath=ancestor::*[self::tr or contains(concat(' ',normalize-space(@class),' '),' row ')][1]")
-                          if anc.count():
-                              return anc
-                  return None
-
+            browser=p.chromium.launch(headless=True); page=browser.new_page(viewport={'width':1600,'height':1200}); page.set_default_timeout(30000); page.on('dialog',lambda d:d.accept())
+            writes=[]
+            page.on('response',lambda r: writes.append({'method':r.request.method,'status':r.status,'url':r.url.split('?')[0]}) if r.request.method in ('POST','PUT','PATCH') else None)
+            page.goto('https://beds24.com/control3.php',wait_until='domcontentloaded',timeout=60000)
+            secret=page.locator("input[type='password']").first
+            if secret.count():
+              usr=page.locator("input[name='username'],input[name='user'],input[autocomplete='username'],input[type='email']").first
+              if not usr.count(): usr=page.locator("input[type='text']").first
+              if not usr.count(): raise SystemExit('Beds24 login username field not found')
+              usr.fill(user); secret.fill(pw)
+              btn=page.locator("button[type='submit'],input[type='submit'],#loginButton,button:has-text('Log in'),button:has-text('Login'),button:has-text('Sign in')").first
+              if not btn.count(): raise SystemExit('Beds24 login submit not found')
+              btn.click(); page.wait_for_timeout(4500)
+            if page.locator("input[type='password']").count(): raise SystemExit('Beds24 login requires fresh interactive authorization')
+            page.goto('https://beds24.com/control3.php?pagetype=synchroniserairbnbmap',wait_until='domcontentloaded',timeout=60000); page.wait_for_timeout(1800)
+            # Select AUMARA property if selector is present.
+            for sel in page.locator('select').all():
+              try: opts=sel.locator('option').evaluate_all("els=>els.map(o=>({t:(o.textContent||'').trim(),v:o.value||''}))")
+              except Exception: continue
+              hit=next((o for o in opts if PID in o['t'] or PID in o['v']),None)
+              if hit:
+                if sel.input_value()!=hit['v']: sel.select_option(hit['v']); page.wait_for_timeout(1800)
+                break
+            rows=page.locator('tr'); row=rows.filter(has_text=RID).first
+            if not row.count(): row=rows.filter(has_text=LID).first
+            if not row.count(): raise SystemExit('Exact Chalet mapping row not found')
+            before=row.inner_text()
+            if 'Everything' not in before: raise SystemExit('Chalet Sync Type is not Everything')
+            update=row.locator("button:has-text('Update'),a:has-text('Update'),input[value='Update']").first
+            if not update.count(): raise SystemExit('Chalet Update control not found')
+            n=len(writes); update.click(); page.wait_for_timeout(7000); new=writes[n:]
+            visible=[]
+            for loc in page.locator('.error,.alert-danger,.text-danger,[role="alert"]').all():
               try:
-                  login()
-                  body = mapping_page()
-
-                  # Content/photo push only makes sense for Sync Type Everything.
-                  selected_sync = []
-                  for select in page.locator('select').all():
-                      try:
-                          text = select.locator('option:checked').inner_text().strip()
-                      except Exception:
-                          continue
-                      if text:
-                          selected_sync.append(text)
-                  report['selected_values'] = selected_sync[:50]
-                  if not any(text.strip().lower() == 'everything' for text in selected_sync):
-                      # Do not silently change sync authority; fail closed.
-                      fail('sync_type', f'Sync Type Everything is not selected; selected values: {selected_sync[:20]}')
-
-                  # Preflight both exact Airbnb mappings before any click.
-                  preflight = {}
-                  for room_id, listing_id in TARGETS.items():
-                      row = row_for(room_id, listing_id)
-                      if row is None or not row.count():
-                          fail('mapping_gate', f'Exact mapping row missing for room {room_id} / Airbnb {listing_id}')
-                      text = row.inner_text()
-                      if room_id not in text and listing_id not in text:
-                          fail('mapping_gate', f'Wrong mapping row resolved for room {room_id}')
-                      update = row.locator("button:has-text('Update'), input[type='submit'][value='Update'], input[type='button'][value='Update'], a:has-text('Update')").first
-                      if not update.count():
-                          fail('update_button', f'Update control missing for room {room_id}')
-                      preflight[room_id] = {'listing_id': listing_id, 'row_text': text[:1200]}
-                  report['preflight'] = preflight
-                  save()
-
-                  # Send content on demand, one exact mapped listing at a time.
-                  for room_id, listing_id in TARGETS.items():
-                      mapping_page()
-                      row = row_for(room_id, listing_id)
-                      if row is None or not row.count():
-                          fail('mapping_gate', f'Mapping row disappeared for room {room_id}')
-                      update = row.locator("button:has-text('Update'), input[type='submit'][value='Update'], input[type='button'][value='Update'], a:has-text('Update')").first
-                      if not update.count():
-                          fail('update_button', f'Update control disappeared for room {room_id}')
-                      before_writes = len(report['write_responses'])
-                      update.click()
-                      page.wait_for_timeout(6500)
-                      report['clicked'].append({'room_id': room_id, 'listing_id': listing_id, 'at_utc': dt.datetime.now(dt.timezone.utc).isoformat()})
-                      new_writes = report['write_responses'][before_writes:]
-                      if not any(200 <= int(x.get('status', 0)) < 400 for x in new_writes):
-                          fail('update_response', f'No successful write response observed after Update for room {room_id}')
-                      # Capture only explicit visible error elements; do not flag help text containing the word error.
-                      visible = []
-                      for loc in page.locator('.error, .alert-danger, .text-danger, [role="alert"]').all():
-                          try:
-                              if loc.is_visible():
-                                  text = loc.inner_text().strip()
-                                  if text:
-                                      visible.append(text[:1000])
-                          except Exception:
-                              pass
-                      if visible:
-                          report['visible_errors'].append({'room_id': room_id, 'messages': visible})
-                          fail('airbnb_error', f'Beds24 displayed an error after Update for room {room_id}: {visible[:3]}')
-                      save()
-
-                  if len(report['clicked']) != 2:
-                      fail('verify', f'Expected 2 exact Update clicks, got {len(report["clicked"])}')
-
-                  report['status'] = 'SUCCESS'
-                  report['completed_at_utc'] = dt.datetime.now(dt.timezone.utc).isoformat()
-                  save()
-              except PwTimeout as exc:
-                  fail('timeout', str(exc))
-              finally:
-                  browser.close()
-
-          subprocess.run(['git','config','user.name','github-actions[bot]'], check=True)
-          subprocess.run(['git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com'], check=True)
-          subprocess.run(['git','add',str(evidence_path)], check=True)
-          if subprocess.run(['git','diff','--cached','--quiet'], check=False).returncode != 0:
-              subprocess.run(['git','commit','-m',f'Record AUMARA Airbnb final update {report["status"]} [skip ci]'], check=True)
-              subprocess.run(['git','pull','--rebase','origin','main'], check=True)
-              subprocess.run(['git','push','origin','HEAD:main'], check=True)
-          print(json.dumps({'status':report['status'],'clicked':report['clicked'],'visible_errors':report['visible_errors']}, ensure_ascii=False))
+                if loc.is_visible() and (loc.inner_text() or '').strip(): visible.append((loc.inner_text() or '').strip()[:1200])
+              except Exception: pass
+            print(json.dumps({'roomId':RID,'listingId':LID,'row_before':before[:1200],'write_responses':new[-20:],'visible_errors':visible},ensure_ascii=False))
+            browser.close()
+            if visible: raise SystemExit('Beds24/Airbnb returned visible error: '+str(visible[:3]))
+            if not any(200 <= int(x['status']) < 400 for x in new): raise SystemExit('No successful write response observed after Chalet Update')
           PY
