@@ -1,4 +1,4 @@
-name: Beds24 Airbnb final classification AUMARA 2026-08-25
+name: Beds24 Airbnb Chalet multi-inventory classification 2026-08-26
 
 on:
   workflow_dispatch:
@@ -27,134 +27,45 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Set final Airbnb multi-inventory classification and verify
+      - name: Fix Chalet multi-inventory Airbnb type and verify
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          import datetime as dt, json, os, pathlib, subprocess, time, urllib.error, urllib.request
-
-          api=(os.environ.get('BEDS24_API_KEY') or '').strip()
-          prop=(os.environ.get('BEDS24_PROP_KEY') or '').strip()
-          pid=int(os.environ.get('PROPERTY_ID','324882'))
-          if not api or not prop:
-              raise SystemExit('Beds24 V1 content credentials missing in Production')
-          print(f'::add-mask::{api}')
-          print(f'::add-mask::{prop}')
-          auth={'apiKey':api,'propKey':prop}
-
+          import datetime as dt, json, os, pathlib, re, subprocess, time, urllib.error, urllib.request
+          api=(os.environ.get('BEDS24_API_KEY') or '').strip(); prop=(os.environ.get('BEDS24_PROP_KEY') or '').strip(); pid=int(os.environ.get('PROPERTY_ID','324882'))
+          if not api or not prop: raise SystemExit('Beds24 V1 content credentials missing in Production')
+          print(f'::add-mask::{api}'); print(f'::add-mask::{prop}'); auth={'apiKey':api,'propKey':prop}
           def post(path,payload):
-              raw=json.dumps(payload,ensure_ascii=False).encode('utf-8')
-              req=urllib.request.Request(
-                  'https://api.beds24.com/json/'+path,
-                  data=raw,
-                  headers={'Content-Type':'application/json','Accept':'application/json','User-Agent':'AUMARA-Control-Tower/1.0'},
-                  method='POST')
+              req=urllib.request.Request('https://api.beds24.com/json/'+path,data=json.dumps(payload,ensure_ascii=False).encode('utf-8'),headers={'Content-Type':'application/json','Accept':'application/json','User-Agent':'AUMARA-Control-Tower/1.0'},method='POST')
               try:
-                  with urllib.request.urlopen(req,timeout=90) as r:
-                      body=r.read(); status=int(r.status)
-              except urllib.error.HTTPError as e:
-                  body=e.read(); status=int(e.code)
+                  with urllib.request.urlopen(req,timeout=90) as r: body=r.read(); status=int(r.status)
+              except urllib.error.HTTPError as e: body=e.read(); status=int(e.code)
               try: data=json.loads(body.decode('utf-8','replace')) if body else {}
               except Exception: data={'non_json_bytes':len(body)}
-              if not 200 <= status < 300:
-                  raise SystemExit(f'{path} HTTP {status}: {str(data)[:1500]}')
+              if not 200 <= status < 300: raise SystemExit(f'{path} HTTP {status}: {str(data)[:1500]}')
               return data
-
-          room_ids=('674465','674466')
-          wanted={
-              rid:{
-                  'propertyTypeGroup':'houses',
-                  'listingType':'private_room',
-                  'publish':'yes',
-                  'picturesFrom':'r'
-              } for rid in room_ids
-          }
-
           def read_content():
-              data=post('getPropertyContent',{
-                  'authentication':auth,
-                  'bookingData':False,
-                  'images':False,
-                  'roomIds':True,
-                  'texts':True,
-                  'includeAirbnb':True,
-                  'includeVrbo':False
-              })
+              data=post('getPropertyContent',{'authentication':auth,'bookingData':False,'images':False,'roomIds':True,'texts':True,'includeAirbnb':True,'includeVrbo':False})
               rows=data.get('getPropertyContent') if isinstance(data,dict) else None
-              if not isinstance(rows,list) or not rows or not isinstance(rows[0],dict):
-                  raise SystemExit('Unexpected getPropertyContent response')
+              if not isinstance(rows,list) or not rows or not isinstance(rows[0],dict): raise SystemExit('Unexpected getPropertyContent response')
               return rows[0]
-
-          before=read_content()
-          before_airbnb={rid:((before.get('roomIds') or {}).get(rid) or {}).get('airbnb',{}) for rid in room_ids}
-
-          changes={
-              'action':'modify',
-              'roomIds':{
-                  rid:{'airbnb':wanted[rid]} for rid in room_ids
-              }
-          }
-          response=post('setPropertyContent',{'authentication':auth,'setPropertyContent':[changes]})
-          time.sleep(4)
-          after=read_content()
-          after_airbnb={rid:((after.get('roomIds') or {}).get(rid) or {}).get('airbnb',{}) for rid in room_ids}
-
-          mismatches=[]
-          for rid in room_ids:
-              for key,val in wanted[rid].items():
-                  got=after_airbnb[rid].get(key)
-                  if str(got).lower()!=str(val).lower():
-                      mismatches.append({'roomId':rid,'field':key,'wanted':val,'got':got})
-
-          evidence={
-              'schema':'aumara.beds24-airbnb-draft-prepare.v1',
-              'property_id':pid,
-              'checked_at_utc':dt.datetime.now(dt.timezone.utc).isoformat(),
-              'decision':{
-                  'propertyTypeGroup':'houses',
-                  'reason':'Beds24 roomType chalet now matches Airbnb propertyTypeGroup houses; publish is enabled for both corrected listings.',
-                  'publish':'yes'
-              },
-              'before':{rid:{k:before_airbnb[rid].get(k) for k in ('propertyTypeGroup','listingType','publish','listingId','picturesFrom')} for rid in room_ids},
-              'wanted':wanted,
-              'after':{rid:{k:after_airbnb[rid].get(k) for k in ('propertyTypeGroup','listingType','publish','listingId','picturesFrom')} for rid in room_ids},
-              'write_response':response,
-              'mismatches':mismatches,
-              'status':'SUCCESS' if not mismatches else 'FAILED_READBACK',
-              'secret_exposed':False
-          }
-          text=json.dumps(evidence,ensure_ascii=False,indent=2,sort_keys=True)
+          room_id='674465'; before=read_content(); room=((before.get('roomIds') or {}).get(room_id) or {}); air=room.get('airbnb') or {}; qty=str(room.get('qty') or '')
+          if qty and int(float(qty)) <= 1: raise SystemExit(f'Fail closed: expected multi-inventory Chalet, got qty={qty}')
+          custom=str(air.get('custom') or '')
+          lines=[ln.strip() for ln in custom.splitlines() if ln.strip() and not re.match(r'^PROPERTYTYPE\s+',ln,re.I)]
+          lines.append('PROPERTYTYPE pension'); new_custom='\n'.join(lines)
+          wanted={'propertyTypeGroup':'boutique_hotels_and_more','listingType':'private_room','picturesFrom':'r','publish':'yes','custom':new_custom}
+          response=post('setPropertyContent',{'authentication':auth,'setPropertyContent':[{'action':'modify','roomIds':{room_id:{'airbnb':wanted}}}]})
+          time.sleep(5); after=read_content(); after_room=((after.get('roomIds') or {}).get(room_id) or {}); after_air=after_room.get('airbnb') or {}; checks={k:after_air.get(k) for k in wanted}
+          mismatches=[{'field':k,'wanted':v,'got':checks.get(k)} for k,v in wanted.items() if str(checks.get(k) or '').strip().lower()!=str(v).strip().lower()]
+          receipt={'schema':'aumara.airbnb-chalet-multi-inventory-type-fix.v1','checked_at_utc':dt.datetime.now(dt.timezone.utc).isoformat(),'property_id':pid,'room_id':int(room_id),'listing_id':str(air.get('listingId') or '1759764557896676605'),'quantity':qty,'decision':'Airbnb-specific PROPERTYTYPE pension for multi-inventory Chalet; global property and Superior unchanged.','before':{k:air.get(k) for k in ('propertyTypeGroup','listingType','picturesFrom','publish','custom')},'after':checks,'mismatches':mismatches,'write_response':response,'status':'SUCCESS' if not mismatches else 'FAILED_READBACK','secret_exposed':False}
+          text=json.dumps(receipt,ensure_ascii=False,indent=2,sort_keys=True)
           for secret in (api,prop): text=text.replace(secret,'[REDACTED]')
-          path=pathlib.Path('aumara-control-tower/evidence/beds24-airbnb-draft-prepare-20260825.json')
-          path.parent.mkdir(parents=True,exist_ok=True)
-          path.write_text(text+'\n',encoding='utf-8')
-
-          subprocess.run(['git','config','user.name','github-actions[bot]'],check=True)
-          subprocess.run(['git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com'],check=True)
-          subprocess.run(['git','add',str(path)],check=True)
+          out=pathlib.Path('aumara-control-tower/evidence/airbnb-chalet-multi-inventory-type-fix-20260826.json'); out.parent.mkdir(parents=True,exist_ok=True); out.write_text(text+'\n',encoding='utf-8')
+          subprocess.run(['git','config','user.name','github-actions[bot]'],check=True); subprocess.run(['git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com'],check=True); subprocess.run(['git','add',str(out)],check=True)
           if subprocess.run(['git','diff','--cached','--quiet'],check=False).returncode != 0:
-              subprocess.run(['git','commit','-m',f'Record AUMARA Airbnb draft prepare {evidence["status"]} [skip ci]'],check=True)
-              for attempt in range(1,4):
-                  pull=subprocess.run(['git','pull','--rebase','origin','main'],check=False,capture_output=True,text=True)
-                  if pull.returncode != 0:
-                      out=((pull.stdout or '')+'\n'+(pull.stderr or ''))
-                      if 'CONFLICT' in out and str(path) in out:
-                          subprocess.run(['git','checkout','--theirs',str(path)],check=True)
-                          subprocess.run(['git','add',str(path)],check=True)
-                          subprocess.run(['git','-c','core.editor=true','rebase','--continue'],check=True)
-                      else:
-                          raise SystemExit(f'git pull --rebase failed: {out[-2000:]}')
-                  push=subprocess.run(['git','push','origin','HEAD:main'],check=False,capture_output=True,text=True)
-                  if push.returncode == 0:
-                      break
-                  push_out=((push.stdout or '')+'\n'+(push.stderr or ''))
-                  if ('non-fast-forward' in push_out or '[rejected]' in push_out) and attempt < 3:
-                      time.sleep(2*attempt)
-                      continue
-                  raise SystemExit(f'git push failed: {push_out[-2000:]}')
-
-          print(json.dumps({'status':evidence['status'],'after':evidence['after'],'mismatches':mismatches},ensure_ascii=False))
-          if mismatches:
-              raise SystemExit(1)
+              subprocess.run(['git','commit','-m',f'Record Chalet multi-inventory type fix {receipt["status"]} [skip ci]'],check=True); subprocess.run(['git','pull','--rebase','origin','main'],check=True); subprocess.run(['git','push','origin','HEAD:main'],check=True)
+          print(json.dumps({'status':receipt['status'],'quantity':qty,'after':checks,'mismatches':mismatches},ensure_ascii=False))
+          if mismatches: raise SystemExit(1)
           PY
