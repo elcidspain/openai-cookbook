@@ -356,19 +356,26 @@ class DynamoClaimAtomicTests(unittest.TestCase):
             workflow,
         )
 
-    def test_airbnb_draft_prepare_workflow_retries_and_resolves_evidence_rebase_conflicts(self) -> None:
+    def test_airbnb_draft_prepare_workflow_applies_chalet_type_patch_with_readback_verification(self) -> None:
         workflow = (
             ROOT.parent
             / ".github"
             / "workflows"
             / "beds24-airbnb-draft-prepare-20260825.yml"
         ).read_text(encoding="utf-8")
-        self.assertIn("for attempt in range(1,4):", workflow)
-        self.assertIn("pull=subprocess.run(['git','pull','--rebase','origin','main']", workflow)
-        self.assertIn("if 'CONFLICT' in out and str(path) in out:", workflow)
-        self.assertIn("subprocess.run(['git','checkout','--theirs',str(path)],check=True)", workflow)
-        self.assertIn("subprocess.run(['git','-c','core.editor=true','rebase','--continue'],check=True)", workflow)
-        self.assertIn("if ('non-fast-forward' in push_out or '[rejected]' in push_out) and attempt < 3:", workflow)
+        self.assertIn("Fix Chalet multi-inventory Airbnb type and verify", workflow)
+        self.assertIn("BEDS24_API_KEY: ${{ secrets.BEDS24_API_KEY }}", workflow)
+        self.assertIn("BEDS24_PROP_KEY: ${{ secrets.BEDS24_PROP_KEY }}", workflow)
+        self.assertIn("set -euo pipefail", workflow)
+        self.assertIn("python3 - <<'PY'", workflow)
+        self.assertIn("lines.append('PROPERTYTYPE pension')", workflow)
+        self.assertIn(
+            "wanted={'propertyTypeGroup':'boutique_hotels_and_more','listingType':'private_room','picturesFrom':'r','publish':'yes'",
+            workflow,
+        )
+        self.assertIn("post('setPropertyContent'", workflow)
+        self.assertIn("if mismatches: raise SystemExit(1)", workflow)
+        self.assertNotIn("git pull --rebase", workflow)
 
     def test_documented_module_entrypoint_resolves(self) -> None:
         result = subprocess.run(
