@@ -356,19 +356,22 @@ class DynamoClaimAtomicTests(unittest.TestCase):
             workflow,
         )
 
-    def test_airbnb_draft_prepare_workflow_retries_and_resolves_evidence_rebase_conflicts(self) -> None:
+    def test_airbnb_draft_prepare_workflow_updates_airbnb_content_via_v1_api(self) -> None:
         workflow = (
             ROOT.parent
             / ".github"
             / "workflows"
             / "beds24-airbnb-draft-prepare-20260825.yml"
         ).read_text(encoding="utf-8")
-        self.assertIn("for attempt in range(1,4):", workflow)
-        self.assertIn("pull=subprocess.run(['git','pull','--rebase','origin','main']", workflow)
-        self.assertIn("if 'CONFLICT' in out and str(path) in out:", workflow)
-        self.assertIn("subprocess.run(['git','checkout','--theirs',str(path)],check=True)", workflow)
-        self.assertIn("subprocess.run(['git','-c','core.editor=true','rebase','--continue'],check=True)", workflow)
-        self.assertIn("if ('non-fast-forward' in push_out or '[rejected]' in push_out) and attempt < 3:", workflow)
+        self.assertIn("environment: Production", workflow)
+        self.assertIn("BEDS24_API_KEY: ${{ secrets.BEDS24_API_KEY }}", workflow)
+        self.assertIn("BEDS24_PROP_KEY: ${{ secrets.BEDS24_PROP_KEY }}", workflow)
+        self.assertIn("https://api.beds24.com/json/", workflow)
+        self.assertIn("getPropertyContent", workflow)
+        self.assertIn("setPropertyContent", workflow)
+        self.assertIn("PROPERTYTYPE pension", workflow)
+        self.assertNotIn("git','pull','--rebase','origin','main", workflow)
+        self.assertNotIn("non-fast-forward", workflow)
 
     def test_documented_module_entrypoint_resolves(self) -> None:
         result = subprocess.run(
