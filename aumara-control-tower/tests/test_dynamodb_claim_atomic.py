@@ -370,7 +370,7 @@ class DynamoClaimAtomicTests(unittest.TestCase):
         self.assertIn("getPropertyContent", workflow)
         self.assertIn("setPropertyContent", workflow)
         self.assertIn("PROPERTYTYPE pension", workflow)
-        self.assertNotIn("git','pull','--rebase','origin','main", workflow)
+        self.assertNotIn("git pull --rebase origin main", workflow)
         self.assertNotIn("non-fast-forward", workflow)
 
     def test_documented_module_entrypoint_resolves(self) -> None:
