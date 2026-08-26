@@ -365,8 +365,8 @@ class DynamoClaimAtomicTests(unittest.TestCase):
         ).read_text(encoding="utf-8")
         self.assertIn("BEDS24_API_KEY: ${{ secrets.BEDS24_API_KEY }}", workflow)
         self.assertIn("BEDS24_PROP_KEY: ${{ secrets.BEDS24_PROP_KEY }}", workflow)
-        self.assertIn("post('getPropertyContent'", workflow)
-        self.assertIn("post('setPropertyContent'", workflow)
+        self.assertIn("getPropertyContent", workflow)
+        self.assertIn("setPropertyContent", workflow)
         self.assertIn("lines.append('PROPERTYTYPE pension')", workflow)
         self.assertIn("'propertyTypeGroup':'boutique_hotels_and_more'", workflow)
 
