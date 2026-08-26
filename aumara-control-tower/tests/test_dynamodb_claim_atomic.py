@@ -356,7 +356,7 @@ class DynamoClaimAtomicTests(unittest.TestCase):
             workflow,
         )
 
-    def test_airbnb_draft_prepare_workflow_updates_and_verifies_multinventory_airbnb_fields(self) -> None:
+    def test_airbnb_draft_prepare_workflow_updates_and_verifies_multi_inventory_airbnb_fields(self) -> None:
         workflow = (
             ROOT.parent
             / ".github"
