@@ -20,18 +20,18 @@
       "listingId": "1759764557896676605",
       "listingType": "private_room",
       "picturesFrom": "r",
-      "propertyTypeGroup": "boutique_hotels_and_more",
+      "propertyTypeGroup": "unique_homes",
       "publish": "yes"
     },
     "674466": {
       "listingId": "1759764847919085354",
-      "listingType": "private_room",
-      "picturesFrom": "r",
-      "propertyTypeGroup": "boutique_hotels_and_more",
+      "listingType": "entire_home",
+      "picturesFrom": "p",
+      "propertyTypeGroup": "unique_homes",
       "publish": "yes"
     }
   },
-  "checked_at_utc": "2026-08-25T23:36:04.149820+00:00",
+  "checked_at_utc": "2026-08-26T00:52:38.506844+00:00",
   "decision": {
     "propertyTypeGroup": "houses",
     "publish": "yes",
