@@ -1,0 +1,79 @@
+{
+  "active_cleanup_attempted": false,
+  "checked_at_utc": "2026-08-26T00:53:19.155362+00:00",
+  "probe": [
+    {
+      "cleared": false,
+      "http_status": 200,
+      "method": "null_url_and_map",
+      "readback": {
+        "map": [
+          {
+            "position": "10",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "10",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/01-common-01.jpg"
+      },
+      "response": {
+        "setPropertyContent": []
+      }
+    },
+    {
+      "cleared": false,
+      "http_status": 200,
+      "method": "null_slot",
+      "readback": {
+        "map": [
+          {
+            "position": "10",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "10",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/01-common-01.jpg"
+      },
+      "response": {
+        "setPropertyContent": []
+      }
+    },
+    {
+      "cleared": false,
+      "http_status": 200,
+      "method": "null_url",
+      "readback": {
+        "map": [
+          {
+            "position": "10",
+            "propId": "324882",
+            "roomId": "674465"
+          },
+          {
+            "position": "10",
+            "propId": "324882",
+            "roomId": "674466"
+          }
+        ],
+        "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/3004659e6b77a5a3bec50c41acad7734ce059ea1/aumara-control-tower/public/airbnb-20260825/01-common-01.jpg"
+      },
+      "response": {
+        "setPropertyContent": []
+      }
+    }
+  ],
+  "property_id": 324882,
+  "schema": "aumara.beds24-external-photo-delete-probe.v1",
+  "secret_exposed": false,
+  "status": "NO_DELETE_SEMANTICS"
+}

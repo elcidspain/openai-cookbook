@@ -19,7 +19,6 @@ jobs:
       BEDS24_API_KEY: ${{ secrets.BEDS24_API_KEY }}
       BEDS24_PROP_KEY: ${{ secrets.BEDS24_PROP_KEY }}
     steps:
-      - uses: actions/checkout@v4
       - name: Print active external photo slots only
         shell: bash
         run: |
@@ -60,3 +59,5 @@ jobs:
           print('BY_ROOM_JSON='+json.dumps(by_room,separators=(',',':'),ensure_ascii=False))
           print('COUNTS='+json.dumps({k:len(v) for k,v in by_room.items()},sort_keys=True))
           PY
+
+# live audit trigger 2026-08-25T23:12Z no-checkout

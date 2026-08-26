@@ -1,0 +1,58 @@
+name: Airbnb Binding Discovery
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/airbnb-binding-discovery.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    environment: Production
+    timeout-minutes: 3
+    env:
+      ALL_SECRETS_JSON: ${{ toJSON(secrets) }}
+      ALL_VARS_JSON: ${{ toJSON(vars) }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Discover Airbnb-related binding names only
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/airbnb-binding-discovery"
+          python3 - <<'PY'
+          import datetime as dt, json, os, re
+          secrets = json.loads(os.environ.get('ALL_SECRETS_JSON') or '{}')
+          vars_ = json.loads(os.environ.get('ALL_VARS_JSON') or '{}')
+          rx = re.compile(r'(AIRBNB|AIR_BNB|COOKIE|SESSION|LOGIN|USERNAME|USER|PASSWORD|PASS)', re.I)
+          out = {
+            'schema': 'aumara.airbnb-binding-discovery',
+            'checked_at_utc': dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z'),
+            'matched_secret_names': sorted([k for k in secrets if rx.search(k)]),
+            'matched_variable_names': sorted([k for k in vars_ if rx.search(k)]),
+            'secret_name_count': len(secrets),
+            'variable_name_count': len(vars_),
+            'secret_values_exposed': False,
+            'variable_values_exposed': False,
+          }
+          path = os.path.join(os.environ['RUNNER_TEMP'], 'airbnb-binding-discovery', 'receipt.json')
+          with open(path, 'w', encoding='utf-8') as f:
+            json.dump(out, f, indent=2)
+            f.write('\n')
+          print('airbnb_binding_name_discovery_complete')
+          print('matched_secret_name_count=' + str(len(out['matched_secret_names'])))
+          print('matched_variable_name_count=' + str(len(out['matched_variable_names'])))
+          print('secret_values_exposed=false')
+          print('variable_values_exposed=false')
+          PY
+      - name: Upload names-only receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: airbnb-binding-discovery
+          path: ${{ runner.temp }}/airbnb-binding-discovery/receipt.json
+          if-no-files-found: error

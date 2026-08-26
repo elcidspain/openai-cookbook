@@ -85,6 +85,7 @@ jobs:
         env:
           BEDS24_REFRESH_TOKEN: ${{ secrets.BEDS24_REFRESH_CREDENTIAL }}
         run: |
+          mkdir -p /tmp/aumara-guest-journey-shadow
           auth_error_log=/tmp/aumara-guest-journey-shadow/auth-error.log
           mkdir -p "$(dirname "$auth_error_log")"
           if python aumara-control-tower/scripts/beds24_guest_journey_shadow.py \

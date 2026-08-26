@@ -1,4 +1,4 @@
 BEDS24_BINDING_INVENTORY
 property=324882
-trigger=2026-08-20T19:12:00+02:00
+trigger=airbnb-binding-discovery-2026-08-26
 mode=names-only

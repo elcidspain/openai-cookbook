@@ -31,7 +31,7 @@ jobs:
           import datetime as dt, json, os, re
           secrets=json.loads(os.environ.get('ALL_SECRETS_JSON') or '{}')
           vars_=json.loads(os.environ.get('ALL_VARS_JSON') or '{}')
-          rx=re.compile(r'(BEDS|BOOKING|PMS|PROP|PROMPT|API|KEY|TOKEN|CREDENTIAL|REFRESH)', re.I)
+          rx=re.compile(r'(BEDS|BOOKING|PMS|PROP|PROMPT|API|KEY|TOKEN|CREDENTIAL|REFRESH|AIRBNB|AIR_BNB|COOKIE|SESSION|LOGIN|USERNAME|USER|PASSWORD|PASS)', re.I)
           out={
             'schema':'aumara.beds24-binding-inventory',
             'checked_at_utc':dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z'),
