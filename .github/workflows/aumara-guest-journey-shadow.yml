@@ -87,6 +87,7 @@ jobs:
         run: |
           mkdir -p /tmp/aumara-guest-journey-shadow
           auth_error_log=/tmp/aumara-guest-journey-shadow/auth-error.log
+          mkdir -p "$(dirname "$auth_error_log")"
           if python aumara-control-tower/scripts/beds24_guest_journey_shadow.py \
             --output /tmp/aumara-guest-journey-shadow/summary.json 2>"$auth_error_log"; then
             rm -f "$auth_error_log"
