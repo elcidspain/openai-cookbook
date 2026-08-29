@@ -356,18 +356,28 @@ class DynamoClaimAtomicTests(unittest.TestCase):
             workflow,
         )
 
-    def test_airbnb_draft_prepare_workflow_uses_legacy_content_auth_and_verifies_readback(self) -> None:
+    def test_airbnb_draft_prepare_workflow_updates_chalet_airbnb_content_and_verifies_readback(self) -> None:
         workflow = (
             ROOT.parent
             / ".github"
             / "workflows"
             / "beds24-airbnb-draft-prepare-20260825.yml"
         ).read_text(encoding="utf-8")
+        self.assertIn("workflow_dispatch:", workflow)
+        self.assertIn("push:", workflow)
+        self.assertIn("environment: Production", workflow)
         self.assertIn("BEDS24_API_KEY: ${{ secrets.BEDS24_API_KEY }}", workflow)
         self.assertIn("BEDS24_PROP_KEY: ${{ secrets.BEDS24_PROP_KEY }}", workflow)
         self.assertIn("https://api.beds24.com/json/", workflow)
+        self.assertIn("Fix Chalet multi-inventory Airbnb type and verify", workflow)
+        self.assertIn(
+            "Beds24 V1 content credentials missing in Production", workflow
+        )
+        self.assertIn("post('getPropertyContent'", workflow)
         self.assertIn("post('setPropertyContent'", workflow)
         self.assertIn("rid='674465'", workflow)
+        self.assertIn("lines.append('PROPERTYTYPE pension')", workflow)
+        self.assertIn("'status':'SUCCESS' if not mismatches else 'FAILED_READBACK'", workflow)
         self.assertIn("if mismatches: raise SystemExit(1)", workflow)
 
     def test_documented_module_entrypoint_resolves(self) -> None:
