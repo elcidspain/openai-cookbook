@@ -384,6 +384,13 @@ class DynamoClaimAtomicTests(unittest.TestCase):
         self.assertIn("'publish':'yes'", workflow)
         self.assertIn("'status':'SUCCESS' if not mismatches else 'FAILED_READBACK'", workflow)
         self.assertIn("if mismatches: raise SystemExit(1)", workflow)
+        self.assertIn("PROPERTYTYPE pension", workflow)
+        self.assertNotIn("git pull --rebase origin main", workflow)
+        self.assertNotIn("non-fast-forward", workflow)
+        self.assertNotRegex(
+            workflow,
+            r"subprocess\.run\(\s*\[\s*['\"]git['\"],\s*['\"]pull['\"],\s*['\"]--rebase['\"]",
+        )
 
     def test_documented_module_entrypoint_resolves(self) -> None:
         result = subprocess.run(
