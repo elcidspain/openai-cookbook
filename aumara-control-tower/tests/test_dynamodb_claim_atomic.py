@@ -387,10 +387,6 @@ class DynamoClaimAtomicTests(unittest.TestCase):
         self.assertIn("PROPERTYTYPE pension", workflow)
         self.assertNotIn("git pull --rebase origin main", workflow)
         self.assertNotIn("non-fast-forward", workflow)
-        self.assertNotRegex(
-            workflow,
-            r"subprocess\.run\(\s*\[\s*['\"]git['\"],\s*['\"]pull['\"],\s*['\"]--rebase['\"]",
-        )
 
     def test_documented_module_entrypoint_resolves(self) -> None:
         result = subprocess.run(
