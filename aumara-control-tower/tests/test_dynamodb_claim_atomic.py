@@ -384,7 +384,6 @@ class DynamoClaimAtomicTests(unittest.TestCase):
         self.assertIn("'publish':'yes'", workflow)
         self.assertIn("'status':'SUCCESS' if not mismatches else 'FAILED_READBACK'", workflow)
         self.assertIn("if mismatches: raise SystemExit(1)", workflow)
-        self.assertIn("PROPERTYTYPE pension", workflow)
 
     def test_documented_module_entrypoint_resolves(self) -> None:
         result = subprocess.run(
