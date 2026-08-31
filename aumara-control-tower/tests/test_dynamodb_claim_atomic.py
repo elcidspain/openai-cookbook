@@ -376,7 +376,12 @@ class DynamoClaimAtomicTests(unittest.TestCase):
         self.assertIn("post('getPropertyContent'", workflow)
         self.assertIn("post('setPropertyContent'", workflow)
         self.assertIn("rid='674465'", workflow)
+        self.assertIn("if qty and int(float(qty)) <= 1: raise SystemExit", workflow)
         self.assertIn("lines.append('PROPERTYTYPE pension')", workflow)
+        self.assertIn("'propertyTypeGroup':'boutique_hotels_and_more'", workflow)
+        self.assertIn("'listingType':'private_room'", workflow)
+        self.assertIn("'picturesFrom':'r'", workflow)
+        self.assertIn("'publish':'yes'", workflow)
         self.assertIn("'status':'SUCCESS' if not mismatches else 'FAILED_READBACK'", workflow)
         self.assertIn("if mismatches: raise SystemExit(1)", workflow)
 
