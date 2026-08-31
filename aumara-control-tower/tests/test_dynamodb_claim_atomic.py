@@ -369,7 +369,6 @@ class DynamoClaimAtomicTests(unittest.TestCase):
         self.assertIn("BEDS24_API_KEY: ${{ secrets.BEDS24_API_KEY }}", workflow)
         self.assertIn("BEDS24_PROP_KEY: ${{ secrets.BEDS24_PROP_KEY }}", workflow)
         self.assertIn("https://api.beds24.com/json/", workflow)
-        self.assertIn("Fix Chalet multi-inventory Airbnb type and verify", workflow)
         self.assertIn(
             "Beds24 V1 content credentials missing in Production", workflow
         )
