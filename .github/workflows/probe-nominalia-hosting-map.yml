@@ -1,0 +1,51 @@
+name: Probe Nominalia hosting map safely
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/probe-nominalia-hosting-map.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    environment: NOMINALIA_FTP_PASSWORD
+    env:
+      FTP_HOST: elcidt.ftp.tb-hosting.com
+      FTP_USER: elcidspaincom@elcidspaincom
+      FTP_PASSWORD: ${{ secrets.NOMINALIAFTPPASSWORD }}
+    steps:
+      - name: Install FTP client
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp
+
+      - name: Inspect hosting map without reading file contents
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$FTP_PASSWORD"
+
+          echo '=== ROOT ==='
+          lftp -u "$FTP_USER","$FTP_PASSWORD" "$FTP_HOST" -e "set cmd:fail-exit yes; set ftp:ssl-allow no; set ftp:passive-mode yes; cls -1; bye" | head -n 100
+
+          echo '=== .webhosting ==='
+          lftp -u "$FTP_USER","$FTP_PASSWORD" "$FTP_HOST" -e "set cmd:fail-exit yes; set ftp:ssl-allow no; set ftp:passive-mode yes; cd .webhosting; cls -la; bye" | head -n 120 || true
+
+          echo '=== subsites ==='
+          lftp -u "$FTP_USER","$FTP_PASSWORD" "$FTP_HOST" -e "set cmd:fail-exit yes; set ftp:ssl-allow no; set ftp:passive-mode yes; cd subsites; cls -la; bye" | head -n 120 || true
+
+          echo '=== shallow domain-like names ==='
+          for dir in .webhosting subsites www; do
+            lftp -u "$FTP_USER","$FTP_PASSWORD" "$FTP_HOST" -e "set ftp:ssl-allow no; set ftp:passive-mode yes; cd $dir; find -d 2; bye" 2>/dev/null \
+              | grep -Ei 'realitysift|\.space|domain|dns|host|site' \
+              | head -n 120 \
+              | sed "s#^#$dir:#" || true
+          done
+
+          echo 'HOSTING_MAP_PROBE_COMPLETE'
