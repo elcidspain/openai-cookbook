@@ -1,0 +1,92 @@
+name: Probe Nominalia control authentication safely
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/probe-nominalia-control-auth.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    environment: NOMINALIA_FTP_PASSWORD
+    env:
+      NOMINALIA_USER: 180379-k
+      NOMINALIA_PASSWORD: ${{ secrets.NOMINALIAFTPPASSWORD }}
+    steps:
+      - name: Test control-panel authentication without exposing credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check -q requests beautifulsoup4
+          python - <<'PY'
+          import os, json
+          from urllib.parse import urljoin, urlparse, parse_qsl, urlencode, urlunparse
+          import requests
+          from bs4 import BeautifulSoup
+
+          user=os.environ.get('NOMINALIA_USER','')
+          password=os.environ.get('NOMINALIA_PASSWORD','')
+          if not password:
+              print(json.dumps({'status':'NO_SECRET_AVAILABLE'}))
+              raise SystemExit(0)
+
+          s=requests.Session()
+          s.headers['User-Agent']='Mozilla/5.0 RealitySift authorized Nominalia control probe'
+          r=s.get('https://controlpanel.nominalia.com/welcome.html',timeout=30,allow_redirects=True)
+          r.raise_for_status()
+          soup=BeautifulSoup(r.text,'html.parser')
+          form=next((f for f in soup.find_all('form') if f.find('input',{'type':'password'})),None)
+          if not form:
+              print(json.dumps({'status':'NO_LOGIN_FORM','final_host':urlparse(r.url).netloc,'final_path':urlparse(r.url).path}))
+              raise SystemExit(0)
+
+          data=[]
+          for inp in form.find_all('input'):
+              name=inp.get('name')
+              if not name: continue
+              typ=(inp.get('type') or 'text').lower()
+              if typ in {'submit','button','image','file','reset'}: continue
+              if typ in {'checkbox','radio'} and not inp.has_attr('checked'): continue
+              data.append((name, inp.get('value','')))
+
+          p=form.find('input',{'type':'password'})
+          visible=[i for i in form.find_all('input') if i.get('name') and (i.get('type') or 'text').lower() in {'text','email'}]
+          if not (p and visible):
+              print(json.dumps({'status':'LOGIN_FIELDS_NOT_FOUND'}))
+              raise SystemExit(0)
+          u_name=visible[0].get('name'); p_name=p.get('name')
+          data=[(k, user if k==u_name else password if k==p_name else v) for k,v in data]
+          names={k for k,_ in data}
+          if u_name not in names: data.append((u_name,user))
+          if p_name not in names: data.append((p_name,password))
+
+          action=urljoin(r.url,form.get('action') or r.url)
+          method=(form.get('method') or 'get').lower()
+          rr=s.post(action,data=data,timeout=30,allow_redirects=True) if method=='post' else s.get(action,params=data,timeout=30,allow_redirects=True)
+          rr.raise_for_status()
+          ss=BeautifulSoup(rr.text,'html.parser')
+          text=ss.get_text(' ',strip=True).lower()
+          still_login=bool(ss.find('input',{'type':'password'})) and any(x in urlparse(rr.url).path.lower() for x in ['welcome','login'])
+          stepup=any(x in text for x in ['verification code','código de verificación','two-factor','2fa','autenticación de dos factores','one-time code','código de seguridad'])
+          status='AUTH_STEPUP_REQUIRED' if stepup else ('AUTH_FAILED' if still_login else 'AUTHENTICATED')
+
+          links=[]
+          if status=='AUTHENTICATED':
+              for a in ss.find_all('a',href=True):
+                  txt=' '.join(a.stripped_strings)
+                  href=urljoin(rr.url,a['href'])
+                  key=(txt+' '+href).lower()
+                  if any(k in key for k in ['domain','dominio','dns','hosting','ssl','website','sitio web']):
+                      pu=urlparse(href); safe=[]
+                      for k,v in parse_qsl(pu.query,keep_blank_values=True):
+                          if k.lower() in {'token','sid','session','auth','key','csrf','code'}: v='REDACTED'
+                          safe.append((k,v))
+                      links.append({'text':txt[:100],'url':urlunparse((pu.scheme,pu.netloc,pu.path,pu.params,urlencode(safe),''))[:350]})
+          print(json.dumps({'status':status,'final_host':urlparse(rr.url).netloc,'final_path':urlparse(rr.url).path,'candidate_links':links[:20]},ensure_ascii=False))
+          PY
