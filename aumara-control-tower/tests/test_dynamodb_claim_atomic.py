@@ -364,16 +364,25 @@ class DynamoClaimAtomicTests(unittest.TestCase):
             / "beds24-airbnb-draft-prepare-20260825.yml"
         ).read_text(encoding="utf-8")
         self.assertIn("Fix Chalet multi-inventory Airbnb type and verify", workflow)
+        self.assertIn("workflow_dispatch:", workflow)
+        self.assertIn("push:", workflow)
+        self.assertIn("environment: Production", workflow)
         self.assertIn("BEDS24_API_KEY: ${{ secrets.BEDS24_API_KEY }}", workflow)
         self.assertIn("BEDS24_PROP_KEY: ${{ secrets.BEDS24_PROP_KEY }}", workflow)
-        self.assertIn("set -euo pipefail", workflow)
-        self.assertIn("python3 - <<'PY'", workflow)
-        self.assertIn("lines.append('PROPERTYTYPE pension')", workflow)
+        self.assertIn("https://api.beds24.com/json/", workflow)
         self.assertIn(
-            "wanted={'propertyTypeGroup':'boutique_hotels_and_more','listingType':'private_room','picturesFrom':'r','publish':'yes'",
-            workflow,
+            "Beds24 V1 content credentials missing in Production", workflow
         )
+        self.assertIn("post('getPropertyContent'", workflow)
         self.assertIn("post('setPropertyContent'", workflow)
+        self.assertIn("rid='674465'", workflow)
+        self.assertIn("if qty and int(float(qty)) <= 1: raise SystemExit", workflow)
+        self.assertIn("lines.append('PROPERTYTYPE pension')", workflow)
+        self.assertIn("'propertyTypeGroup':'boutique_hotels_and_more'", workflow)
+        self.assertIn("'listingType':'private_room'", workflow)
+        self.assertIn("'picturesFrom':'r'", workflow)
+        self.assertIn("'publish':'yes'", workflow)
+        self.assertIn("'status':'SUCCESS' if not mismatches else 'FAILED_READBACK'", workflow)
         self.assertIn("if mismatches: raise SystemExit(1)", workflow)
         self.assertNotIn("git pull --rebase", workflow)
 

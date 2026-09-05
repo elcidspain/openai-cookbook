@@ -1,0 +1,34 @@
+name: Probe Nominalia FTP access safely
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/probe-nominalia-ftp-access.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    environment: NOMINALIA_FTP_PASSWORD
+    env:
+      FTP_HOST: elcidt.ftp.tb-hosting.com
+      FTP_USER: elcidspaincom@elcidspaincom
+      FTP_PASSWORD: ${{ secrets.NOMINALIAFTPPASSWORD }}
+    steps:
+      - name: Install FTP client
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp
+      - name: Verify login and inspect top-level hosting paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$FTP_PASSWORD"
+          echo 'FTP_SECRET_PRESENT'
+          lftp -u "$FTP_USER","$FTP_PASSWORD" "$FTP_HOST" -e "set cmd:fail-exit yes; set ftp:ssl-allow no; set ftp:passive-mode yes; pwd; cls -1; bye" | sed -E 's#^(.*)$#ENTRY \1#' | head -n 80
+          echo 'FTP_AUTHENTICATED'
