@@ -389,8 +389,10 @@ class DynamoClaimAtomicTests(unittest.TestCase):
             ROOT.parent / ".github" / "workflows" / "aumara-actions-heartbeat.yml"
         ).read_text(encoding="utf-8")
         self.assertIn("for attempt in 1 2 3; do", workflow)
+        self.assertIn("git fetch origin main", workflow)
+        self.assertIn("git reset --hard origin/main", workflow)
         self.assertIn("git push origin HEAD:main", workflow)
-        self.assertIn("git pull --rebase origin main", workflow)
+        self.assertNotIn("git pull --rebase origin main", workflow)
         self.assertIn("Unable to push heartbeat after 3 attempts.", workflow)
 
     def test_documented_module_entrypoint_resolves(self) -> None:
