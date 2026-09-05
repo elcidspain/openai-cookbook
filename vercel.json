@@ -1,26 +1,19 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "trailingSlash": true,
+  "ignoreCommand": "exit 0",
+  "trailingSlash": false,
   "routes": [
     {
       "src": "^/$",
-      "dest": "/elcid-site/index.html"
-    },
-    {
-      "src": "^/(styles\\.css|site\\.js|official-logo\\.svg|legal\\.html|privacy\\.html|cookies\\.html)$",
-      "dest": "/elcid-site/$1"
+      "dest": "/aumara-site/index.html"
     },
     {
       "src": "^/aumara/?$",
-      "dest": "/aumara-site/direct-v2.html"
+      "dest": "/aumara-site/index.html"
     },
     {
       "src": "^/staff/?$",
       "dest": "/staff/index.html"
-    },
-    {
-      "src": "^/.*$",
-      "status": 404
     }
   ]
 }
