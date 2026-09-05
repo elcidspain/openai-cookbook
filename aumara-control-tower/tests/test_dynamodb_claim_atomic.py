@@ -296,11 +296,19 @@ class DynamoClaimAtomicTests(unittest.TestCase):
             workflow,
         )
         self.assertIn(
+            "contains(github.event.comment.body, 'execute to completion revert you job')",
+            workflow,
+        )
+        self.assertIn(
             "'AUMARA control: run Beds24 photo vault sync':'beds24-photo-sync-vault-controller.yml'",
             workflow,
         )
         self.assertIn(
             "'AUMARA control: sync Beds24 photos from vault':'beds24-photo-sync-vault-controller.yml'",
+            workflow,
+        )
+        self.assertIn(
+            "'[WIP] Dispatch Beds24 photo vault sync using recovered vault':'beds24-photo-sync-vault-controller.yml'",
             workflow,
         )
 
