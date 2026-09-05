@@ -2,14 +2,22 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "ignoreCommand": "exit 0",
   "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/aumara",
+      "destination": "https://www.aumara.me/",
+      "permanent": true
+    },
+    {
+      "source": "/aumara/",
+      "destination": "https://www.aumara.me/",
+      "permanent": true
+    }
+  ],
   "routes": [
     {
       "src": "^/$",
-      "dest": "/aumara-site/index.html"
-    },
-    {
-      "src": "^/aumara/?$",
-      "dest": "/aumara-site/index.html"
+      "dest": "/elcid-site/index.html"
     },
     {
       "src": "^/staff/?$",
