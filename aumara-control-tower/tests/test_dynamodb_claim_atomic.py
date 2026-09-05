@@ -384,6 +384,17 @@ class DynamoClaimAtomicTests(unittest.TestCase):
         self.assertIn("'status':'SUCCESS' if not mismatches else 'FAILED_READBACK'", workflow)
         self.assertIn("if mismatches: raise SystemExit(1)", workflow)
 
+    def test_actions_heartbeat_workflow_retries_non_fast_forward_push(self) -> None:
+        workflow = (
+            ROOT.parent / ".github" / "workflows" / "aumara-actions-heartbeat.yml"
+        ).read_text(encoding="utf-8")
+        self.assertIn("for attempt in 1 2 3; do", workflow)
+        self.assertIn("git fetch origin main", workflow)
+        self.assertIn("git reset --hard origin/main", workflow)
+        self.assertIn("git push origin HEAD:main", workflow)
+        self.assertNotIn("git pull --rebase origin main", workflow)
+        self.assertIn("Unable to push heartbeat after 3 attempts.", workflow)
+
     def test_documented_module_entrypoint_resolves(self) -> None:
         result = subprocess.run(
             [

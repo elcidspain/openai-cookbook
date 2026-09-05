@@ -37,6 +37,30 @@ jobs:
           set -euo pipefail
           git config user.name 'AUMARA Automation'
           git config user.email 'elcidspain@gmail.com'
-          git add aumara-control-tower/checkpoints/AUMARA_ACTIONS_HEARTBEAT.json
-          git commit -m 'Record AUMARA Actions heartbeat'
-          git push origin HEAD:main
+          heartbeat_file='aumara-control-tower/checkpoints/AUMARA_ACTIONS_HEARTBEAT.json'
+          heartbeat_snapshot="$(mktemp)"
+          trap 'rm -f "$heartbeat_snapshot"' EXIT
+          cp "$heartbeat_file" "$heartbeat_snapshot"
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp "$heartbeat_snapshot" "$heartbeat_file"
+            git add "$heartbeat_file"
+            if git diff --cached --quiet; then
+              exit 0
+            fi
+            if ! git commit -m 'Record AUMARA Actions heartbeat'; then
+              if git diff --cached --quiet; then
+                exit 0
+              fi
+              exit 1
+            fi
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            if [ "$attempt" -lt 3 ]; then
+              sleep 2
+            fi
+          done
+          echo 'Unable to push heartbeat after 3 attempts.' >&2
+          exit 1
