@@ -39,6 +39,7 @@ jobs:
           git config user.email 'elcidspain@gmail.com'
           heartbeat_file='aumara-control-tower/checkpoints/AUMARA_ACTIONS_HEARTBEAT.json'
           heartbeat_snapshot="$(mktemp)"
+          trap 'rm -f "$heartbeat_snapshot"' EXIT
           cp "$heartbeat_file" "$heartbeat_snapshot"
           for attempt in 1 2 3; do
             git fetch origin main
