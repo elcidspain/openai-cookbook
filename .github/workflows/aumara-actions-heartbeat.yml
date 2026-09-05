@@ -39,4 +39,14 @@ jobs:
           git config user.email 'elcidspain@gmail.com'
           git add aumara-control-tower/checkpoints/AUMARA_ACTIONS_HEARTBEAT.json
           git commit -m 'Record AUMARA Actions heartbeat'
-          git push origin HEAD:main
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            if [ "$attempt" -lt 3 ]; then
+              git pull --rebase origin main
+              sleep 2
+            fi
+          done
+          echo 'Unable to push heartbeat after 3 attempts.' >&2
+          exit 1
