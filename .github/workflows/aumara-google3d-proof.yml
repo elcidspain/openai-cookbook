@@ -1,0 +1,81 @@
+name: AUMARA Google 3D owner proof
+on:
+  push:
+    branches:
+      - spatial/google3d-proof-20260906
+    paths:
+      - .github/workflows/aumara-google3d-proof.yml
+permissions:
+  contents: read
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    env:
+      CESIUM_TOKEN: ${{ secrets.CESSIUM_AUMARA_TOKEN_FRESH || secrets.CESIUM_AUMARA_TOKEN_FRESH || secrets.CESIUM_ION_TOKEN }}
+    steps:
+      - name: Verify Cesium secret is available
+        shell: bash
+        run: |
+          test -n "$CESIUM_TOKEN"
+          echo "Cesium credential present; value remains masked."
+      - uses: actions/checkout@v4
+        with:
+          repository: elcidspain/aumara
+          ref: preview/spatial-descent-integration-20260905
+          path: site
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install browser harness
+        shell: bash
+        run: |
+          mkdir harness && cd harness
+          npm init -y >/dev/null
+          npm install --silent playwright@1.55.0
+          npx playwright install --with-deps chromium >/dev/null
+      - name: Run local Google 3D proof
+        shell: bash
+        run: |
+          python3 -m http.server 8765 --directory site/public >/tmp/aumara-http.log 2>&1 &
+          echo $! >/tmp/aumara-http.pid
+          cat > harness/proof.mjs <<'JS'
+          import { chromium } from 'playwright';
+          import fs from 'node:fs';
+          const token = process.env.CESIUM_TOKEN || '';
+          if (!token) throw new Error('CESIUM_TOKEN_MISSING');
+          const browser = await chromium.launch({headless:true,args:['--use-gl=swiftshader','--enable-webgl','--ignore-gpu-blocklist']});
+          const page = await browser.newPage({viewport:{width:1440,height:900}});
+          await page.goto('http://127.0.0.1:8765/spatial/', {waitUntil:'domcontentloaded'});
+          await page.evaluate(t => localStorage.setItem('CESIUM_ION_TOKEN', t), token);
+          await page.goto('http://127.0.0.1:8765/spatial/#flight', {waitUntil:'domcontentloaded'});
+          await page.waitForFunction(() => window.__AUMARA && window.__AUMARA.ownerProof, null, {timeout:45000});
+          await page.waitForFunction(() => {
+            const p = window.__AUMARA.ownerProof();
+            return p.provider === 'GOOGLE_PHOTOREALISTIC_3D_TILES' && p.firstGoogleTileRendered === true;
+          }, null, {timeout:45000});
+          const stages = [['earth',1],['costa',12],['benidoleig',16],['parcel',19.5],['handoff',21.7],['wp0',22.1],['wp27',69.99]];
+          for (const [name,t] of stages) {
+            await page.evaluate(x => window.__AUMARA.advanceTo(x), t);
+            await page.waitForTimeout(name === 'parcel' ? 3500 : 1800);
+            if (['earth','costa','benidoleig','parcel','wp27'].includes(name)) await page.screenshot({path:`harness/${name}.png`});
+          }
+          const proof = await page.evaluate(() => window.__AUMARA.ownerProof());
+          fs.writeFileSync('harness/proof.json', JSON.stringify(proof,null,2));
+          const pass = proof.provider === 'GOOGLE_PHOTOREALISTIC_3D_TILES' && proof.firstGoogleTileRendered === true && proof.parcelClippingActive === false && proof.GoogleEarthStageVisible === true && proof.GoogleParcelApproachVisible === true && proof.handoffComplete === true && proof.localTwinVisibleAtWP0 === true && proof.waypointReached === 27 && proof.flightComplete === true && proof.fatalRenderError === false;
+          console.log(JSON.stringify({status:pass?'PASS':'FAIL',provider:proof.provider,firstGoogleTileRendered:proof.firstGoogleTileRendered,parcelClippingActive:proof.parcelClippingActive,GoogleEarthStageVisible:proof.GoogleEarthStageVisible,GoogleParcelApproachVisible:proof.GoogleParcelApproachVisible,handoffComplete:proof.handoffComplete,localTwinVisibleAtWP0:proof.localTwinVisibleAtWP0,waypointReached:proof.waypointReached,flightComplete:proof.flightComplete,fatalRenderError:proof.fatalRenderError,events:proof.events}));
+          await browser.close();
+          if (!pass) process.exit(2);
+          JS
+          node harness/proof.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aumara-google3d-proof
+          path: |
+            harness/proof.json
+            harness/earth.png
+            harness/costa.png
+            harness/benidoleig.png
+            harness/parcel.png
+            harness/wp27.png
+          retention-days: 7
