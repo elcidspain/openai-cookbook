@@ -148,3 +148,6 @@ examples/coding-agent-workspace
 .vscode/
 .cursorignore
 aumara-control-tower/evidence/vouchers/
+
+# Node dependencies
+node_modules/

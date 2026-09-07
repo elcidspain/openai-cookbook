@@ -1,0 +1,13 @@
+{
+  "name": "OpenAI Cookbook + AUMARA/EL CID",
+  "install": "bash .cursor/install.sh",
+  "terminals": [
+    {
+      "name": "control-tower",
+      "command": "bash .cursor/dev-control-tower.sh"
+    }
+  ],
+  "ports": [
+    8787
+  ]
+}
