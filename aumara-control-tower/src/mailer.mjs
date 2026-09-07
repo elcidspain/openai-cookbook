@@ -1,4 +1,4 @@
-import { Resend } from '@resend/node';
+import { Resend } from 'resend';
 
 function env(name, fallback = undefined) {
   const value = process.env[name];

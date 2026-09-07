@@ -15,6 +15,6 @@
     "threads:daily": "node --env-file-if-exists=.env src/threads-insights-daily.mjs"
   },
   "dependencies": {
-    "@resend/node": "latest"
+    "resend": "^6.0.0"
   }
 }
