@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""AUMARA Booking photo replace 324882 — V1 external pictures on clean slots."""
+"""AUMARA Booking photo replace 324882 — scrub maps then write clean slots 35-68."""
 from __future__ import annotations
 
 import datetime as dt
@@ -12,14 +12,13 @@ import time
 import urllib.error
 import urllib.request
 
-PROPERTY_ID = 324882
+PROPERTY_ID = "324882"
 ROOM_CHALET = "674465"
 ROOM_SUPERIOR = "674466"
 REPO = "elcidspain/openai-cookbook"
 PUBLIC_DIR = "aumara-control-tower/public/booking-20260908"
 EVIDENCE = pathlib.Path("aumara-control-tower/evidence/beds24-booking-photo-replace-20260908.json")
-# V1 merges maps and cannot reliably delete them — use proven-empty high slots.
-SLOT_START = 50
+SLOTS = list(range(35, 69))  # 34 slots
 
 
 def mask(v: str) -> None:
@@ -72,7 +71,7 @@ def main() -> int:
     for s in (api, prop, refresh):
         mask(s)
     if not api or not prop:
-        raise SystemExit("BEDS24_API_KEY / BEDS24_PROP_KEY missing in environment")
+        raise SystemExit("BEDS24_API_KEY / BEDS24_PROP_KEY missing")
 
     asset_sha = (
         subprocess.check_output(["git", "rev-list", "-1", "HEAD", "--", PUBLIC_DIR], text=True).strip()
@@ -80,49 +79,50 @@ def main() -> int:
     )
     files = sorted(pathlib.Path(PUBLIC_DIR).glob("*.jpg"))
     if len(files) != 34:
-        raise SystemExit(f"Expected 34 JPGs in {PUBLIC_DIR}, got {len(files)}")
+        raise SystemExit(f"Expected 34 JPGs, got {len(files)}")
+    if len(SLOTS) != 34:
+        raise SystemExit("SLOTS must be 34")
 
     manifest = []
     for f in files:
-        parts = f.name.split("-")
-        category = parts[1] if len(parts) >= 3 else ""
+        category = f.name.split("-")[1]
         if category not in ("common", "chalet", "superior"):
-            raise SystemExit(f"Bad filename category: {f.name}")
+            raise SystemExit(f"Bad category: {f.name}")
         url = f"https://raw.githubusercontent.com/{REPO}/{asset_sha}/{PUBLIC_DIR}/{f.name}"
-        if len(url) > 250:
-            raise SystemExit(f"URL too long: {url}")
         last = None
-        for _ in range(10):
+        for _ in range(8):
             try:
                 rq = urllib.request.Request(url, headers={"User-Agent": "AUMARA-photo-readback/1.0"})
                 with urllib.request.urlopen(rq, timeout=30) as resp:
                     head = resp.read(64)
-                    status = int(resp.status)
-                if status == 200 and head.startswith(b"\xff\xd8\xff"):
-                    break
-                last = f"status={status}"
+                    if int(resp.status) == 200 and head.startswith(b"\xff\xd8\xff"):
+                        break
             except Exception as e:
                 last = str(e)
             time.sleep(2)
         else:
-            raise SystemExit(f"Not fetchable: {f.name}: {last}")
+            raise SystemExit(f"Not fetchable {f.name}: {last}")
         manifest.append({"category": category, "filename": f.name, "url": url})
 
-    # 1) Blank old active URLs so stale maps become harmless
-    blank = {str(i): {"url": ""} for i in range(1, 101)}
     auth = {"apiKey": api, "propKey": prop}
+    # Scrub: force map=[] with a real temp URL, then blank, for ALL slots
+    scrub_url = manifest[0]["url"]
+    scrub = {str(i): {"url": scrub_url, "map": []} for i in range(1, 101)}
+    post_v1(
+        "setPropertyContent",
+        {"authentication": auth, "setPropertyContent": [{"action": "modify", "images": {"external": scrub}}]},
+    )
+    time.sleep(2)
+    blank = {str(i): {"url": "", "map": []} for i in range(1, 101)}
     post_v1(
         "setPropertyContent",
         {"authentication": auth, "setPropertyContent": [{"action": "modify", "images": {"external": blank}}]},
     )
     time.sleep(3)
 
-    # 2) Write pack into clean high slots
     desired = {}
-    chalet_pos = 0
-    superior_pos = 0
-    for idx, item in enumerate(manifest):
-        slot = str(SLOT_START + idx)
+    chalet_pos = superior_pos = 0
+    for slot, item in zip(SLOTS, manifest):
         maps = []
         if item["category"] == "common":
             chalet_pos += 1
@@ -137,8 +137,9 @@ def main() -> int:
         else:
             superior_pos += 1
             maps = [{"propId": PROPERTY_ID, "roomId": ROOM_SUPERIOR, "position": str(superior_pos)}]
-        desired[slot] = {"url": item["url"], "map": maps}
-        item["slot"] = slot
+        key = str(slot)
+        desired[key] = {"url": item["url"], "map": maps}
+        item["slot"] = key
 
     wanted = {ROOM_CHALET: chalet_pos, ROOM_SUPERIOR: superior_pos}
     if wanted != {ROOM_CHALET: 21, ROOM_SUPERIOR: 25}:
@@ -162,17 +163,18 @@ def main() -> int:
         },
     )
     data = (readback.get("getPropertyContent") or [{}])[0]
-    got_external = ((data.get("images") or {}).get("external") or {})
+    ext = ((data.get("images") or {}).get("external") or {})
 
     mismatches = []
-    # old low slots should be blank
-    for i in range(1, SLOT_START):
-        got_url = (got_external.get(str(i)) or {}).get("url")
+    for i in range(1, 101):
+        if i in SLOTS:
+            continue
+        got_url = (ext.get(str(i)) or {}).get("url")
         if got_url not in ("", None):
             mismatches.append({"slot": str(i), "field": "old_url_not_blank", "got": got_url})
 
     for key, want in desired.items():
-        got = got_external.get(key) or {}
+        got = ext.get(key) or {}
         if got.get("url") != want["url"]:
             mismatches.append({"slot": key, "field": "url", "wanted": want["url"], "got": got.get("url")})
         if norm_maps(got.get("map")) != norm_maps(want["map"]):
@@ -181,9 +183,9 @@ def main() -> int:
     evidence = {
         "schema": "aumara.beds24-booking-photo-replace.v1",
         "checked_at_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
-        "property_id": PROPERTY_ID,
+        "property_id": int(PROPERTY_ID),
         "asset_commit": asset_sha,
-        "slot_start": SLOT_START,
+        "slots": SLOTS,
         "manifest": manifest,
         "wanted_room_photo_counts": wanted,
         "mismatches": mismatches,
@@ -197,27 +199,21 @@ def main() -> int:
             text = text.replace(s, "[REDACTED]")
     EVIDENCE.parent.mkdir(parents=True, exist_ok=True)
     EVIDENCE.write_text(text + "\n", encoding="utf-8")
-    try:
-        subprocess.run(["git", "config", "user.name", "github-actions[bot]"], check=False)
+    subprocess.run(["git", "config", "user.name", "github-actions[bot]"], check=False)
+    subprocess.run(
+        ["git", "config", "user.email", "41898282+github-actions[bot]@users.noreply.github.com"],
+        check=False,
+    )
+    subprocess.run(["git", "add", str(EVIDENCE)], check=False)
+    if subprocess.run(["git", "diff", "--cached", "--quiet"], check=False).returncode != 0:
         subprocess.run(
-            ["git", "config", "user.email", "41898282+github-actions[bot]@users.noreply.github.com"],
+            ["git", "commit", "-m", f"Record Booking photo replace {evidence['status']} [skip ci]"],
             check=False,
         )
-        subprocess.run(["git", "add", str(EVIDENCE)], check=False)
-        if subprocess.run(["git", "diff", "--cached", "--quiet"], check=False).returncode != 0:
-            subprocess.run(
-                ["git", "commit", "-m", f"Record Booking photo replace {evidence['status']} [skip ci]"],
-                check=False,
-            )
-            subprocess.run(["git", "pull", "--rebase", "origin", "main"], check=False)
-            subprocess.run(["git", "push", "origin", "HEAD:main"], check=False)
-    except Exception as e:
-        print(f"evidence commit skipped: {e}", flush=True)
+        subprocess.run(["git", "pull", "--rebase", "origin", "main"], check=False)
+        subprocess.run(["git", "push", "origin", "HEAD:main"], check=False)
 
-    print(
-        json.dumps({"status": evidence["status"], "counts": wanted, "mismatches": len(mismatches)}),
-        flush=True,
-    )
+    print(json.dumps({"status": evidence["status"], "counts": wanted, "mismatches": len(mismatches)}), flush=True)
     if mismatches:
         raise SystemExit(f"Readback mismatches: {len(mismatches)}")
     return 0
