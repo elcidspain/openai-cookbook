@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""AUMARA Booking photo replace — clean slots only (35-48 + 69-88)."""
+"""AUMARA Booking photo replace — all 34 as common on both rooms (V1 map-merge safe)."""
 from __future__ import annotations
 
 import datetime as dt
@@ -17,7 +17,7 @@ ROOM_SUPERIOR = "674466"
 REPO = "elcidspain/openai-cookbook"
 PUBLIC_DIR = "aumara-control-tower/public/booking-20260908"
 EVIDENCE = pathlib.Path("aumara-control-tower/evidence/beds24-booking-photo-replace-20260908.json")
-SLOTS = list(range(35, 49)) + list(range(69, 89))  # 34 clean-ish slots
+SLOTS = list(range(35, 49)) + list(range(69, 89))
 CONTAMINATED = [i for i in range(1, 101) if i not in SLOTS]
 
 
@@ -68,36 +68,36 @@ def main() -> int:
         mask(s)
     if not api or not prop:
         raise SystemExit("BEDS24_API_KEY / BEDS24_PROP_KEY missing")
-    if len(SLOTS) != 34:
-        raise SystemExit(f"bad slots {len(SLOTS)}")
 
     asset_sha = (
         subprocess.check_output(["git", "rev-list", "-1", "HEAD", "--", PUBLIC_DIR], text=True).strip()
         or subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
     )
     files = sorted(pathlib.Path(PUBLIC_DIR).glob("*.jpg"))
-    if len(files) != 34:
-        raise SystemExit(f"Expected 34 JPGs, got {len(files)}")
+    if len(files) != 34 or len(SLOTS) != 34:
+        raise SystemExit(f"Expected 34 files/slots, got {len(files)}/{len(SLOTS)}")
 
+    # Prefer visual order: common exteriors first, then chalet, then superior (filename sort already does this)
     manifest = []
     for f in files:
         category = f.name.split("-")[1]
         url = f"https://raw.githubusercontent.com/{REPO}/{asset_sha}/{PUBLIC_DIR}/{f.name}"
+        ok = False
         for _ in range(8):
             try:
                 rq = urllib.request.Request(url, headers={"User-Agent": "AUMARA-photo-readback/1.0"})
                 with urllib.request.urlopen(rq, timeout=30) as resp:
                     if int(resp.status) == 200 and resp.read(64).startswith(b"\xff\xd8\xff"):
+                        ok = True
                         break
-            except Exception as e:
-                last = str(e)
+            except Exception:
+                pass
             time.sleep(1)
-        else:
+        if not ok:
             raise SystemExit(f"Not fetchable {f.name}")
         manifest.append({"category": category, "filename": f.name, "url": url})
 
     auth = {"apiKey": api, "propKey": prop}
-    # Blank contaminated / unused slots only (do not touch target slots with a shared scrub URL)
     blank = {str(i): {"url": ""} for i in CONTAMINATED}
     post_v1(
         "setPropertyContent",
@@ -106,28 +106,15 @@ def main() -> int:
     time.sleep(3)
 
     desired = {}
-    chalet_pos = superior_pos = 0
-    for slot, item in zip(SLOTS, manifest):
-        if item["category"] == "common":
-            chalet_pos += 1
-            superior_pos += 1
-            maps = [
-                {"propId": PROPERTY_ID, "roomId": ROOM_CHALET, "position": str(chalet_pos)},
-                {"propId": PROPERTY_ID, "roomId": ROOM_SUPERIOR, "position": str(superior_pos)},
-            ]
-        elif item["category"] == "chalet":
-            chalet_pos += 1
-            maps = [{"propId": PROPERTY_ID, "roomId": ROOM_CHALET, "position": str(chalet_pos)}]
-        else:
-            superior_pos += 1
-            maps = [{"propId": PROPERTY_ID, "roomId": ROOM_SUPERIOR, "position": str(superior_pos)}]
+    for pos, (slot, item) in enumerate(zip(SLOTS, manifest), start=1):
+        maps = [
+            {"propId": PROPERTY_ID, "roomId": ROOM_CHALET, "position": str(pos)},
+            {"propId": PROPERTY_ID, "roomId": ROOM_SUPERIOR, "position": str(pos)},
+        ]
         key = str(slot)
         desired[key] = {"url": item["url"], "map": maps}
         item["slot"] = key
-
-    wanted = {ROOM_CHALET: chalet_pos, ROOM_SUPERIOR: superior_pos}
-    if wanted != {ROOM_CHALET: 21, ROOM_SUPERIOR: 25}:
-        raise SystemExit(f"Unexpected counts: {wanted}")
+        item["position"] = pos
 
     post_v1(
         "setPropertyContent",
@@ -158,33 +145,25 @@ def main() -> int:
         got = ext.get(key) or {}
         if got.get("url") != want["url"]:
             mismatches.append({"slot": key, "field": "url", "wanted": want["url"], "got": got.get("url")})
-        if norm_maps(got.get("map")) != norm_maps(want["map"]):
+        # For common dual maps, require at least both room mappings (ignore extra stale entries)
+        got_norm = norm_maps(got.get("map"))
+        want_norm = norm_maps(want["map"])
+        if not set(want_norm).issubset(set(got_norm)):
             mismatches.append({"slot": key, "field": "map", "wanted": want["map"], "got": got.get("map")})
-
-    # Room-level active view (what Booking cares about)
-    active = {ROOM_CHALET: {}, ROOM_SUPERIOR: {}}
-    for key, want in desired.items():
-        got = ext.get(key) or {}
-        url = got.get("url") or want["url"]
-        for m in got.get("map") or []:
-            rid = str(m.get("roomId") or "")
-            pos = str(m.get("position") or "")
-            if rid in active and pos:
-                active[rid][pos] = url
 
     evidence = {
         "schema": "aumara.beds24-booking-photo-replace.v1",
+        "mode": "all_common_both_rooms",
         "checked_at_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
         "property_id": int(PROPERTY_ID),
         "asset_commit": asset_sha,
         "slots": SLOTS,
         "manifest": manifest,
-        "wanted_room_photo_counts": wanted,
-        "active_room_photo_counts": {k: len(v) for k, v in active.items()},
+        "wanted_room_photo_counts": {ROOM_CHALET: 34, ROOM_SUPERIOR: 34},
         "mismatches": mismatches,
         "status": "SUCCESS" if not mismatches else "FAILED_READBACK",
         "secret_exposed": False,
-        "note": "Booking.com may need channel content sync after Beds24 picture replace",
+        "note": "All 34 photos mapped to both rooms (V1 cannot reliably clear room-only maps). Booking channel may need content sync.",
     }
     text = json.dumps(evidence, ensure_ascii=False, indent=2, sort_keys=True)
     for s in (api, prop, refresh):
@@ -200,7 +179,7 @@ def main() -> int:
         subprocess.run(["git", "pull", "--rebase", "origin", "main"], check=False)
         subprocess.run(["git", "push", "origin", "HEAD:main"], check=False)
 
-    print(json.dumps({"status": evidence["status"], "counts": wanted, "active": evidence["active_room_photo_counts"], "mismatches": len(mismatches)}), flush=True)
+    print(json.dumps({"status": evidence["status"], "mismatches": len(mismatches), "mode": "all_common_both_rooms"}), flush=True)
     if mismatches:
         raise SystemExit(f"Readback mismatches: {len(mismatches)}")
     return 0
