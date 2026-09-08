@@ -1,175 +1,209 @@
 {
   "asset_commit": "7375473350aa4dc2f832c67f8f3e847685fe66fe",
-  "checked_at_utc": "2026-09-08T23:02:54.644063+00:00",
+  "checked_at_utc": "2026-09-08T23:05:42.075530+00:00",
   "manifest": [
     {
       "category": "common",
       "filename": "01-common-01.jpg",
+      "slot": "50",
       "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/7375473350aa4dc2f832c67f8f3e847685fe66fe/aumara-control-tower/public/booking-20260908/01-common-01.jpg"
     },
     {
       "category": "common",
       "filename": "02-common-02.jpg",
+      "slot": "51",
       "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/7375473350aa4dc2f832c67f8f3e847685fe66fe/aumara-control-tower/public/booking-20260908/02-common-02.jpg"
     },
     {
       "category": "common",
       "filename": "03-common-03.jpg",
+      "slot": "52",
       "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/7375473350aa4dc2f832c67f8f3e847685fe66fe/aumara-control-tower/public/booking-20260908/03-common-03.jpg"
     },
     {
       "category": "common",
       "filename": "04-common-04.jpg",
+      "slot": "53",
       "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/7375473350aa4dc2f832c67f8f3e847685fe66fe/aumara-control-tower/public/booking-20260908/04-common-04.jpg"
     },
     {
       "category": "common",
       "filename": "05-common-05.jpg",
+      "slot": "54",
       "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/7375473350aa4dc2f832c67f8f3e847685fe66fe/aumara-control-tower/public/booking-20260908/05-common-05.jpg"
     },
     {
       "category": "common",
       "filename": "06-common-06.jpg",
+      "slot": "55",
       "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/7375473350aa4dc2f832c67f8f3e847685fe66fe/aumara-control-tower/public/booking-20260908/06-common-06.jpg"
     },
     {
       "category": "common",
       "filename": "07-common-07.jpg",
+      "slot": "56",
       "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/7375473350aa4dc2f832c67f8f3e847685fe66fe/aumara-control-tower/public/booking-20260908/07-common-07.jpg"
     },
     {
       "category": "common",
       "filename": "08-common-08.jpg",
+      "slot": "57",
       "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/7375473350aa4dc2f832c67f8f3e847685fe66fe/aumara-control-tower/public/booking-20260908/08-common-08.jpg"
     },
     {
       "category": "common",
       "filename": "09-common-09.jpg",
+      "slot": "58",
       "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/7375473350aa4dc2f832c67f8f3e847685fe66fe/aumara-control-tower/public/booking-20260908/09-common-09.jpg"
     },
     {
       "category": "common",
       "filename": "10-common-10.jpg",
+      "slot": "59",
       "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/7375473350aa4dc2f832c67f8f3e847685fe66fe/aumara-control-tower/public/booking-20260908/10-common-10.jpg"
     },
     {
       "category": "common",
       "filename": "11-common-11.jpg",
+      "slot": "60",
       "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/7375473350aa4dc2f832c67f8f3e847685fe66fe/aumara-control-tower/public/booking-20260908/11-common-11.jpg"
     },
     {
       "category": "common",
       "filename": "12-common-12.jpg",
+      "slot": "61",
       "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/7375473350aa4dc2f832c67f8f3e847685fe66fe/aumara-control-tower/public/booking-20260908/12-common-12.jpg"
     },
     {
       "category": "chalet",
       "filename": "13-chalet-01.jpg",
+      "slot": "62",
       "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/7375473350aa4dc2f832c67f8f3e847685fe66fe/aumara-control-tower/public/booking-20260908/13-chalet-01.jpg"
     },
     {
       "category": "chalet",
       "filename": "14-chalet-02.jpg",
+      "slot": "63",
       "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/7375473350aa4dc2f832c67f8f3e847685fe66fe/aumara-control-tower/public/booking-20260908/14-chalet-02.jpg"
     },
     {
       "category": "chalet",
       "filename": "15-chalet-03.jpg",
+      "slot": "64",
       "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/7375473350aa4dc2f832c67f8f3e847685fe66fe/aumara-control-tower/public/booking-20260908/15-chalet-03.jpg"
     },
     {
       "category": "chalet",
       "filename": "16-chalet-04.jpg",
+      "slot": "65",
       "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/7375473350aa4dc2f832c67f8f3e847685fe66fe/aumara-control-tower/public/booking-20260908/16-chalet-04.jpg"
     },
     {
       "category": "chalet",
       "filename": "17-chalet-05.jpg",
+      "slot": "66",
       "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/7375473350aa4dc2f832c67f8f3e847685fe66fe/aumara-control-tower/public/booking-20260908/17-chalet-05.jpg"
     },
     {
       "category": "chalet",
       "filename": "18-chalet-06.jpg",
+      "slot": "67",
       "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/7375473350aa4dc2f832c67f8f3e847685fe66fe/aumara-control-tower/public/booking-20260908/18-chalet-06.jpg"
     },
     {
       "category": "chalet",
       "filename": "19-chalet-07.jpg",
+      "slot": "68",
       "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/7375473350aa4dc2f832c67f8f3e847685fe66fe/aumara-control-tower/public/booking-20260908/19-chalet-07.jpg"
     },
     {
       "category": "chalet",
       "filename": "20-chalet-08.jpg",
+      "slot": "69",
       "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/7375473350aa4dc2f832c67f8f3e847685fe66fe/aumara-control-tower/public/booking-20260908/20-chalet-08.jpg"
     },
     {
       "category": "chalet",
       "filename": "21-chalet-09.jpg",
+      "slot": "70",
       "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/7375473350aa4dc2f832c67f8f3e847685fe66fe/aumara-control-tower/public/booking-20260908/21-chalet-09.jpg"
     },
     {
       "category": "superior",
       "filename": "22-superior-01.jpg",
+      "slot": "71",
       "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/7375473350aa4dc2f832c67f8f3e847685fe66fe/aumara-control-tower/public/booking-20260908/22-superior-01.jpg"
     },
     {
       "category": "superior",
       "filename": "23-superior-02.jpg",
+      "slot": "72",
       "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/7375473350aa4dc2f832c67f8f3e847685fe66fe/aumara-control-tower/public/booking-20260908/23-superior-02.jpg"
     },
     {
       "category": "superior",
       "filename": "24-superior-03.jpg",
+      "slot": "73",
       "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/7375473350aa4dc2f832c67f8f3e847685fe66fe/aumara-control-tower/public/booking-20260908/24-superior-03.jpg"
     },
     {
       "category": "superior",
       "filename": "25-superior-04.jpg",
+      "slot": "74",
       "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/7375473350aa4dc2f832c67f8f3e847685fe66fe/aumara-control-tower/public/booking-20260908/25-superior-04.jpg"
     },
     {
       "category": "superior",
       "filename": "26-superior-05.jpg",
+      "slot": "75",
       "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/7375473350aa4dc2f832c67f8f3e847685fe66fe/aumara-control-tower/public/booking-20260908/26-superior-05.jpg"
     },
     {
       "category": "superior",
       "filename": "27-superior-06.jpg",
+      "slot": "76",
       "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/7375473350aa4dc2f832c67f8f3e847685fe66fe/aumara-control-tower/public/booking-20260908/27-superior-06.jpg"
     },
     {
       "category": "superior",
       "filename": "28-superior-07.jpg",
+      "slot": "77",
       "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/7375473350aa4dc2f832c67f8f3e847685fe66fe/aumara-control-tower/public/booking-20260908/28-superior-07.jpg"
     },
     {
       "category": "superior",
       "filename": "29-superior-08.jpg",
+      "slot": "78",
       "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/7375473350aa4dc2f832c67f8f3e847685fe66fe/aumara-control-tower/public/booking-20260908/29-superior-08.jpg"
     },
     {
       "category": "superior",
       "filename": "30-superior-09.jpg",
+      "slot": "79",
       "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/7375473350aa4dc2f832c67f8f3e847685fe66fe/aumara-control-tower/public/booking-20260908/30-superior-09.jpg"
     },
     {
       "category": "superior",
       "filename": "31-superior-10.jpg",
+      "slot": "80",
       "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/7375473350aa4dc2f832c67f8f3e847685fe66fe/aumara-control-tower/public/booking-20260908/31-superior-10.jpg"
     },
     {
       "category": "superior",
       "filename": "32-superior-11.jpg",
+      "slot": "81",
       "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/7375473350aa4dc2f832c67f8f3e847685fe66fe/aumara-control-tower/public/booking-20260908/32-superior-11.jpg"
     },
     {
       "category": "superior",
       "filename": "33-superior-12.jpg",
+      "slot": "82",
       "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/7375473350aa4dc2f832c67f8f3e847685fe66fe/aumara-control-tower/public/booking-20260908/33-superior-12.jpg"
     },
     {
       "category": "superior",
       "filename": "34-superior-13.jpg",
+      "slot": "83",
       "url": "https://raw.githubusercontent.com/elcidspain/openai-cookbook/7375473350aa4dc2f832c67f8f3e847685fe66fe/aumara-control-tower/public/booking-20260908/34-superior-13.jpg"
     }
   ],
@@ -183,16 +217,16 @@
           "roomId": "674465"
         },
         {
-          "position": "13",
+          "position": "36",
           "propId": "324882",
           "roomId": "674466"
         }
       ],
-      "slot": "13",
+      "slot": "62",
       "wanted": [
         {
           "position": "13",
-          "propId": "324882",
+          "propId": 324882,
           "roomId": "674465"
         }
       ]
@@ -206,16 +240,16 @@
           "roomId": "674465"
         },
         {
-          "position": "14",
+          "position": "37",
           "propId": "324882",
           "roomId": "674466"
         }
       ],
-      "slot": "14",
+      "slot": "63",
       "wanted": [
         {
           "position": "14",
-          "propId": "324882",
+          "propId": 324882,
           "roomId": "674465"
         }
       ]
@@ -224,398 +258,7 @@
       "field": "map",
       "got": [
         {
-          "position": "15",
-          "propId": "324882",
-          "roomId": "674465"
-        },
-        {
-          "position": "15",
-          "propId": "324882",
-          "roomId": "674466"
-        }
-      ],
-      "slot": "15",
-      "wanted": [
-        {
-          "position": "15",
-          "propId": "324882",
-          "roomId": "674465"
-        }
-      ]
-    },
-    {
-      "field": "map",
-      "got": [
-        {
-          "position": "16",
-          "propId": "324882",
-          "roomId": "674465"
-        },
-        {
-          "position": "16",
-          "propId": "324882",
-          "roomId": "674466"
-        }
-      ],
-      "slot": "16",
-      "wanted": [
-        {
-          "position": "16",
-          "propId": "324882",
-          "roomId": "674465"
-        }
-      ]
-    },
-    {
-      "field": "map",
-      "got": [
-        {
-          "position": "17",
-          "propId": "324882",
-          "roomId": "674465"
-        },
-        {
-          "position": "17",
-          "propId": "324882",
-          "roomId": "674466"
-        }
-      ],
-      "slot": "17",
-      "wanted": [
-        {
-          "position": "17",
-          "propId": "324882",
-          "roomId": "674465"
-        }
-      ]
-    },
-    {
-      "field": "map",
-      "got": [
-        {
-          "position": "18",
-          "propId": "324882",
-          "roomId": "674465"
-        },
-        {
-          "position": "18",
-          "propId": "324882",
-          "roomId": "674466"
-        }
-      ],
-      "slot": "18",
-      "wanted": [
-        {
-          "position": "18",
-          "propId": "324882",
-          "roomId": "674465"
-        }
-      ]
-    },
-    {
-      "field": "map",
-      "got": [
-        {
-          "position": "19",
-          "propId": "324882",
-          "roomId": "674465"
-        },
-        {
-          "position": "19",
-          "propId": "324882",
-          "roomId": "674466"
-        }
-      ],
-      "slot": "19",
-      "wanted": [
-        {
-          "position": "19",
-          "propId": "324882",
-          "roomId": "674465"
-        }
-      ]
-    },
-    {
-      "field": "map",
-      "got": [
-        {
-          "position": "20",
-          "propId": "324882",
-          "roomId": "674465"
-        },
-        {
-          "position": "20",
-          "propId": "324882",
-          "roomId": "674466"
-        }
-      ],
-      "slot": "20",
-      "wanted": [
-        {
-          "position": "20",
-          "propId": "324882",
-          "roomId": "674465"
-        }
-      ]
-    },
-    {
-      "field": "map",
-      "got": [
-        {
-          "position": "21",
-          "propId": "324882",
-          "roomId": "674465"
-        },
-        {
-          "position": "21",
-          "propId": "324882",
-          "roomId": "674466"
-        }
-      ],
-      "slot": "21",
-      "wanted": [
-        {
-          "position": "21",
-          "propId": "324882",
-          "roomId": "674465"
-        }
-      ]
-    },
-    {
-      "field": "map",
-      "got": [
-        {
-          "position": "22",
-          "propId": "324882",
-          "roomId": "674465"
-        },
-        {
-          "position": "13",
-          "propId": "324882",
-          "roomId": "674466"
-        }
-      ],
-      "slot": "22",
-      "wanted": [
-        {
-          "position": "13",
-          "propId": "324882",
-          "roomId": "674466"
-        }
-      ]
-    },
-    {
-      "field": "map",
-      "got": [
-        {
-          "position": "23",
-          "propId": "324882",
-          "roomId": "674465"
-        },
-        {
-          "position": "14",
-          "propId": "324882",
-          "roomId": "674466"
-        }
-      ],
-      "slot": "23",
-      "wanted": [
-        {
-          "position": "14",
-          "propId": "324882",
-          "roomId": "674466"
-        }
-      ]
-    },
-    {
-      "field": "map",
-      "got": [
-        {
-          "position": "24",
-          "propId": "324882",
-          "roomId": "674465"
-        },
-        {
-          "position": "15",
-          "propId": "324882",
-          "roomId": "674466"
-        }
-      ],
-      "slot": "24",
-      "wanted": [
-        {
-          "position": "15",
-          "propId": "324882",
-          "roomId": "674466"
-        }
-      ]
-    },
-    {
-      "field": "map",
-      "got": [
-        {
-          "position": "25",
-          "propId": "324882",
-          "roomId": "674465"
-        },
-        {
-          "position": "16",
-          "propId": "324882",
-          "roomId": "674466"
-        }
-      ],
-      "slot": "25",
-      "wanted": [
-        {
-          "position": "16",
-          "propId": "324882",
-          "roomId": "674466"
-        }
-      ]
-    },
-    {
-      "field": "map",
-      "got": [
-        {
-          "position": "26",
-          "propId": "324882",
-          "roomId": "674465"
-        },
-        {
-          "position": "17",
-          "propId": "324882",
-          "roomId": "674466"
-        }
-      ],
-      "slot": "26",
-      "wanted": [
-        {
-          "position": "17",
-          "propId": "324882",
-          "roomId": "674466"
-        }
-      ]
-    },
-    {
-      "field": "map",
-      "got": [
-        {
-          "position": "27",
-          "propId": "324882",
-          "roomId": "674465"
-        },
-        {
-          "position": "18",
-          "propId": "324882",
-          "roomId": "674466"
-        }
-      ],
-      "slot": "27",
-      "wanted": [
-        {
-          "position": "18",
-          "propId": "324882",
-          "roomId": "674466"
-        }
-      ]
-    },
-    {
-      "field": "map",
-      "got": [
-        {
-          "position": "28",
-          "propId": "324882",
-          "roomId": "674465"
-        },
-        {
-          "position": "19",
-          "propId": "324882",
-          "roomId": "674466"
-        }
-      ],
-      "slot": "28",
-      "wanted": [
-        {
-          "position": "19",
-          "propId": "324882",
-          "roomId": "674466"
-        }
-      ]
-    },
-    {
-      "field": "map",
-      "got": [
-        {
-          "position": "29",
-          "propId": "324882",
-          "roomId": "674465"
-        },
-        {
-          "position": "20",
-          "propId": "324882",
-          "roomId": "674466"
-        }
-      ],
-      "slot": "29",
-      "wanted": [
-        {
-          "position": "20",
-          "propId": "324882",
-          "roomId": "674466"
-        }
-      ]
-    },
-    {
-      "field": "map",
-      "got": [
-        {
-          "position": "30",
-          "propId": "324882",
-          "roomId": "674465"
-        },
-        {
-          "position": "21",
-          "propId": "324882",
-          "roomId": "674466"
-        }
-      ],
-      "slot": "30",
-      "wanted": [
-        {
-          "position": "21",
-          "propId": "324882",
-          "roomId": "674466"
-        }
-      ]
-    },
-    {
-      "field": "map",
-      "got": [
-        {
-          "position": "31",
-          "propId": "324882",
-          "roomId": "674465"
-        },
-        {
-          "position": "22",
-          "propId": "324882",
-          "roomId": "674466"
-        }
-      ],
-      "slot": "31",
-      "wanted": [
-        {
-          "position": "22",
-          "propId": "324882",
-          "roomId": "674466"
-        }
-      ]
-    },
-    {
-      "field": "map",
-      "got": [
-        {
-          "position": "32",
+          "position": "1",
           "propId": "324882",
           "roomId": "674465"
         },
@@ -625,11 +268,11 @@
           "roomId": "674466"
         }
       ],
-      "slot": "32",
+      "slot": "81",
       "wanted": [
         {
           "position": "23",
-          "propId": "324882",
+          "propId": 324882,
           "roomId": "674466"
         }
       ]
@@ -638,7 +281,7 @@
       "field": "map",
       "got": [
         {
-          "position": "33",
+          "position": "2",
           "propId": "324882",
           "roomId": "674465"
         },
@@ -648,11 +291,11 @@
           "roomId": "674466"
         }
       ],
-      "slot": "33",
+      "slot": "82",
       "wanted": [
         {
           "position": "24",
-          "propId": "324882",
+          "propId": 324882,
           "roomId": "674466"
         }
       ]
@@ -661,7 +304,7 @@
       "field": "map",
       "got": [
         {
-          "position": "34",
+          "position": "3",
           "propId": "324882",
           "roomId": "674465"
         },
@@ -671,11 +314,11 @@
           "roomId": "674466"
         }
       ],
-      "slot": "34",
+      "slot": "83",
       "wanted": [
         {
           "position": "25",
-          "propId": "324882",
+          "propId": 324882,
           "roomId": "674466"
         }
       ]
@@ -685,10 +328,10 @@
   "property_id": 324882,
   "schema": "aumara.beds24-booking-photo-replace.v1",
   "secret_exposed": false,
+  "slot_start": 50,
   "status": "FAILED_READBACK",
   "wanted_room_photo_counts": {
     "674465": 21,
     "674466": 25
-  },
-  "write_ok": true
+  }
 }
