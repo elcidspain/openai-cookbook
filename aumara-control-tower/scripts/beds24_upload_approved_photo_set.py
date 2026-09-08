@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""AUMARA Booking photo replace 324882 — scrub maps then write clean slots 35-68."""
+"""AUMARA Booking photo replace — clean slots only (35-48 + 69-88)."""
 from __future__ import annotations
 
 import datetime as dt
@@ -7,7 +7,6 @@ import json
 import os
 import pathlib
 import subprocess
-import sys
 import time
 import urllib.error
 import urllib.request
@@ -18,7 +17,8 @@ ROOM_SUPERIOR = "674466"
 REPO = "elcidspain/openai-cookbook"
 PUBLIC_DIR = "aumara-control-tower/public/booking-20260908"
 EVIDENCE = pathlib.Path("aumara-control-tower/evidence/beds24-booking-photo-replace-20260908.json")
-SLOTS = list(range(35, 69))  # 34 slots
+SLOTS = list(range(35, 49)) + list(range(69, 89))  # 34 clean-ish slots
+CONTAMINATED = [i for i in range(1, 101) if i not in SLOTS]
 
 
 def mask(v: str) -> None:
@@ -63,15 +63,13 @@ def norm_maps(value):
 def main() -> int:
     api = (os.environ.get("BEDS24_API_KEY") or "").strip()
     prop = (os.environ.get("BEDS24_PROP_KEY") or "").strip()
-    refresh = (
-        os.environ.get("BEDS24_REFRESH_CREDENTIAL")
-        or os.environ.get("BEDS24_VAULT_KEK")
-        or ""
-    ).strip()
+    refresh = (os.environ.get("BEDS24_REFRESH_CREDENTIAL") or os.environ.get("BEDS24_VAULT_KEK") or "").strip()
     for s in (api, prop, refresh):
         mask(s)
     if not api or not prop:
         raise SystemExit("BEDS24_API_KEY / BEDS24_PROP_KEY missing")
+    if len(SLOTS) != 34:
+        raise SystemExit(f"bad slots {len(SLOTS)}")
 
     asset_sha = (
         subprocess.check_output(["git", "rev-list", "-1", "HEAD", "--", PUBLIC_DIR], text=True).strip()
@@ -80,40 +78,27 @@ def main() -> int:
     files = sorted(pathlib.Path(PUBLIC_DIR).glob("*.jpg"))
     if len(files) != 34:
         raise SystemExit(f"Expected 34 JPGs, got {len(files)}")
-    if len(SLOTS) != 34:
-        raise SystemExit("SLOTS must be 34")
 
     manifest = []
     for f in files:
         category = f.name.split("-")[1]
-        if category not in ("common", "chalet", "superior"):
-            raise SystemExit(f"Bad category: {f.name}")
         url = f"https://raw.githubusercontent.com/{REPO}/{asset_sha}/{PUBLIC_DIR}/{f.name}"
-        last = None
         for _ in range(8):
             try:
                 rq = urllib.request.Request(url, headers={"User-Agent": "AUMARA-photo-readback/1.0"})
                 with urllib.request.urlopen(rq, timeout=30) as resp:
-                    head = resp.read(64)
-                    if int(resp.status) == 200 and head.startswith(b"\xff\xd8\xff"):
+                    if int(resp.status) == 200 and resp.read(64).startswith(b"\xff\xd8\xff"):
                         break
             except Exception as e:
                 last = str(e)
-            time.sleep(2)
+            time.sleep(1)
         else:
-            raise SystemExit(f"Not fetchable {f.name}: {last}")
+            raise SystemExit(f"Not fetchable {f.name}")
         manifest.append({"category": category, "filename": f.name, "url": url})
 
     auth = {"apiKey": api, "propKey": prop}
-    # Scrub: force map=[] with a real temp URL, then blank, for ALL slots
-    scrub_url = manifest[0]["url"]
-    scrub = {str(i): {"url": scrub_url, "map": []} for i in range(1, 101)}
-    post_v1(
-        "setPropertyContent",
-        {"authentication": auth, "setPropertyContent": [{"action": "modify", "images": {"external": scrub}}]},
-    )
-    time.sleep(2)
-    blank = {str(i): {"url": "", "map": []} for i in range(1, 101)}
+    # Blank contaminated / unused slots only (do not touch target slots with a shared scrub URL)
+    blank = {str(i): {"url": ""} for i in CONTAMINATED}
     post_v1(
         "setPropertyContent",
         {"authentication": auth, "setPropertyContent": [{"action": "modify", "images": {"external": blank}}]},
@@ -123,7 +108,6 @@ def main() -> int:
     desired = {}
     chalet_pos = superior_pos = 0
     for slot, item in zip(SLOTS, manifest):
-        maps = []
         if item["category"] == "common":
             chalet_pos += 1
             superior_pos += 1
@@ -166,19 +150,27 @@ def main() -> int:
     ext = ((data.get("images") or {}).get("external") or {})
 
     mismatches = []
-    for i in range(1, 101):
-        if i in SLOTS:
-            continue
+    for i in CONTAMINATED:
         got_url = (ext.get(str(i)) or {}).get("url")
         if got_url not in ("", None):
             mismatches.append({"slot": str(i), "field": "old_url_not_blank", "got": got_url})
-
     for key, want in desired.items():
         got = ext.get(key) or {}
         if got.get("url") != want["url"]:
             mismatches.append({"slot": key, "field": "url", "wanted": want["url"], "got": got.get("url")})
         if norm_maps(got.get("map")) != norm_maps(want["map"]):
             mismatches.append({"slot": key, "field": "map", "wanted": want["map"], "got": got.get("map")})
+
+    # Room-level active view (what Booking cares about)
+    active = {ROOM_CHALET: {}, ROOM_SUPERIOR: {}}
+    for key, want in desired.items():
+        got = ext.get(key) or {}
+        url = got.get("url") or want["url"]
+        for m in got.get("map") or []:
+            rid = str(m.get("roomId") or "")
+            pos = str(m.get("position") or "")
+            if rid in active and pos:
+                active[rid][pos] = url
 
     evidence = {
         "schema": "aumara.beds24-booking-photo-replace.v1",
@@ -188,6 +180,7 @@ def main() -> int:
         "slots": SLOTS,
         "manifest": manifest,
         "wanted_room_photo_counts": wanted,
+        "active_room_photo_counts": {k: len(v) for k, v in active.items()},
         "mismatches": mismatches,
         "status": "SUCCESS" if not mismatches else "FAILED_READBACK",
         "secret_exposed": False,
@@ -200,20 +193,14 @@ def main() -> int:
     EVIDENCE.parent.mkdir(parents=True, exist_ok=True)
     EVIDENCE.write_text(text + "\n", encoding="utf-8")
     subprocess.run(["git", "config", "user.name", "github-actions[bot]"], check=False)
-    subprocess.run(
-        ["git", "config", "user.email", "41898282+github-actions[bot]@users.noreply.github.com"],
-        check=False,
-    )
+    subprocess.run(["git", "config", "user.email", "41898282+github-actions[bot]@users.noreply.github.com"], check=False)
     subprocess.run(["git", "add", str(EVIDENCE)], check=False)
     if subprocess.run(["git", "diff", "--cached", "--quiet"], check=False).returncode != 0:
-        subprocess.run(
-            ["git", "commit", "-m", f"Record Booking photo replace {evidence['status']} [skip ci]"],
-            check=False,
-        )
+        subprocess.run(["git", "commit", "-m", f"Record Booking photo replace {evidence['status']} [skip ci]"], check=False)
         subprocess.run(["git", "pull", "--rebase", "origin", "main"], check=False)
         subprocess.run(["git", "push", "origin", "HEAD:main"], check=False)
 
-    print(json.dumps({"status": evidence["status"], "counts": wanted, "mismatches": len(mismatches)}), flush=True)
+    print(json.dumps({"status": evidence["status"], "counts": wanted, "active": evidence["active_room_photo_counts"], "mismatches": len(mismatches)}), flush=True)
     if mismatches:
         raise SystemExit(f"Readback mismatches: {len(mismatches)}")
     return 0
