@@ -105,6 +105,31 @@ class AumaraAccessAuditTests(unittest.TestCase):
         self.assertNotIn("1531", serialized)
         self.assertNotIn("654321", serialized)
 
+    def test_message_order_uses_latest_timestamp_not_api_array_order(self):
+        booking = {
+            "id": 90754013,
+            "infoItems": [{"code": "LOCK_PIN", "value": "1531"}],
+        }
+        messages = [
+            {
+                "source": "host",
+                "message": "Access code PIN 1531.",
+                "createdAt": "2026-08-02T18:00:00Z",
+            },
+            {
+                "source": "host",
+                "message": "Old access code PIN 654321.",
+                "createdAt": "2026-08-01T18:00:00Z",
+            },
+        ]
+        result = MODULE.audit_booking(booking, messages)
+        self.assertEqual(result["status"], "PIN_MESSAGE_MATCHED")
+        self.assertTrue(result["hostMessageMatchesCurrentPin"])
+        self.assertEqual(result["hostAccessMessageAt"], "2026-08-02T18:00:00Z")
+        serialized = json.dumps(result)
+        self.assertNotIn("1531", serialized)
+        self.assertNotIn("654321", serialized)
+
     def test_message_code_without_beds24_pin_is_explicit_exception(self):
         booking = {
             "id": 90754013,
