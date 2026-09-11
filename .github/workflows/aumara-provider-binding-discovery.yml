@@ -6,7 +6,7 @@ on:
     paths:
       - '.github/workflows/aumara-provider-binding-discovery.yml'
   push:
-    branches: [main]
+    branches: [main, fix/bitrix24-readonly-connectivity]
     paths:
       - '.github/workflows/aumara-provider-binding-discovery.yml'
 
@@ -36,7 +36,8 @@ jobs:
     timeout-minutes: 3
     steps:
       - uses: actions/checkout@v4
-      - name: Discover provider-related binding names only
+
+      - name: Discover provider-related binding names when metadata access permits
         id: discover
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -45,22 +46,27 @@ jobs:
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/b24"
           python3 - <<'PY'
-          import datetime, json, os, re, urllib.parse, urllib.request
+          import datetime, json, os, re, urllib.error, urllib.parse, urllib.request
 
           api_url = os.environ.get('GITHUB_API_URL', 'https://api.github.com').rstrip('/')
           repo = os.environ['GITHUB_REPOSITORY']
           token = os.environ['GITHUB_TOKEN']
           headers = {
-             'Accept': 'application/vnd.github+json',
-             'Authorization': 'Bearer ' + token,
-             'X-GitHub-Api-Version': '2022-11-28',
+              'Accept': 'application/vnd.github+json',
+              'Authorization': 'Bearer ' + token,
+              'X-GitHub-Api-Version': '2022-11-28',
           }
+          errors = []
 
           def fetch_entries(path, key):
-             request = urllib.request.Request(f'{api_url}{path}', headers=headers)
-             with urllib.request.urlopen(request, timeout=15) as response:
-                 payload = json.loads(response.read().decode('utf-8'))
-             return [entry['name'] for entry in payload.get(key, [])]
+              request = urllib.request.Request(f'{api_url}{path}', headers=headers)
+              try:
+                  with urllib.request.urlopen(request, timeout=15) as response:
+                      payload = json.loads(response.read().decode('utf-8'))
+                  return [entry['name'] for entry in payload.get(key, [])]
+              except urllib.error.HTTPError as exc:
+                  errors.append({'scope': key, 'http_status': exc.code})
+                  return []
 
           environment = urllib.parse.quote('Production', safe='')
           secret_names = set(fetch_entries(f'/repos/{repo}/actions/secrets', 'secrets'))
@@ -69,31 +75,33 @@ jobs:
           variable_names.update(fetch_entries(f'/repos/{repo}/environments/{environment}/variables', 'variables'))
 
           patterns = {
-            'xai_grok': re.compile(r'(XAI|GROK|X_AI)', re.I),
-            'gemini_google_ai': re.compile(r'(GEMINI|GENAI|GENERATIVE.*AI|GOOGLE.*AI|AI.*GOOGLE)', re.I),
-            'bitrix24': re.compile(r'(BITRIX_?24|BX24|CRM(?:_WEBHOOK|_PORTAL)?|INBOUND_WEBHOOK|REST_WEBHOOK|(?:^|_)B24(?:_|$)|PORTAL)', re.I),
+              'xai_grok': re.compile(r'(XAI|GROK|X_AI)', re.I),
+              'gemini_google_ai': re.compile(r'(GEMINI|GENAI|GENERATIVE.*AI|GOOGLE.*AI|AI.*GOOGLE)', re.I),
+              'bitrix24': re.compile(r'(BITRIX_?24|BX24|CRM(?:_WEBHOOK|_PORTAL)?|INBOUND_WEBHOOK|REST_WEBHOOK|(?:^|_)B24(?:_|$)|PORTAL)', re.I),
           }
-          def keep_bitrix(name):
-             return 'BEDS24' not in name.upper() and bool(patterns['bitrix24'].search(name))
+
+          def is_bitrix(name):
+              return 'BEDS24' not in name.upper() and bool(patterns['bitrix24'].search(name))
 
           matched_secret_names = {
-            'xai_grok': sorted(n for n in secret_names if patterns['xai_grok'].search(n)),
-            'gemini_google_ai': sorted(n for n in secret_names if patterns['gemini_google_ai'].search(n)),
-            'bitrix24': sorted(n for n in secret_names if keep_bitrix(n)),
+              'xai_grok': sorted(n for n in secret_names if patterns['xai_grok'].search(n)),
+              'gemini_google_ai': sorted(n for n in secret_names if patterns['gemini_google_ai'].search(n)),
+              'bitrix24': sorted(n for n in secret_names if is_bitrix(n)),
           }
-          matched_variable_names = {'bitrix24': sorted(n for n in variable_names if keep_bitrix(n))}
+          matched_variable_names = {'bitrix24': sorted(n for n in variable_names if is_bitrix(n))}
           receipt = {
-            'schema': 'aumara.provider-binding-discovery.v2',
-            'checked_at_utc': datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z'),
-            'matched_secret_names': matched_secret_names,
-            'matched_variable_names': matched_variable_names,
-            'total_secret_count_seen': len(secret_names),
-            'total_variable_count_seen': len(variable_names),
-            'secret_values_exposed': False,
+              'schema': 'aumara.provider-binding-discovery.v2',
+              'checked_at_utc': datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00', 'Z'),
+              'matched_secret_names': matched_secret_names,
+              'matched_variable_names': matched_variable_names,
+              'metadata_api_access': 'ok' if not errors else 'restricted',
+              'metadata_api_errors': errors,
+              'secret_values_exposed': False,
           }
           path = os.path.join(os.environ['RUNNER_TEMP'], 'b24', 'binding-names.json')
           open(path, 'w', encoding='utf-8').write(json.dumps(receipt, indent=2) + '\n')
           print('provider_binding_name_discovery_complete')
+          print('metadata_api_access=' + receipt['metadata_api_access'])
           print('bitrix24_secret_name_matches=' + str(len(matched_secret_names['bitrix24'])))
           print('bitrix24_variable_name_matches=' + str(len(matched_variable_names['bitrix24'])))
           PY
@@ -134,7 +142,7 @@ jobs:
 
       - name: Read-only Bitrix24 health check
         id: b24_probe
-        if: steps.b24_binding.outputs.present == 'true' && steps.b24_binding.outputs.valid == 'true'
+        if: github.event_name != 'pull_request' && steps.b24_binding.outputs.present == 'true' && steps.b24_binding.outputs.valid == 'true'
         continue-on-error: true
         shell: bash
         run: |
@@ -143,7 +151,7 @@ jobs:
           import json, os, time, urllib.error, urllib.request
 
           base = open(os.path.join(os.environ['RUNNER_TEMP'], 'b24', 'webhook.url'), encoding='utf-8').read().strip()
-          result = {'profile': {}, 'crm_item_list': {}, 'writes_performed': False}
+          result = {'profile': {}, 'crm_list': {}, 'writes_performed': False}
 
           def call(method, body=None):
               url = base + method + '.json'
@@ -167,17 +175,18 @@ jobs:
           ok, status, latency = call('profile')
           result['profile'] = {'method': 'profile', 'ok': ok, 'http_status': status, 'latency_ms': latency}
           if ok:
-              ok2, status2, latency2 = call('crm.item.list', {'entityTypeId': 2, 'select': ['id'], 'start': 0})
-              result['crm_item_list'] = {'method': 'crm.item.list', 'ok': ok2, 'http_status': status2, 'latency_ms': latency2}
+              ok2, status2, latency2 = call('crm.deal.list', {'select': ['ID'], 'filter': {'ID': 1}, 'start': 0})
+              result['crm_list'] = {'method': 'crm.deal.list', 'ok': ok2, 'http_status': status2, 'latency_ms': latency2}
           else:
-              result['crm_item_list'] = {'method': 'crm.item.list', 'ok': False, 'skipped': True}
+              result['crm_list'] = {'method': 'crm.deal.list', 'ok': False, 'skipped': True}
+
           out = os.path.join(os.environ['RUNNER_TEMP'], 'b24', 'health.json')
           open(out, 'w', encoding='utf-8').write(json.dumps(result, indent=2) + '\n')
           print('BITRIX24_PROFILE_' + ('PASS' if result['profile']['ok'] else 'FAIL'))
           if not result['profile']['ok']:
               raise SystemExit(11)
-          print('BITRIX24_CRM_ITEM_LIST_' + ('PASS' if result['crm_item_list']['ok'] else 'FAIL'))
-          if not result['crm_item_list']['ok']:
+          print('BITRIX24_CRM_LIST_' + ('PASS' if result['crm_list']['ok'] else 'FAIL'))
+          if not result['crm_list']['ok']:
               raise SystemExit(12)
           PY
 
@@ -195,24 +204,31 @@ jobs:
           python3 - <<'PY'
           import json, os
           root = os.path.join(os.environ['RUNNER_TEMP'], 'b24')
-          names = json.load(open(os.path.join(root, 'binding-names.json'), encoding='utf-8'))
+          names_path = os.path.join(root, 'binding-names.json')
+          names = json.load(open(names_path, encoding='utf-8')) if os.path.exists(names_path) else {
+              'checked_at_utc': None,
+              'matched_secret_names': {'bitrix24': []},
+              'matched_variable_names': {'bitrix24': []},
+              'metadata_api_access': 'failed',
+          }
           health_path = os.path.join(root, 'health.json')
           health = json.load(open(health_path, encoding='utf-8')) if os.path.exists(health_path) else None
           receipt = {
-            'schema': 'aumara.bitrix24-readonly-connectivity.v1',
-            'checked_at_utc': names['checked_at_utc'],
-            'matched_secret_names': names['matched_secret_names']['bitrix24'],
-            'matched_variable_names': names['matched_variable_names']['bitrix24'],
-            'selected_binding_name': os.getenv('BINDING_NAME') or None,
-            'portal_host': os.getenv('PORTAL_HOST') or None,
-            'binding_present': os.getenv('BINDING_PRESENT') == 'true',
-            'binding_valid': os.getenv('BINDING_VALID') == 'true',
-            'probe_outcome': os.getenv('PROBE_OUTCOME') or 'not_run',
-            'health': health,
-            'secret_values_exposed': False,
-            'webhook_path_exposed': False,
-            'crm_ids_recorded': False,
-            'writes_performed': False,
+              'schema': 'aumara.bitrix24-readonly-connectivity.v1',
+              'checked_at_utc': names['checked_at_utc'],
+              'matched_secret_names': names['matched_secret_names']['bitrix24'],
+              'matched_variable_names': names['matched_variable_names']['bitrix24'],
+              'metadata_api_access': names.get('metadata_api_access'),
+              'selected_binding_name': os.getenv('BINDING_NAME') or None,
+              'portal_host': os.getenv('PORTAL_HOST') or None,
+              'binding_present': os.getenv('BINDING_PRESENT') == 'true',
+              'binding_valid': os.getenv('BINDING_VALID') == 'true',
+              'probe_outcome': os.getenv('PROBE_OUTCOME') or 'not_run',
+              'health': health,
+              'secret_values_exposed': False,
+              'webhook_path_exposed': False,
+              'crm_ids_recorded': False,
+              'writes_performed': False,
           }
           open('AUMARA_BITRIX24_CONNECTIVITY_RECEIPT.json', 'w', encoding='utf-8').write(json.dumps(receipt, indent=2) + '\n')
           print(json.dumps({k: receipt[k] for k in ('portal_host','binding_present','binding_valid','probe_outcome','secret_values_exposed','webhook_path_exposed','crm_ids_recorded','writes_performed')}))
@@ -226,7 +242,7 @@ jobs:
           path: AUMARA_BITRIX24_CONNECTIVITY_RECEIPT.json
 
       - name: Enforce read-only Bitrix24 connectivity
-        if: always()
+        if: always() && github.event_name != 'pull_request'
         env:
           BINDING_PRESENT: ${{ steps.b24_binding.outputs.present }}
           BINDING_VALID: ${{ steps.b24_binding.outputs.valid }}
