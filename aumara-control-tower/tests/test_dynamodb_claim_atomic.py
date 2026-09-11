@@ -351,8 +351,10 @@ class DynamoClaimAtomicTests(unittest.TestCase):
     def test_airbnb_draft_prepare_workflow_updates_chalet_airbnb_content_and_verifies_readback(self) -> None:
         workflow = (
             ROOT.parent
-            / ".github"
-            / "workflows"
+            / "ops"
+            / "archive"
+            / "github-actions"
+            / "2026-08"
             / "beds24-airbnb-draft-prepare-20260825.yml"
         ).read_text(encoding="utf-8")
         self.assertIn("workflow_dispatch:", workflow)
