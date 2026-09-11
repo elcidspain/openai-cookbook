@@ -173,6 +173,19 @@ def _pin_candidates(value: Any) -> set[str]:
     return set(PIN_RE.findall(text))
 
 
+def _message_timestamp(message: dict[str, Any]) -> dt.datetime | None:
+    text = str(
+        message.get("createdAt") or message.get("time") or message.get("date") or ""
+    ).strip()
+    if not text:
+        return None
+    try:
+        parsed = dt.datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    return parsed if parsed.tzinfo else parsed.replace(tzinfo=MADRID)
+
+
 def current_lock_pins(booking: dict[str, Any]) -> tuple[bool, set[str]]:
     """Return descriptor presence and PINs privately; callers must never serialize PINs."""
     items = booking.get("infoItems") or booking.get("bookingInfo") or []
@@ -244,7 +257,7 @@ def access_message_state(
 ) -> tuple[bool, bool, bool, str | None]:
     """Return marker, PIN-like presence, exact match and timestamp without content."""
     current_pins = current_pins or set()
-    evidence: list[tuple[dict[str, Any], bool, bool]] = []
+    evidence: list[tuple[dict[str, Any], bool, bool, dt.datetime | None]] = []
     for message in messages:
         source = str(message.get("source") or message.get("sender") or "").casefold()
         body = str(
@@ -260,10 +273,18 @@ def access_message_state(
         pin_like = bool(_pin_candidates(body))
         exact_match = bool(current_pins) and any(pin in body for pin in current_pins)
         if marker_found or pin_like or exact_match:
-            evidence.append((message, pin_like, exact_match))
+            evidence.append((message, pin_like, exact_match, _message_timestamp(message)))
     if not evidence:
         return False, False, False, None
-    latest, latest_pin_like, latest_match = evidence[-1]
+    minimum = dt.datetime.min.replace(tzinfo=dt.timezone.utc)
+    latest, latest_pin_like, latest_match, _ = max(
+        enumerate(evidence),
+        key=lambda pair: (
+            pair[1][3] is not None,
+            pair[1][3].astimezone(dt.timezone.utc) if pair[1][3] else minimum,
+            pair[0],
+        ),
+    )[1]
     sent_at = latest.get("time") or latest.get("createdAt") or latest.get("date")
     return True, latest_pin_like, latest_match, str(sent_at) if sent_at else None
 
