@@ -1,6 +1,6 @@
 # AUMARA Automation Registry
 
-Cutover packets: `OPS_AUTOMATION_HYGIENE_001`, `OPS_AUTOMATION_HYGIENE_P1`.
+Cutover packets: `OPS_AUTOMATION_HYGIENE_001`, `OPS_AUTOMATION_HYGIENE_P1`, `OPS_AUTOMATION_HYGIENE_P2`.
 
 This registry records only the workflows classified by these cleanup packets. Other workflows remain unchanged and are not implicitly reclassified.
 
@@ -22,8 +22,11 @@ This registry records only the workflows classified by these cleanup packets. Ot
 ## RECOVERY / EXISTING
 
 - `.github/workflows/beds24-recover-live-exchange-artifacts.yml` — direct recovery workflow retained unchanged in P1. It still has `workflow_dispatch` plus its existing file-scoped `push` trigger on changes to that workflow itself; no issue-controller wrapper remains live.
+- `.github/workflows/aumara-actions-heartbeat.yml` — retained for now. It is manual plus a self-file-scoped push trigger; P2 did not change it because it is not a recurring cross-repository source of noise.
 
 ## ARCHIVED / non-runnable
+
+P2 archived `.github/workflows/aumara-airbnb-live-watch.yml`. The workflow listened for `/airbnb-live-watch` comments on issue #83, but issue #83 is a closed Beds24 photo-vault issue rather than a current Airbnb control surface. The byte-identical workflow remains at `ops/archive/github-actions/2026-08/aumara-airbnb-live-watch.yml`.
 
 P1 moved these legacy issue-driven controller wrappers out of `.github/workflows/` with byte-identical blobs:
 
@@ -35,8 +38,9 @@ P0 moved all workflow files with explicit historical suffixes `20260823` or `202
 
 ## Guardrails
 
-- No guest-message workflow is changed by P1.
+- No guest-message workflow is changed by P1 or P2.
 - P1 intentionally narrows the photo-vault runtime workflow to manual dispatch only; it does not execute that workflow.
+- P2 archives only the stale issue-driven Airbnb watcher described above.
 - No booking, rate, property, photo, or credential mutation is performed by the cleanup itself.
 - No credential or secret value is copied into this registry.
 - No deployment is triggered by this registry.
