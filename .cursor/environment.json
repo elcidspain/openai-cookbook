@@ -8,6 +8,9 @@
     }
   ],
   "ports": [
-    8787
+    {
+      "name": "control-tower",
+      "port": 8787
+    }
   ]
 }
