@@ -2,8 +2,6 @@ name: AUMARA rotation-safe Beds24 photo sync from vault
 
 on:
   workflow_dispatch:
-  issues:
-    types: [opened]
 
 permissions:
   contents: write
@@ -11,18 +9,13 @@ permissions:
 
 jobs:
   sync:
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      ((github.event.issue.title == 'AUMARA control: sync Beds24 photos from vault' ||
-        github.event.issue.title == 'AUMARA control: run Beds24 photo vault sync') &&
-       github.event.issue.user.login == 'elcidspain')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment: Production
     env:
       BEDS24_VAULT_KEK: ${{ secrets.BEDS24_REFRESH_CREDENTIAL }}
       PROPERTY_ID: '324882'
-      ISSUE_NUMBER: ${{ github.event.issue.number || '' }}
+      ISSUE_NUMBER: ''
       GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
