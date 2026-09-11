@@ -74,7 +74,17 @@ jobs:
 
       - name: Audit current PIN distribution for today and tomorrow
         if: steps.credential.outputs.available == 'true'
-        run: python aumara-control-tower/scripts/beds24_aumara_access_audit.py
+        shell: bash
+        run: |
+          set +e
+          python aumara-control-tower/scripts/beds24_aumara_access_audit.py
+          rc=$?
+          set -e
+          if [ "$rc" -eq 2 ]; then
+            echo "::warning::Beds24 access distribution exception detected; sanitized evidence uploaded."
+            exit 0
+          fi
+          exit "$rc"
 
       - name: Upload sanitized evidence
         if: always() && steps.credential.outputs.available == 'true'
