@@ -2,8 +2,6 @@ name: Beds24 Photo Sync Discovery
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '*/5 * * * *'
   pull_request:
     types: [opened, synchronize, reopened]
     paths:
