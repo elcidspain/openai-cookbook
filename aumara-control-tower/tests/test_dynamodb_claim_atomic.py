@@ -280,45 +280,37 @@ class DynamoClaimAtomicTests(unittest.TestCase):
         self.assertEqual(heredoc_start, run_block_indent)
         self.assertEqual(heredoc_end, run_block_indent)
 
-    def test_photo_vault_dispatcher_accepts_owner_retry_comment(self) -> None:
-        workflow = (
+    def test_photo_vault_dispatcher_is_archived_and_non_runnable(self) -> None:
+        live_path = (
             ROOT.parent
             / ".github"
             / "workflows"
             / "beds24-live-recovery-dispatch-controller.yml"
-        ).read_text(encoding="utf-8")
-
+        )
+        archived_path = (
+            ROOT.parent
+            / "ops"
+            / "archive"
+            / "github-actions"
+            / "2026-08"
+            / "beds24-live-recovery-dispatch-controller.yml"
+        )
+        self.assertFalse(live_path.exists())
+        workflow = archived_path.read_text(encoding="utf-8")
         self.assertIn("issue_comment:", workflow)
         self.assertIn("types: [created]", workflow)
         self.assertIn("github.event.comment.user.login == 'elcidspain'", workflow)
-        self.assertIn(
-            "contains(github.event.comment.body, 'run Beds24 photo vault sync')",
-            workflow,
-        )
-        self.assertIn(
-            "'AUMARA control: run Beds24 photo vault sync':'beds24-photo-sync-vault-controller.yml'",
-            workflow,
-        )
-        self.assertIn(
-            "'AUMARA control: sync Beds24 photos from vault':'beds24-photo-sync-vault-controller.yml'",
-            workflow,
-        )
 
-    def test_photo_vault_controller_accepts_registered_retry_title(self) -> None:
+    def test_photo_vault_controller_is_manual_only(self) -> None:
         workflow = (
             ROOT.parent
             / ".github"
             / "workflows"
             / "beds24-photo-sync-vault-controller.yml"
         ).read_text(encoding="utf-8")
-        self.assertIn(
-            "github.event.issue.title == 'AUMARA control: run Beds24 photo vault sync'",
-            workflow,
-        )
-        self.assertIn(
-            "github.event.issue.title == 'AUMARA control: sync Beds24 photos from vault'",
-            workflow,
-        )
+        self.assertIn("workflow_dispatch:", workflow)
+        self.assertNotIn("issue_comment:", workflow)
+        self.assertIn("ISSUE_NUMBER: ''", workflow)
 
     def test_update_photo_workflow_supports_refresh_vault_rotation(self) -> None:
         workflow = (
