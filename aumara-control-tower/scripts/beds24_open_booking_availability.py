@@ -47,7 +47,10 @@ def load_refresh() -> str:
     kek = (os.environ.get("BEDS24_VAULT_KEK") or "").strip().strip('"').strip("'")
     mask(direct)
     mask(kek)
-    # If KEK present, prefer decrypting vault (Production vault-sync path)
+    # Prefer plaintext refresh injected by vault controller
+    if direct and (not kek or direct != kek):
+        print("auth_source=env_refresh", flush=True)
+        return direct
     if kek and VAULT.exists():
         from cryptography.fernet import Fernet
 
@@ -59,12 +62,6 @@ def load_refresh() -> str:
         mask(cred)
         print("auth_source=vault_decrypt", flush=True)
         return cred
-    if direct and kek and direct == kek:
-        # Misconfigured: KEK passed as refresh — refuse
-        raise SystemExit("BEDS24_REFRESH_CREDENTIAL looks like vault KEK only; need decrypted refresh")
-    if direct:
-        print("auth_source=env_refresh", flush=True)
-        return direct
     raise SystemExit("No Beds24 refresh credential available")
 
 
