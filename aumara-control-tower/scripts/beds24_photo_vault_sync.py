@@ -119,17 +119,30 @@ def main() -> int:
         print(f"::add-mask::{credential}", flush=True)
         result["vault_loaded"] = True
 
+        raw = SOURCE.read_text(encoding="utf-8")
+        match = re.search(r"python3 - <<'PY'\n(.*?)\n\s+PY\n", raw, re.S)
+        if not match:
+            raise RuntimeError("Could not extract canonical photo-transfer Python from workflow")
+        code = textwrap.dedent(match.group(1))
+
+        if "BEDS24_ROTATED_OUT" not in code:
+            pattern = r"(?m)^(\s*)if isinstance\(rotated, str\) and rotated:\n\1    mask\(rotated\)"
+            replacement = (
+                r"\1if isinstance(rotated, str) and rotated:\n"
+                r"\1    mask(rotated)\n"
+                r"\1    pathlib.Path(os.environ['BEDS24_ROTATED_OUT']).write_text(rotated, encoding='utf-8')"
+            )
+            code, count = re.subn(pattern, replacement, code, count=1)
+            if count != 1:
+                raise RuntimeError("Could not install rotation persistence hook into canonical transfer")
+
         child_env = dict(os.environ)
         child_env["BEDS24_REFRESH_CREDENTIAL"] = credential
-        child_env["BEDS24_REFRESH_TOKEN"] = credential
-        child_env.pop("BEDS24_VAULT_KEK", None)  # child must use plaintext refresh, not KEK
-        open_script = ROOT / "aumara-control-tower/scripts/beds24_open_booking_availability.py"
-        if not open_script.exists():
-            raise RuntimeError(f"missing {open_script}")
-        proc = subprocess.run([sys.executable, str(open_script)], env=child_env, check=False)
+        child_env["BEDS24_REFRESH_TOKEN"] = ""
+        child_env["BEDS24_ROTATED_OUT"] = str(ROTATED_PATH)
+        proc = subprocess.run([sys.executable, "-c", code], env=child_env, check=False)
         rc = int(proc.returncode)
         result["child_returncode"] = rc
-        result["child"] = "beds24_open_booking_availability.py"
 
         refresh_to_keep = credential
         if ROTATED_PATH.exists():
