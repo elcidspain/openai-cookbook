@@ -36,3 +36,4 @@ User-agent: CCBot
 Disallow: /
 
 Sitemap: https://www.elcidspain.com/sitemap.xml
+Agentmap: https://www.elcidspain.com/.well-known/ai-catalog.json
