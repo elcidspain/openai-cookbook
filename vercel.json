@@ -37,6 +37,10 @@
     {
       "src": "^/staff/?$",
       "dest": "/staff/index.html"
+    },
+    {
+      "src": "^/.*$",
+      "status": 404
     }
   ]
 }
