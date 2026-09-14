@@ -1,0 +1,32 @@
+name: AUMARA AI agent rate slot claim
+
+on:
+  push:
+    branches:
+      - feat/aumara-ai-agent-rate-20260915
+    paths:
+      - '.github/workflows/aumara-agent-rate-slot-claim.yml'
+      - 'aumara-control-tower/scripts/aumara_agent_rate_claim_slot.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  claim:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      BEDS24_PROPERTIES_TOKEN: ${{ secrets.BEDS24_TOKEN_CREDENTIAL }}
+      BEDS24_REFRESH_TOKEN: ${{ secrets.BEDS24_REFRESH_CREDENTIAL }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Claim free Daily Price Rule 2 with guarded read-back
+        run: python aumara-control-tower/scripts/aumara_agent_rate_claim_slot.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aumara-agent-rate-slot-claim
+          path: aumara-control-tower/evidence/aumara-agent-rate-slot-claim.json
+          retention-days: 2
+          if-no-files-found: ignore
