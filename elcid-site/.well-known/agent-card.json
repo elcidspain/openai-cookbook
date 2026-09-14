@@ -1,0 +1,36 @@
+{
+  "name": "EL CID Country Club Guest Discovery Agent",
+  "description": "Read-only discovery for EL CID Country Club stays, restaurant, location and booking/contact routes in Benidoleig, Marina Alta, Alicante. It never creates or changes a reservation.",
+  "version": "1.0.0",
+  "protocolVersion": "1.0",
+  "supportedInterfaces": [
+    {
+      "url": "https://www.elcidspain.com/a2a",
+      "protocolBinding": "JSONRPC",
+      "protocolVersion": "1.0"
+    }
+  ],
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false,
+    "extendedAgentCard": false
+  },
+  "defaultInputModes": ["text/plain", "application/json"],
+  "defaultOutputModes": ["text/plain", "application/json"],
+  "skills": [
+    {
+      "id": "discover-elcid-stay",
+      "name": "Discover EL CID Country Club",
+      "description": "Return public factual information about the hotel, studio, restaurant, outdoor spaces and Benidoleig location.",
+      "tags": ["rural hotel", "Benidoleig", "Marina Alta", "Costa Blanca", "restaurant"],
+      "examples": ["rural hotel in Benidoleig", "country club stay near Denia", "hotel with pool and restaurant in Marina Alta"]
+    },
+    {
+      "id": "find-elcid-booking",
+      "name": "Find booking and contact routes",
+      "description": "Return EL CID's public Booking.com, WhatsApp, phone and email routes without creating or modifying a reservation.",
+      "tags": ["booking", "availability", "WhatsApp", "hotel"],
+      "examples": ["book EL CID Country Club", "check EL CID dates", "contact EL CID in Benidoleig"]
+    }
+  ]
+}

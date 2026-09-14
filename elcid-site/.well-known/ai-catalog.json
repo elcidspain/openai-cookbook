@@ -1,0 +1,41 @@
+{
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "EL CID Country Club",
+    "identifier": "did:web:www.elcidspain.com"
+  },
+  "entries": [
+    {
+      "identifier": "urn:air:www.elcidspain.com:server:guest-mcp",
+      "displayName": "EL CID Country Club Public MCP",
+      "type": "application/mcp-server-card+json",
+      "url": "https://www.elcidspain.com/.well-known/mcp/server-card.json",
+      "representativeQueries": [
+        "find a rural hotel in Benidoleig",
+        "what does EL CID Country Club offer",
+        "how can I book EL CID Country Club"
+      ]
+    },
+    {
+      "identifier": "urn:air:www.elcidspain.com:agent:guest-discovery",
+      "displayName": "EL CID Country Club Guest Discovery Agent",
+      "type": "application/json",
+      "url": "https://www.elcidspain.com/.well-known/agent-card.json",
+      "representativeQueries": [
+        "country club stay near Denia",
+        "hotel with pool and restaurant in Marina Alta",
+        "contact EL CID Country Club in Benidoleig"
+      ]
+    },
+    {
+      "identifier": "urn:air:www.elcidspain.com:catalog:public-api",
+      "displayName": "EL CID Public API Catalog",
+      "type": "application/linkset+json",
+      "url": "https://www.elcidspain.com/.well-known/api-catalog",
+      "representativeQueries": [
+        "discover EL CID public APIs",
+        "get machine-readable EL CID guest information"
+      ]
+    }
+  ]
+}
