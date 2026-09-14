@@ -1,0 +1,31 @@
+name: AUMARA agent commerce audit
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/aumara-agent-commerce-audit.yml'
+      - 'scripts/aumara_agent_commerce_audit.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    env:
+      BEDS24_REFRESH_CREDENTIAL: ${{ secrets.BEDS24_REFRESH_CREDENTIAL }}
+      AUDIT_OUTPUT: aumara-agent-commerce-audit.json
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run read-only Beds24 commerce audit
+        run: python scripts/aumara_agent_commerce_audit.py
+      - name: Upload sanitized audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aumara-agent-commerce-audit
+          path: aumara-agent-commerce-audit.json
+          if-no-files-found: warn
+          retention-days: 3
