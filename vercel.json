@@ -27,7 +27,7 @@
         "Content-Type": "text/markdown; charset=utf-8",
         "Content-Signal": "ai-train=no, search=yes, ai-input=yes",
         "Vary": "Accept",
-        "Link": "</sitemap.xml>; rel=\"sitemap\"; type=\"application/xml\", </llms.txt>; rel=\"describedby\"; type=\"text/plain\", </.well-known/agent-skills/index.json>; rel=\"describedby\"; type=\"application/json\""
+        "Link": "</sitemap.xml>; rel=\"sitemap\"; type=\"application/xml\", </llms.txt>; rel=\"describedby\"; type=\"text/plain\", </.well-known/agent-skills/index.json>; rel=\"describedby\"; type=\"application/json\", </.well-known/mcp/server-card.json>; rel=\"describedby\"; type=\"application/json\""
       },
       "dest": "/elcid-site/index.md"
     },
@@ -36,13 +36,17 @@
       "headers": {
         "Content-Signal": "ai-train=no, search=yes, ai-input=yes",
         "Vary": "Accept",
-        "Link": "</sitemap.xml>; rel=\"sitemap\"; type=\"application/xml\", </llms.txt>; rel=\"describedby\"; type=\"text/plain\", </.well-known/agent-skills/index.json>; rel=\"describedby\"; type=\"application/json\""
+        "Link": "</sitemap.xml>; rel=\"sitemap\"; type=\"application/xml\", </llms.txt>; rel=\"describedby\"; type=\"text/plain\", </.well-known/agent-skills/index.json>; rel=\"describedby\"; type=\"application/json\", </.well-known/mcp/server-card.json>; rel=\"describedby\"; type=\"application/json\""
       },
       "continue": true
     },
     {
       "src": "^/$",
       "dest": "/elcid-site/index.html"
+    },
+    {
+      "src": "^/mcp$",
+      "dest": "/api/elcid-mcp"
     },
     {
       "src": "^/(styles\\.css|site\\.js|official-logo\\.svg|legal\\.html|privacy\\.html|cookies\\.html|robots\\.txt|sitemap\\.xml|llms\\.txt)$",
