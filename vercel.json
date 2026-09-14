@@ -27,7 +27,7 @@
         "Content-Type": "text/markdown; charset=utf-8",
         "Content-Signal": "ai-train=no, search=yes, ai-input=yes",
         "Vary": "Accept",
-        "Link": "</sitemap.xml>; rel=\"sitemap\"; type=\"application/xml\", </llms.txt>; rel=\"describedby\"; type=\"text/plain\", </.well-known/agent-skills/index.json>; rel=\"describedby\"; type=\"application/json\", </.well-known/mcp/server-card.json>; rel=\"describedby\"; type=\"application/json\""
+        "Link": "</sitemap.xml>; rel=\"sitemap\"; type=\"application/xml\", </llms.txt>; rel=\"describedby\"; type=\"text/plain\", </auth.md>; rel=\"describedby\"; type=\"text/markdown\", </.well-known/api-catalog>; rel=\"api-catalog\"; type=\"application/linkset+json\", </.well-known/agent-skills/index.json>; rel=\"describedby\"; type=\"application/json\", </.well-known/mcp/server-card.json>; rel=\"describedby\"; type=\"application/json\", </.well-known/agent-card.json>; rel=\"describedby\"; type=\"application/json\", </.well-known/ai-catalog.json>; rel=\"ai-catalog\"; type=\"application/json\""
       },
       "dest": "/elcid-site/index.md"
     },
@@ -36,7 +36,7 @@
       "headers": {
         "Content-Signal": "ai-train=no, search=yes, ai-input=yes",
         "Vary": "Accept",
-        "Link": "</sitemap.xml>; rel=\"sitemap\"; type=\"application/xml\", </llms.txt>; rel=\"describedby\"; type=\"text/plain\", </.well-known/agent-skills/index.json>; rel=\"describedby\"; type=\"application/json\", </.well-known/mcp/server-card.json>; rel=\"describedby\"; type=\"application/json\""
+        "Link": "</sitemap.xml>; rel=\"sitemap\"; type=\"application/xml\", </llms.txt>; rel=\"describedby\"; type=\"text/plain\", </auth.md>; rel=\"describedby\"; type=\"text/markdown\", </.well-known/api-catalog>; rel=\"api-catalog\"; type=\"application/linkset+json\", </.well-known/agent-skills/index.json>; rel=\"describedby\"; type=\"application/json\", </.well-known/mcp/server-card.json>; rel=\"describedby\"; type=\"application/json\", </.well-known/agent-card.json>; rel=\"describedby\"; type=\"application/json\", </.well-known/ai-catalog.json>; rel=\"ai-catalog\"; type=\"application/json\""
       },
       "continue": true
     },
@@ -49,7 +49,15 @@
       "dest": "/api/elcid-mcp"
     },
     {
-      "src": "^/(styles\\.css|site\\.js|official-logo\\.svg|legal\\.html|privacy\\.html|cookies\\.html|robots\\.txt|sitemap\\.xml|llms\\.txt)$",
+      "src": "^/a2a$",
+      "dest": "/api/elcid-a2a"
+    },
+    {
+      "src": "^/\\.well-known/api-catalog$",
+      "dest": "/api/elcid-api-catalog"
+    },
+    {
+      "src": "^/(styles\\.css|site\\.js|official-logo\\.svg|legal\\.html|privacy\\.html|cookies\\.html|robots\\.txt|sitemap\\.xml|llms\\.txt|auth\\.md)$",
       "dest": "/elcid-site/$1"
     },
     {
