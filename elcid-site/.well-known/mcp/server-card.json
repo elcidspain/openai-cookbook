@@ -1,0 +1,40 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/mcp-server-card/v1.json",
+  "version": "1.0",
+  "protocolVersion": "2025-06-18",
+  "serverInfo": {
+    "name": "elcid-public-mcp",
+    "title": "EL CID Country Club Public MCP",
+    "version": "1.0.0"
+  },
+  "description": "Read-only public hotel guidance and booking/contact discovery for EL CID Country Club in Benidoleig, Alicante, Spain.",
+  "transport": {
+    "type": "streamable-http",
+    "endpoint": "/mcp"
+  },
+  "authentication": {
+    "required": false
+  },
+  "tools": [
+    {
+      "name": "elcid_guest_guide",
+      "title": "EL CID Country Club guest guide",
+      "description": "Return public EL CID stay, location, restaurant, contact and policy guidance. Read-only.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "elcid_booking_options",
+      "title": "EL CID booking and contact options",
+      "description": "Return the public Booking.com and contact routes shown by EL CID. This does not create or modify a reservation. Read-only.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      }
+    }
+  ]
+}
