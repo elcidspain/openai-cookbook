@@ -1,9 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "git": {
-    "deploymentEnabled": false
-  },
-  "ignoreCommand": "exit 0",
   "trailingSlash": false,
   "redirects": [
     {
@@ -20,11 +16,31 @@
   "routes": [
     {
       "src": "^/$",
-      "dest": "/aumara-site/index.html"
+      "headers": {
+        "Content-Signal": "ai-train=no, search=yes, ai-input=yes",
+        "Link": "</sitemap.xml>; rel=\"sitemap\"; type=\"application/xml\", </llms.txt>; rel=\"describedby\"; type=\"text/plain\", </.well-known/agent-skills/index.json>; rel=\"describedby\"; type=\"application/json\""
+      },
+      "continue": true
+    },
+    {
+      "src": "^/$",
+      "dest": "/elcid-site/index.html"
+    },
+    {
+      "src": "^/(styles\\.css|site\\.js|official-logo\\.svg|legal\\.html|privacy\\.html|cookies\\.html|robots\\.txt|sitemap\\.xml|llms\\.txt)$",
+      "dest": "/elcid-site/$1"
+    },
+    {
+      "src": "^/\\.well-known/(.*)$",
+      "dest": "/elcid-site/.well-known/$1"
     },
     {
       "src": "^/staff/?$",
       "dest": "/staff/index.html"
+    },
+    {
+      "src": "^/.*$",
+      "status": 404
     }
   ]
 }

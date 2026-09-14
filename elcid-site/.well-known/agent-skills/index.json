@@ -1,0 +1,12 @@
+{
+  "$schema": "https://schemas.agentskills.io/discovery/0.2.0/schema.json",
+  "skills": [
+    {
+      "name": "plan-elcid-stay",
+      "type": "skill-md",
+      "description": "Use this skill when a user asks about staying at EL CID Country Club in Benidoleig, including rooms, amenities, location, restaurant, contact, or how to continue to booking.",
+      "url": "/.well-known/agent-skills/plan-elcid-stay/SKILL.md",
+      "digest": "sha256:35153503f72d85080afd4ce88ba42b2fec0e6af402fad46574cc848c5c7f9c5d"
+    }
+  ]
+}
