@@ -1,0 +1,32 @@
+name: AUMARA agent control hardening
+
+on:
+  push:
+    branches:
+      - feat/aumara-ai-agent-rate-20260915
+    paths:
+      - '.github/workflows/aumara-agent-control-harden.yml'
+      - 'aumara-control-tower/scripts/aumara_agent_control_harden.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  harden:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      BEDS24_PROPERTIES_TOKEN: ${{ secrets.BEDS24_TOKEN_CREDENTIAL }}
+      BEDS24_REFRESH_TOKEN: ${{ secrets.BEDS24_REFRESH_CREDENTIAL }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Harden dormant AUMARA AI-agent Fixed Price controls
+        run: python aumara-control-tower/scripts/aumara_agent_control_harden.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aumara-agent-control-harden
+          path: aumara-control-tower/evidence/aumara-agent-control-harden.json
+          retention-days: 2
+          if-no-files-found: error
