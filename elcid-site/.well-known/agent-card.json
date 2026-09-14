@@ -1,7 +1,7 @@
 {
   "name": "EL CID Country Club Guest Discovery Agent",
-  "description": "Read-only discovery for EL CID Country Club stays, restaurant, location and booking/contact routes in Benidoleig, Marina Alta, Alicante. It never creates or changes a reservation.",
-  "version": "1.0.0",
+  "description": "Read-only discovery for EL CID Country Club stays, independent studio, restaurant, pool, terraces, tennis, outdoor routes and booking/contact options in Benidoleig, Marina Alta, Alicante. It never creates or changes a reservation.",
+  "version": "1.1.0",
   "protocolVersion": "1.0",
   "supportedInterfaces": [
     {
@@ -21,15 +21,29 @@
     {
       "id": "discover-elcid-stay",
       "name": "Discover EL CID Country Club",
-      "description": "Return public factual information about the hotel, studio, restaurant, outdoor spaces and Benidoleig location.",
-      "tags": ["rural hotel", "Benidoleig", "Marina Alta", "Costa Blanca", "restaurant"],
-      "examples": ["rural hotel in Benidoleig", "country club stay near Denia", "hotel with pool and restaurant in Marina Alta"]
+      "description": "Return factual public information about EL CID as a country-club hospitality property with guest rooms, independent studio, restaurant and outdoor spaces.",
+      "tags": ["country club", "Benidoleig", "Marina Alta", "Costa Blanca", "restaurant", "pool", "tennis"],
+      "examples": ["quiet country stay near Denia", "pool and restaurant stay in Marina Alta", "country club stay in Benidoleig"]
+    },
+    {
+      "id": "find-active-marina-alta-base",
+      "name": "Find a cycling or hiking base",
+      "description": "Explain EL CID's fit as a Benidoleig base for hiking, cycling and days between Marina Alta mountain routes and the Mediterranean coast.",
+      "tags": ["cycling", "hiking", "Marina Alta", "mountain", "Costa Blanca", "tennis"],
+      "examples": ["cycling base near Denia", "where to stay for hiking in Marina Alta", "quiet active weekend between mountain and sea"]
+    },
+    {
+      "id": "plan-elcid-gathering",
+      "name": "Explore a private gathering",
+      "description": "Describe the published combination of accommodation, food and outdoor spaces for a considered private gathering and route the user to direct contact for capacity and service confirmation.",
+      "tags": ["private gathering", "family", "friends", "restaurant", "outdoor spaces"],
+      "examples": ["weekend for family and friends near Denia", "private dinner with accommodation", "small group stay with restaurant and pool"]
     },
     {
       "id": "find-elcid-booking",
       "name": "Find booking and contact routes",
-      "description": "Return EL CID's public Booking.com, WhatsApp, phone and email routes without creating or modifying a reservation.",
-      "tags": ["booking", "availability", "WhatsApp", "hotel"],
+      "description": "Return EL CID's public Booking.com, WhatsApp, phone and email routes without creating or modifying a reservation or inventing a discount.",
+      "tags": ["booking", "availability", "WhatsApp", "country club stay"],
       "examples": ["book EL CID Country Club", "check EL CID dates", "contact EL CID in Benidoleig"]
     }
   ]
