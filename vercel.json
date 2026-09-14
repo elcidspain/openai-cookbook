@@ -16,8 +16,26 @@
   "routes": [
     {
       "src": "^/$",
+      "has": [
+        {
+          "type": "header",
+          "key": "accept",
+          "value": ".*text/markdown.*"
+        }
+      ],
+      "headers": {
+        "Content-Type": "text/markdown; charset=utf-8",
+        "Content-Signal": "ai-train=no, search=yes, ai-input=yes",
+        "Vary": "Accept",
+        "Link": "</sitemap.xml>; rel=\"sitemap\"; type=\"application/xml\", </llms.txt>; rel=\"describedby\"; type=\"text/plain\", </.well-known/agent-skills/index.json>; rel=\"describedby\"; type=\"application/json\""
+      },
+      "dest": "/elcid-site/index.md"
+    },
+    {
+      "src": "^/$",
       "headers": {
         "Content-Signal": "ai-train=no, search=yes, ai-input=yes",
+        "Vary": "Accept",
         "Link": "</sitemap.xml>; rel=\"sitemap\"; type=\"application/xml\", </llms.txt>; rel=\"describedby\"; type=\"text/plain\", </.well-known/agent-skills/index.json>; rel=\"describedby\"; type=\"application/json\""
       },
       "continue": true
