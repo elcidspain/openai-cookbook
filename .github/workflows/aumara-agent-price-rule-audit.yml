@@ -1,0 +1,28 @@
+name: AUMARA agent price rule audit
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/aumara-agent-price-rule-audit.yml'
+      - 'aumara-control-tower/scripts/aumara_agent_price_rule_audit.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      BEDS24_PROPERTIES_TOKEN: ${{ secrets.BEDS24_TOKEN_CREDENTIAL }}
+      BEDS24_REFRESH_TOKEN: ${{ secrets.BEDS24_REFRESH_CREDENTIAL }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Audit current price-rule slots read-only
+        run: python aumara-control-tower/scripts/aumara_agent_price_rule_audit.py > aumara-price-rule-audit.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aumara-agent-price-rule-audit
+          path: aumara-price-rule-audit.json
+          retention-days: 2
