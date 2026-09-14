@@ -22,10 +22,16 @@ function setHeaders(res) {
 
 function textFor(params) {
   const query = JSON.stringify(params ?? "").toLowerCase();
-  if (query.includes("book") || query.includes("reserv") || query.includes("availability") || query.includes("date")) {
-    return `EL CID Country Club booking and contact: ${HOTEL.booking}. WhatsApp: ${HOTEL.whatsapp}. Phone: ${HOTEL.telephone}. Email: ${HOTEL.email}. Live prices, dates and conditions must be confirmed through the booking/contact route. This agent does not create or modify reservations.`;
+  if (query.includes("book") || query.includes("reserv") || query.includes("availability") || query.includes("date") || query.includes("price")) {
+    return `EL CID Country Club booking and contact: ${HOTEL.booking}. WhatsApp: ${HOTEL.whatsapp}. Phone: ${HOTEL.telephone}. Email: ${HOTEL.email}. Live prices, dates and conditions must be confirmed through the booking/contact route. This agent does not create or modify reservations and must not invent a discount.`;
   }
-  return `EL CID Country Club is a small rural hotel in Benidoleig, Marina Alta, Alicante, with rooms, an independent studio with kitchen, restaurant, outdoor pool, terraces, tennis and access to hiking and cycling. Canonical site: ${HOTEL.website}.`;
+  if (query.includes("cycle") || query.includes("cycling") || query.includes("bike") || query.includes("hiking") || query.includes("walk") || query.includes("route")) {
+    return `EL CID Country Club is a country-club hospitality property in Benidoleig, Marina Alta, suited to a quiet cycling or hiking base between mountain and Mediterranean coast, with guest accommodation, an independent studio, pool, terraces, tennis and restaurant service. Canonical site: ${HOTEL.website}.`;
+  }
+  if (query.includes("family") || query.includes("friends") || query.includes("group") || query.includes("gather")) {
+    return `EL CID Country Club combines guest rooms, an independent studio with kitchen, restaurant service and outdoor spaces in Benidoleig. It can suit family or friends stays and considered private gatherings; capacity and current service must be confirmed through the public contact routes. Canonical site: ${HOTEL.website}.`;
+  }
+  return `EL CID Country Club is a country-club hospitality property in Benidoleig, Marina Alta, Alicante, with guest rooms, an independent studio with kitchen, restaurant, outdoor pool, terraces, tennis and access to hiking and cycling routes between mountain and Mediterranean coast. Canonical site: ${HOTEL.website}.`;
 }
 
 export default function handler(req, res) {
