@@ -13,3 +13,32 @@ const drawer=$('#bookingDrawer'),backdrop=$('#bookingBackdrop'),close=$('#closeB
 const nudge=$('#bookingNudge');setTimeout(()=>{if(!sessionStorage.getItem('elcid-nudge')){nudge.hidden=false;sessionStorage.setItem('elcid-nudge','1')}},7000);$('button:not(.nudge-action)',nudge).addEventListener('click',()=>nudge.hidden=true);$('.nudge-action',nudge).addEventListener('click',()=>nudge.hidden=true);
 document.documentElement.classList.add('reveal-ready');const observer=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target)}}),{threshold:.12});$$('[data-reveal]').forEach(el=>observer.observe(el));
 applyLanguage();
+
+// WebMCP: read-only public tools for agent-capable browsers.
+(async()=>{
+  const modelContext=document.modelContext||navigator.modelContext;
+  if(!modelContext?.registerTool)return;
+  const register=async(tool)=>{try{await modelContext.registerTool(tool)}catch{}};
+  await register({
+    name:'elcid_guest_guide',
+    title:'EL CID Country Club guest guide',
+    description:'Read the public EL CID hotel, contact, policy and booking guidance. Read-only.',
+    inputSchema:{type:'object',properties:{},additionalProperties:false},
+    annotations:{readOnlyHint:true,untrustedContentHint:false,consequentialHint:false},
+    execute:async()=>await fetch('/llms.txt',{cache:'no-store'}).then(r=>r.text())
+  });
+  await register({
+    name:'elcid_booking_options',
+    title:'EL CID public booking options',
+    description:'Return the public Booking.com and contact routes shown by EL CID. This does not create a reservation. Read-only.',
+    inputSchema:{type:'object',properties:{},additionalProperties:false},
+    annotations:{readOnlyHint:true,untrustedContentHint:false,consequentialHint:false},
+    execute:async()=>JSON.stringify({
+      property:'EL CID Country Club',
+      location:'Benidoleig, Alicante, Spain',
+      booking:'https://www.booking.com/hotel/es/el-cid-country-club.html',
+      whatsapp:'https://wa.me/34622914323',
+      website:'https://www.elcidspain.com/'
+    })
+  });
+})();
