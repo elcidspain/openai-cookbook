@@ -1,31 +1,31 @@
 # EL CID / AUMARA production probe
 
-- Checked UTC: 2026-08-22T03:20:15Z
-- Commit: bdd3aeb85403a476db7a0ad6f9af8de663fe2e07
-- Trigger: push
+- Checked UTC: 2026-09-14T19:39:23Z
+- Commit: 606cfc39ba111ec15511f976e65edd0134282ea8
+- Trigger: workflow_run
 - Fully operational: **no**
 
 ## Root
 - URL: https://elcidspain.com/
-- curl_exit|http|final_url|content_type|bytes: `0|200|https://elcidspain.com/|text/html; charset=UTF-8|77380`
+- curl_exit|http|final_url|content_type|bytes: `0|200|https://www.elcidspain.com/|text/html; charset=utf-8|13498`
 - expanded release marker: **no**
 - secondary section marker: **no**
 - AUMARA walkthrough link: **no**
 
 ## AUMARA
 - URL: https://elcidspain.com/aumara/
-- curl_exit|http|final_url|content_type|bytes: `0|200|https://elcidspain.com/aumara/|text/html|36656`
-- exact page marker: **yes**
-- node-01 reference: **yes**
-- node-08 reference: **yes**
-- Beds24 reference: **yes**
+- curl_exit|http|final_url|content_type|bytes: `0|404|https://www.elcidspain.com/aumara|text/plain; charset=utf-8|79`
+- exact page marker: **no**
+- node-01 reference: **no**
+- node-08 reference: **no**
+- Beds24 reference: **no**
 
 ## Walkthrough clips
-- node-01 curl_exit|http|final_url|content_type|bytes: `0|206|https://elcidspain.com/aumara/media/nodes/node-01.mp4|video/mp4|2048`
-- node-08 curl_exit|http|final_url|content_type|bytes: `0|206|https://elcidspain.com/aumara/media/nodes/node-08.mp4|video/mp4|2048`
+- node-01 curl_exit|http|final_url|content_type|bytes: `0|404|https://www.elcidspain.com/aumara/media/nodes/node-01.mp4|text/plain; charset=utf-8|79`
+- node-08 curl_exit|http|final_url|content_type|bytes: `0|404|https://www.elcidspain.com/aumara/media/nodes/node-08.mp4|text/plain; charset=utf-8|79`
 
 ## Beds24
 - URL: https://beds24.com/booking2.php?propid=324882
-- curl_exit|http|final_url|content_type|bytes: `0|200|https://beds24.com/booking2.php?propid=324882|text/html; charset=utf-8|112036`
+- curl_exit|http|final_url|content_type|bytes: `0|200|https://beds24.com/booking2.php?propid=324882|text/html; charset=utf-8|118431`
 
 ## Errors
