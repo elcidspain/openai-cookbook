@@ -113,7 +113,7 @@ for key in keys:
     if not re.search(rf"\b{re.escape(key)}\s*:", js):
         fail(f"translation key absent: {key}")
 
-for required_file in ("robots.txt", "sitemap.xml", "llms.txt", "legal.html", "privacy.html", "cookies.html"):
+for required_file in ("robots.txt", "sitemap.xml", "llms.txt", "index.md", "legal.html", "privacy.html", "cookies.html"):
     if not (ROOT / required_file).exists():
         fail(f"missing production public file: {required_file}")
 skill_index = ROOT / ".well-known" / "agent-skills" / "index.json"
@@ -133,15 +133,23 @@ if "aumara-site" in root_html.lower():
 
 vercel = json.loads((REPO / "vercel.json").read_text(encoding="utf-8"))
 routes = vercel.get("routes", [])
-root_route = next((item for item in routes if item.get("src") == "^/$" and item.get("dest")), None)
-if not root_route or root_route.get("dest") != "/elcid-site/index.html":
-    fail("production root / does not resolve to EL CID")
+root_route = next((item for item in routes if item.get("src") == "^/$" and item.get("dest") == "/elcid-site/index.html"), None)
+if not root_route:
+    fail("production HTML root / does not resolve to EL CID")
+markdown_route = next((item for item in routes if item.get("src") == "^/$" and item.get("dest") == "/elcid-site/index.md"), None)
+if not markdown_route:
+    fail("Markdown content-negotiation route missing")
+has = markdown_route.get("has", [])
+if not any(item.get("type") == "header" and item.get("key", "").lower() == "accept" and "text/markdown" in item.get("value", "") for item in has):
+    fail("Markdown route does not negotiate Accept: text/markdown")
+if not markdown_route.get("headers", {}).get("Content-Type", "").startswith("text/markdown"):
+    fail("Markdown route does not declare text/markdown")
 redirects = vercel.get("redirects", [])
 if not any(item.get("source") in ("/aumara", "/aumara/") and item.get("destination") == "https://www.aumara.me/" for item in redirects):
     fail("AUMARA canonical redirect missing")
 if not any(item.get("src") == "^/.*$" and item.get("status") == 404 for item in routes):
     fail("production routing does not fail closed for unrelated repository files")
-header_route = next((item for item in routes if item.get("src") == "^/$" and item.get("headers")), None)
+header_route = next((item for item in routes if item.get("src") == "^/$" and item.get("headers") and item.get("continue")), None)
 if not header_route or "Content-Signal" not in header_route.get("headers", {}) or "Link" not in header_route.get("headers", {}):
     fail("production discovery headers missing")
 
@@ -150,7 +158,7 @@ print(f"ids={len(p.ids)} links={len(p.links)} images={len(p.images)} scripts={le
 print("external_hosts=" + ",".join(hosts))
 print("conversion=booking drawer + Booking.com + verified WhatsApp")
 print("studio=verified kitchen + living area + bedroom + bathroom")
-print("discovery=robots + sitemap + llms + Agent Skills + WebMCP + Link headers")
+print("discovery=robots + sitemap + llms + Markdown negotiation + Agent Skills + WebMCP + Link headers")
 print("policies=legal + privacy + cookies")
-print("routes=/->EL CID, /aumara/->www.aumara.me")
+print("routes=/->EL CID HTML/Markdown, /aumara/->www.aumara.me")
 print("EL CID production static site checks: PASS")
