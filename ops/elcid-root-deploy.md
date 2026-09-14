@@ -1,8 +1,8 @@
 # EL CID root deployment evidence
 
-- Checked UTC: 2026-09-14T22:03:13Z
-- Source commit: b1bde8027e1e5161373e72069133f386ea3c6470
-- Run: https://github.com/elcidspain/openai-cookbook/actions/runs/34902029267
+- Checked UTC: 2026-09-14T22:56:26Z
+- Source commit: a76698b964671d25b99901df4cb769a76fd8a2dc
+- Run: https://github.com/elcidspain/openai-cookbook/actions/runs/34906480383
 - Secret check: **failure**
 - WordPress backup: **skipped**
 - FTP publish: **skipped**
