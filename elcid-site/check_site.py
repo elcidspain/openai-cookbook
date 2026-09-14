@@ -55,18 +55,18 @@ p.feed(html)
 
 if "AUMARA_Explore" in html or "08_AUMARA_Domes" in html:
     fail("AUMARA primary image assets leaked into EL CID page")
-if "noindex,nofollow" not in html:
-    fail("review page must remain noindex")
-if contains_external_host(html, "cf.bstatic.com") or contains_external_host(
-    css, "cf.bstatic.com"
-):
+if 'name="robots" content="index,follow' not in html:
+    fail("production EL CID page must be indexable")
+if 'rel="canonical" href="https://www.elcidspain.com/"' not in html:
+    fail("production canonical must be https://www.elcidspain.com/")
+if contains_external_host(html, "cf.bstatic.com") or contains_external_host(css, "cf.bstatic.com"):
     fail("Booking CDN image hotlink remains")
 if "official-logo" not in html or "official-logo" not in css:
     fail("official EL CID logo missing")
 if "Wabi-Sabi" in html or "Wabi-Sabi" in js or "Wabi‑Sabi" in html or "Wabi‑Sabi" in js:
     fail("retired restaurant working name remains")
 if "reservas@elcidspain.com" in html or "reservas@elcidspain.com" in js:
-    fail("broken domain mailbox remains in guest-facing review page")
+    fail("broken domain mailbox remains in guest-facing page")
 if "elcidspain@gmail.com" not in html:
     fail("operational email fallback missing")
 
@@ -92,9 +92,9 @@ if not any("booking.com/hotel/es/el-cid-country-club" in x for x in p.links):
 if any("beds24" in x.lower() for x in p.links):
     fail("unverified EL CID Beds24 CTA present")
 if "wa.me/" not in js:
-    fail("WhatsApp review CTA missing")
+    fail("WhatsApp CTA missing")
 if "34622914323" not in js or "34622914323" not in html:
-    fail("verified review WhatsApp number is not explicit")
+    fail("verified WhatsApp number is not explicit")
 if "data-open-booking" not in html or "booking-drawer" not in css:
     fail("booking drawer trigger or styling missing")
 
@@ -113,8 +113,18 @@ for key in keys:
     if not re.search(rf"\b{re.escape(key)}\s*:", js):
         fail(f"translation key absent: {key}")
 
-# Product-routing guardrail: the repository root and preview root are EL CID;
-# only /aumara and /aumara/ are allowed to resolve to AUMARA.
+for required_file in ("robots.txt", "sitemap.xml", "llms.txt", "legal.html", "privacy.html", "cookies.html"):
+    if not (ROOT / required_file).exists():
+        fail(f"missing production public file: {required_file}")
+skill_index = ROOT / ".well-known" / "agent-skills" / "index.json"
+skill_md = ROOT / ".well-known" / "agent-skills" / "plan-elcid-stay" / "SKILL.md"
+if not skill_index.exists() or not skill_md.exists():
+    fail("Agent Skills discovery files missing")
+if "elcid_guest_guide" not in js or "elcid_booking_options" not in js or "registerTool" not in js:
+    fail("EL CID WebMCP read-only tools missing")
+
+# Product-routing guardrail: repository fallback and deployed root are EL CID;
+# AUMARA is redirected to its separate canonical production site.
 root_html = (REPO / "index.html").read_text(encoding="utf-8")
 if "./elcid-site/" not in root_html:
     fail("repository root fallback does not point to EL CID")
@@ -122,24 +132,25 @@ if "aumara-site" in root_html.lower():
     fail("repository root fallback still points to AUMARA")
 
 vercel = json.loads((REPO / "vercel.json").read_text(encoding="utf-8"))
-routes = {item.get("src"): item for item in vercel.get("routes", [])}
-root_route = routes.get("^/$")
+routes = vercel.get("routes", [])
+root_route = next((item for item in routes if item.get("src") == "^/$" and item.get("dest")), None)
 if not root_route or root_route.get("dest") != "/elcid-site/index.html":
-    fail("preview root / does not resolve to EL CID")
-aumara_route = routes.get("^/aumara/?$")
-if not aumara_route or aumara_route.get("dest") != "/aumara-site/direct-v2.html":
-    fail("/aumara/ does not resolve to the separate AUMARA page")
-if not any(item.get("src") == "^/.*$" and item.get("status") == 404 for item in vercel.get("routes", [])):
-    fail("preview routing does not block direct access to other repository files")
+    fail("production root / does not resolve to EL CID")
+redirects = vercel.get("redirects", [])
+if not any(item.get("source") in ("/aumara", "/aumara/") and item.get("destination") == "https://www.aumara.me/" for item in redirects):
+    fail("AUMARA canonical redirect missing")
+if not any(item.get("src") == "^/.*$" and item.get("status") == 404 for item in routes):
+    fail("production routing does not fail closed for unrelated repository files")
+header_route = next((item for item in routes if item.get("src") == "^/$" and item.get("headers")), None)
+if not header_route or "Content-Signal" not in header_route.get("headers", {}) or "Link" not in header_route.get("headers", {}):
+    fail("production discovery headers missing")
 
 hosts = sorted({urlparse(x).netloc for x in p.links if x.startswith("http")})
-print(
-    f"ids={len(p.ids)} links={len(p.links)} images={len(p.images)} "
-    f"scripts={len(p.scripts)} styles={len(p.styles)}"
-)
+print(f"ids={len(p.ids)} links={len(p.links)} images={len(p.images)} scripts={len(p.scripts)} styles={len(p.styles)}")
 print("external_hosts=" + ",".join(hosts))
 print("conversion=booking drawer + Booking.com + verified WhatsApp")
 print("studio=verified kitchen + living area + bedroom + bathroom")
-print("email=operational Gmail fallback; broken domain mailbox excluded")
-print("routes=/->EL CID, /aumara/->AUMARA")
-print("EL CID v2 static site checks: PASS")
+print("discovery=robots + sitemap + llms + Agent Skills + WebMCP + Link headers")
+print("policies=legal + privacy + cookies")
+print("routes=/->EL CID, /aumara/->www.aumara.me")
+print("EL CID production static site checks: PASS")
