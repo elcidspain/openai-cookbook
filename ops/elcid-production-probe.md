@@ -1,13 +1,13 @@
 # EL CID / AUMARA production probe
 
-- Checked UTC: 2026-09-14T22:06:15Z
-- Commit: e14f04093530a4bcf668fff20f17cdee5c99cad1
+- Checked UTC: 2026-09-14T22:59:27Z
+- Commit: 56182fdfa5ec3fb3a1652cbb6c94898714e9a958
 - Trigger: workflow_run
 - Fully operational: **no**
 
 ## Root
 - URL: https://elcidspain.com/
-- curl_exit|http|final_url|content_type|bytes: `0|200|https://www.elcidspain.com/|text/html; charset=utf-8|13498`
+- curl_exit|http|final_url|content_type|bytes: `0|200|https://www.elcidspain.com/|text/html; charset=utf-8|13673`
 - expanded release marker: **no**
 - secondary section marker: **no**
 - AUMARA walkthrough link: **no**
