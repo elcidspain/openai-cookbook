@@ -16,6 +16,14 @@
   "routes": [
     {
       "src": "^/$",
+      "headers": {
+        "Content-Signal": "ai-train=no, search=yes, ai-input=yes",
+        "Link": "</sitemap.xml>; rel=\"sitemap\"; type=\"application/xml\", </llms.txt>; rel=\"describedby\"; type=\"text/plain\", </.well-known/agent-skills/index.json>; rel=\"describedby\"; type=\"application/json\""
+      },
+      "continue": true
+    },
+    {
+      "src": "^/$",
       "dest": "/elcid-site/index.html"
     },
     {
@@ -29,21 +37,6 @@
     {
       "src": "^/staff/?$",
       "dest": "/staff/index.html"
-    }
-  ],
-  "headers": [
-    {
-      "source": "/",
-      "headers": [
-        {
-          "key": "Content-Signal",
-          "value": "ai-train=no, search=yes, ai-input=yes"
-        },
-        {
-          "key": "Link",
-          "value": "</sitemap.xml>; rel=\"sitemap\"; type=\"application/xml\", </llms.txt>; rel=\"describedby\"; type=\"text/plain\", </.well-known/agent-skills/index.json>; rel=\"describedby\"; type=\"application/json\""
-        }
-      ]
     }
   ]
 }
