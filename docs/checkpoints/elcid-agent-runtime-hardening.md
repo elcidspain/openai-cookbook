@@ -4,7 +4,7 @@
 Verify and harden the live EL CID agent runtime beyond the Cloudflare 100/100 discovery score.
 
 ## Status
-in progress
+complete
 
 ## Scope
 Allowed: EL CID public machine-readable guidance, MCP/A2A read-only runtime semantics, one manual verification script, and documentation for this execution.
@@ -12,16 +12,30 @@ Allowed: EL CID public machine-readable guidance, MCP/A2A read-only runtime sema
 Excluded: Beds24 data or credentials, booking writes, deployment/runtime configuration changes, scheduled monitoring, payments, external messaging, AUMARA production changes, and marketing/publicity.
 
 ## Evidence
-- Live production Markdown negotiation, llms.txt, Agent Skill, MCP Server Card, A2A Agent Card, and OAuth discovery all returned HTTP 200 on 2026-09-15.
-- Live MCP initialize, tools/list, and elcid_guest_guide tools/call returned HTTP 200.
-- Live A2A message/send returned HTTP 200 with EL CID Country Club content.
-- Current MCP tool schemas accept no inputs; current guidance separates AUMARA but does not explicitly defend all legacy/entity collisions.
+- Live production Markdown negotiation, llms.txt, Agent Skill, MCP Server Card, A2A Agent Card, and OAuth discovery returned HTTP 200 on 2026-09-15.
+- Live MCP initialize, tools/list and guest-guide call returned HTTP 200.
+- Live A2A message/send returned HTTP 200.
+- Production baseline on the new verifier: 4/14 PASS; OAuth and DNS-AID/DNSSEC were already live, while semantic/runtime hardening remained absent.
+- Branch-compatible local HTTP harness: 14/14 PASS using branch static files and branch MCP/A2A handlers, with live OAuth discovery and live authenticated DNS-AID/DNSSEC.
+
+## Changes
+- Added explicit Benidoleig vs Mexico/Mazatlán/Sinaloa disambiguation.
+- Hardened AUMARA separation and legacy third-party data handling.
+- Added typed MCP booking intent for dates, guests, accommodation type and dining intent.
+- Made unchecked availability, price and restaurant times explicit in structured output.
+- Added fail-closed invalid-date handling.
+- Added a manual end-to-end verifier covering Markdown, skills, MCP, A2A, OAuth and DNS-AID/DNSSEC.
 
 ## Tests
-Run the new manual verifier against https://www.elcidspain.com and require: Markdown negotiation; llms/skill discovery; MCP initialize/list/call; typed booking-intent echo without fabricated availability/price; A2A entity disambiguation; OAuth metadata; DNS-AID/DNSSEC evidence where externally resolvable.
+- JS syntax and JSON parse checks: PASS.
+- Local handler behavior tests: PASS.
+- `node scripts/verify-elcid-agent-runtime.mjs` against current production: 4/14 PASS (expected pre-merge baseline).
+- Same verifier against branch-compatible local harness: 14/14 PASS.
 
 ## Stop condition
-A draft PR contains the scoped hardening plus a verifier that passes against the branch-compatible implementation and documents any checks that remain production-only until merge/deploy.
+Reached: the scoped branch contains the hardening and a verifier that passes 14/14 against the branch-compatible implementation. Production-only confirmation remains intentionally pending merge/deploy authorization.
 
 ## Recovery point
-Branch: agent/elcid-runtime-hardening from main. Next safe action: update only the scoped EL CID files, run focused checks, then open one draft PR. Do not merge or deploy in this execution.
+Branch: `agent/elcid-runtime-hardening`.
+Base: `main` at `e2629ddbfed2e5cb8dd93b6e9bcdebb4aafd0788`.
+Next safe action: review the draft PR, then separately authorize merge/deploy and rerun the same verifier against production. No merge or deployment occurred in this execution.
