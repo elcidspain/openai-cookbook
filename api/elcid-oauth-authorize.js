@@ -1,4 +1,4 @@
-import { ISSUER, RESOURCE, SCOPE, issueAuthorizationCode } from "./_elcid-oauth-core.js";
+import { ISSUER, RESOURCE, SCOPE, issueAuthorizationCode } from "../elcid-server/oauth-core.js";
 
 export default function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
