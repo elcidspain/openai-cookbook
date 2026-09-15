@@ -1,7 +1,7 @@
 # EL CID / AUMARA production probe
 
-- Checked UTC: 2026-09-14T22:59:27Z
-- Commit: 56182fdfa5ec3fb3a1652cbb6c94898714e9a958
+- Checked UTC: 2026-09-15T00:27:40Z
+- Commit: c2be05a36b607abf53d339d198d66f2fcfc303df
 - Trigger: workflow_run
 - Fully operational: **no**
 
