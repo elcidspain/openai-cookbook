@@ -1,4 +1,4 @@
-import { RESOURCE, SCOPE, cors, exchangeAuthorizationCode } from "./_elcid-oauth-core.js";
+import { RESOURCE, SCOPE, cors, exchangeAuthorizationCode } from "../elcid-server/oauth-core.js";
 
 export default function handler(req, res) {
   cors(res, "POST, OPTIONS");
