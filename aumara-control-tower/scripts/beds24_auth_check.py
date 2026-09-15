@@ -276,15 +276,16 @@ def command_authenticate() -> int:
         evidence["credential_mode"] = "access_token"
         evidence["readonly_probe_http_status"] = direct_status
         evidence["readonly_probe_diagnostics"] = evidence["direct_probe_diagnostics"]
-        try:
-            evidence["inventory_fix"] = open_booking_inventory(credential)
-            evidence["inventory_fix_status"] = "SUCCESS"
-            print("Beds24 inventory open SUCCESS (access token).")
-        except Exception as exc:
-            evidence["inventory_fix_status"] = f"FAIL:{type(exc).__name__}:{str(exc)[:300]}"
-            print(evidence["inventory_fix_status"], file=sys.stderr)
-            save_evidence(evidence)
-            return 1
+        if os.environ.get("BEDS24_OPEN_INVENTORY") == "1":
+            try:
+                evidence["inventory_fix"] = open_booking_inventory(credential)
+                evidence["inventory_fix_status"] = "SUCCESS"
+                print("Beds24 inventory open SUCCESS (access token).")
+            except Exception as exc:
+                evidence["inventory_fix_status"] = f"FAIL:{type(exc).__name__}:{str(exc)[:300]}"
+                print(evidence["inventory_fix_status"], file=sys.stderr)
+                save_evidence(evidence)
+                return 1
         save_evidence(evidence)
         print("Beds24 read-only authentication probe succeeded with access token.")
         return 0
@@ -339,15 +340,16 @@ def command_authenticate() -> int:
         evidence["status"] = "AUTH_OK"
         evidence["credential_mode"] = "refresh_token"
         evidence["failure_stage"] = None
-        try:
-            evidence["inventory_fix"] = open_booking_inventory(access_token)
-            evidence["inventory_fix_status"] = "SUCCESS"
-            print("Beds24 inventory open SUCCESS (refresh exchange).")
-        except Exception as exc:
-            evidence["inventory_fix_status"] = f"FAIL:{type(exc).__name__}:{str(exc)[:300]}"
-            print(evidence["inventory_fix_status"], file=sys.stderr)
-            save_evidence(evidence)
-            return 1
+        if os.environ.get("BEDS24_OPEN_INVENTORY") == "1":
+            try:
+                evidence["inventory_fix"] = open_booking_inventory(access_token)
+                evidence["inventory_fix_status"] = "SUCCESS"
+                print("Beds24 inventory open SUCCESS (refresh exchange).")
+            except Exception as exc:
+                evidence["inventory_fix_status"] = f"FAIL:{type(exc).__name__}:{str(exc)[:300]}"
+                print(evidence["inventory_fix_status"], file=sys.stderr)
+                save_evidence(evidence)
+                return 1
         save_evidence(evidence)
         print("Beds24 read-only authentication probe succeeded after token exchange.")
         return 0
