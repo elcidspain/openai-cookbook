@@ -1,0 +1,36 @@
+# EL CID runtime hardening verification results
+
+Date: 2026-09-15
+
+## Production baseline before this branch
+Manual verifier against `https://www.elcidspain.com` passed 4/14 checks:
+- PASS Markdown negotiation
+- PASS MCP initialize (v1.0.0)
+- PASS OAuth discovery
+- PASS authenticated DNS-AID + DNSSEC (2/2 names)
+
+The remaining 10 checks correctly failed because production still lacks the branch-only identity firewall, typed MCP intent schema, fail-closed date validation, and A2A stale/entity guards.
+
+## Branch-compatible verification
+The same verifier was run against a local HTTP harness serving the branch static files and branch MCP/A2A handlers while using live OAuth discovery and the live DNS-AID/DNSSEC chain.
+
+Result: 14/14 PASS.
+
+## Deployed Vercel preview verification
+The same verifier was then run end-to-end against the READY Vercel preview deployment for PR #158:
+`https://openai-cookbook-958n37w8t-elidspaincom.vercel.app`
+
+Result: 14/14 PASS.
+
+Verified behaviors:
+- Markdown negotiation and machine-readable discovery
+- EL CID Benidoleig vs Mexico/Mazatlán/Sinaloa disambiguation
+- AUMARA kept as a separate product/inventory
+- legacy opening-hours/menu/bowling claims treated as non-authoritative
+- typed MCP booking intent for dates, guests, accommodation type and dining intent
+- explicit `availabilityChecked: false` and `priceChecked: false`
+- invalid date ranges fail closed with JSON-RPC `-32602`
+- OAuth discovery contract remains available
+- authenticated DNS-AID/DNSSEC remains 2/2
+
+No Beds24 access, booking writes, production merge/deployment, scheduled monitoring, external messaging or marketing action was performed.
