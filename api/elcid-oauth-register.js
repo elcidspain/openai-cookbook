@@ -1,4 +1,4 @@
-import { cors, registerClient } from "./_elcid-oauth-core.js";
+import { cors, registerClient } from "../elcid-server/oauth-core.js";
 
 export default function handler(req, res) {
   cors(res, "POST, OPTIONS");
