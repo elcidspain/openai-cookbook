@@ -460,8 +460,7 @@ def open_booking_inventory(access_token: str) -> dict:
     }
     path = ROOT / "evidence" / "beds24-open-booking-availability-20260913.json"
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(out, indent=2) + "
-", encoding="utf-8")
+    path.write_text(json.dumps(out, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(out, indent=2))
     if write_status >= 300:
         raise RuntimeError(f"calendar POST HTTP {write_status}: {str(write_body)[:400]}")
