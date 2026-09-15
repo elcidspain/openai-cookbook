@@ -1,4 +1,4 @@
-import { PROTECTED_ENDPOINT, SCOPE, cors, verifyAccessToken } from "./_elcid-oauth-core.js";
+import { PROTECTED_ENDPOINT, SCOPE, cors, verifyAccessToken } from "../elcid-server/oauth-core.js";
 
 const resourceMetadata = "https://www.elcidspain.com/.well-known/oauth-protected-resource";
 
