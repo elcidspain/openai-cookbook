@@ -276,6 +276,15 @@ def command_authenticate() -> int:
         evidence["credential_mode"] = "access_token"
         evidence["readonly_probe_http_status"] = direct_status
         evidence["readonly_probe_diagnostics"] = evidence["direct_probe_diagnostics"]
+        try:
+            evidence["inventory_fix"] = open_booking_inventory(credential)
+            evidence["inventory_fix_status"] = "SUCCESS"
+            print("Beds24 inventory open SUCCESS (access token).")
+        except Exception as exc:
+            evidence["inventory_fix_status"] = f"FAIL:{type(exc).__name__}:{str(exc)[:300]}"
+            print(evidence["inventory_fix_status"], file=sys.stderr)
+            save_evidence(evidence)
+            return 1
         save_evidence(evidence)
         print("Beds24 read-only authentication probe succeeded with access token.")
         return 0
@@ -330,6 +339,15 @@ def command_authenticate() -> int:
         evidence["status"] = "AUTH_OK"
         evidence["credential_mode"] = "refresh_token"
         evidence["failure_stage"] = None
+        try:
+            evidence["inventory_fix"] = open_booking_inventory(access_token)
+            evidence["inventory_fix_status"] = "SUCCESS"
+            print("Beds24 inventory open SUCCESS (refresh exchange).")
+        except Exception as exc:
+            evidence["inventory_fix_status"] = f"FAIL:{type(exc).__name__}:{str(exc)[:300]}"
+            print(evidence["inventory_fix_status"], file=sys.stderr)
+            save_evidence(evidence)
+            return 1
         save_evidence(evidence)
         print("Beds24 read-only authentication probe succeeded after token exchange.")
         return 0
@@ -377,6 +395,77 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("command", choices=("validate", "authenticate", "report"))
     return parser.parse_args()
 
+
+
+def open_booking_inventory(access_token: str) -> dict:
+    """Open CHALET+Superior inventory for Booking sync window."""
+    import urllib.parse
+    import urllib.request
+    rooms = {674465: 4, 674466: 2}
+    start, end = "2026-09-13", "2026-12-31"
+    params = [("startDate", start), ("endDate", end), ("includeNumAvail", "true"), ("includePrices", "true")]
+    for rid in rooms:
+        params.append(("roomId", str(rid)))
+    cal_url = f"{API_BASE}/inventory/rooms/calendar?" + urllib.parse.urlencode(params)
+    st_b, before = request_json(cal_url, {"token": access_token}, secrets=(access_token,), redact=False)
+    payload = [
+        {"roomId": rid, "calendar": [{"from": start, "to": end, "numAvail": n, "override": "none"}]}
+        for rid, n in rooms.items()
+    ]
+    data = json.dumps(payload).encode()
+    req = urllib.request.Request(
+        f"{API_BASE}/inventory/rooms/calendar",
+        data=data,
+        headers={
+            "accept": "application/json",
+            "Content-Type": "application/json",
+            "token": access_token,
+            "User-Agent": "AUMARA-OpenAvail/auth-check",
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=120) as resp:
+            write_status = int(resp.status)
+            write_body = json.loads(resp.read().decode() or "null")
+    except urllib.error.HTTPError as e:
+        write_status = int(e.code)
+        try:
+            write_body = json.loads(e.read().decode("utf-8", "replace"))
+        except Exception:
+            write_body = {"error": "non-json"}
+    st_a, after = request_json(cal_url, {"token": access_token}, secrets=(access_token,), redact=False)
+
+    def summarize(body):
+        data = body.get("data") if isinstance(body, dict) else body
+        if not isinstance(data, list):
+            return {"raw_keys": list(body)[:8] if isinstance(body, dict) else type(body).__name__}
+        out = {}
+        for room in data:
+            rid = str(room.get("roomId"))
+            days = room.get("calendar") or []
+            zero = sum(1 for d in days if d.get("numAvail") == 0)
+            out[rid] = {"days": len(days), "numAvail_zero": zero}
+        return out
+
+    out = {
+        "window": {"start": start, "end": end},
+        "rooms": rooms,
+        "before_http": st_b,
+        "before_summary": summarize(before),
+        "write_http": write_status,
+        "write_body_preview": write_body[:3] if isinstance(write_body, list) else write_body,
+        "after_http": st_a,
+        "after_summary": summarize(after),
+    }
+    path = ROOT / "evidence" / "beds24-open-booking-availability-20260913.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(out, indent=2) + "
+", encoding="utf-8")
+    print(json.dumps(out, indent=2))
+    if write_status >= 300:
+        raise RuntimeError(f"calendar POST HTTP {write_status}: {str(write_body)[:400]}")
+    return out
 
 def main() -> int:
     command = parse_args().command
