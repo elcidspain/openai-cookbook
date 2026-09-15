@@ -1,8 +1,10 @@
 import { randomBytes } from "node:crypto";
-import { mkdir, writeFile } from "node:fs/promises";
+import { cp, mkdir, rm, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 
-const output = resolve(process.cwd(), "api/_elcid-oauth-key.js");
+const root = process.cwd();
+const output = resolve(root, "api/_elcid-oauth-key.js");
+const publicDir = resolve(root, "public");
 const key = randomBytes(48).toString("base64url");
 
 await mkdir(dirname(output), { recursive: true });
@@ -12,4 +14,9 @@ await writeFile(
   { encoding: "utf8", mode: 0o600 },
 );
 
-console.log("Generated per-deployment EL CID agent OAuth signing key.");
+await rm(publicDir, { recursive: true, force: true });
+await mkdir(publicDir, { recursive: true });
+await cp(resolve(root, "elcid-site"), resolve(publicDir, "elcid-site"), { recursive: true });
+await cp(resolve(root, "staff"), resolve(publicDir, "staff"), { recursive: true });
+
+console.log("Generated EL CID OAuth key and preserved static output in public/.");
