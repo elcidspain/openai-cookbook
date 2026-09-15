@@ -1,0 +1,1 @@
+Scoped hardening summary: identity firewall, typed MCP booking intent, A2A stale-data guards, and a manual 14-check verifier. No merge, deployment, Beds24 access, scheduled monitoring, external messaging or marketing action occurred.
