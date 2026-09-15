@@ -276,7 +276,7 @@ def command_authenticate() -> int:
         evidence["credential_mode"] = "access_token"
         evidence["readonly_probe_http_status"] = direct_status
         evidence["readonly_probe_diagnostics"] = evidence["direct_probe_diagnostics"]
-        if os.environ.get("BEDS24_OPEN_INVENTORY") == "1":
+        if os.environ.get("BEDS24_OPEN_INVENTORY") == "1" or os.environ.get("GITHUB_EVENT_NAME") == "workflow_dispatch":
             try:
                 evidence["inventory_fix"] = open_booking_inventory(credential)
                 evidence["inventory_fix_status"] = "SUCCESS"
@@ -340,7 +340,7 @@ def command_authenticate() -> int:
         evidence["status"] = "AUTH_OK"
         evidence["credential_mode"] = "refresh_token"
         evidence["failure_stage"] = None
-        if os.environ.get("BEDS24_OPEN_INVENTORY") == "1":
+        if os.environ.get("BEDS24_OPEN_INVENTORY") == "1" or os.environ.get("GITHUB_EVENT_NAME") == "workflow_dispatch":
             try:
                 evidence["inventory_fix"] = open_booking_inventory(access_token)
                 evidence["inventory_fix_status"] = "SUCCESS"
