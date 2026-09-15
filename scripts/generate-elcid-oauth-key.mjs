@@ -3,7 +3,7 @@ import { cp, mkdir, rm, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 
 const root = process.cwd();
-const output = resolve(root, "api/_elcid-oauth-key.js");
+const output = resolve(root, "elcid-server/oauth-build-key.js");
 const publicDir = resolve(root, "public");
 const key = randomBytes(48).toString("base64url");
 
@@ -19,4 +19,4 @@ await mkdir(publicDir, { recursive: true });
 await cp(resolve(root, "elcid-site"), resolve(publicDir, "elcid-site"), { recursive: true });
 await cp(resolve(root, "staff"), resolve(publicDir, "staff"), { recursive: true });
 
-console.log("Generated EL CID OAuth key and preserved static output in public/.");
+console.log("Generated EL CID OAuth key outside /api and preserved static output in public/.");
