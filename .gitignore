@@ -151,3 +151,6 @@ aumara-control-tower/evidence/vouchers/
 
 # Node dependencies
 node_modules/
+
+# Build-generated agent OAuth key
+api/_elcid-oauth-key.js
