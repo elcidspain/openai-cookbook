@@ -1,0 +1,55 @@
+name: Open AUMARA Booking.com availability
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/beds24-open-booking-availability.yml"
+      - "aumara-control-tower/scripts/beds24_open_booking_availability.py"
+      - "aumara-control-tower/scripts/tests/test_beds24_open_booking_availability.py"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/beds24-open-booking-availability.yml"
+      - "aumara-control-tower/scripts/beds24_open_booking_availability.py"
+      - "aumara-control-tower/scripts/tests/test_beds24_open_booking_availability.py"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: beds24-open-booking-availability-${{ github.event_name }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check date window and workflow wiring
+        run: python -m unittest aumara-control-tower/scripts/tests/test_beds24_open_booking_availability.py -v
+
+  open-availability:
+    if: github.event_name == 'workflow_dispatch'
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      # Canonical Actions secret name in this repo
+      BEDS24_REFRESH_CREDENTIAL: ${{ secrets.BEDS24_REFRESH_CREDENTIAL }}
+      # Scripts also accept the legacy env name; map both from the same secret
+      BEDS24_REFRESH_TOKEN: ${{ secrets.BEDS24_REFRESH_CREDENTIAL }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Open Booking.com inventory calendar
+        run: python aumara-control-tower/scripts/beds24_open_booking_availability.py
+      - name: Upload availability evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: beds24-open-booking-availability-evidence
+          path: aumara-control-tower/evidence/beds24-open-booking-availability*.json
+          if-no-files-found: warn
+          retention-days: 7
