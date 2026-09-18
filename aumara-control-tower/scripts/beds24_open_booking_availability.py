@@ -85,26 +85,23 @@ def load_refresh() -> str:
 
 
 def exchange_token(refresh: str) -> str:
-    # Try details first
-    try:
-        r = urllib.request.Request(
-            API + "/authentication/details",
-            headers={"Accept": "application/json", "token": refresh, "User-Agent": "AUMARA-OpenAvail/2"},
-            method="GET",
-        )
-        with urllib.request.urlopen(r, timeout=45) as resp:
-            if int(resp.status) == 200:
-                print("token_mode=direct_access", flush=True)
-                return refresh
-    except Exception as e:
-        print(f"details_probe={type(e).__name__}", flush=True)
-    r = urllib.request.Request(
+    """Always exchange a refresh credential for a short-lived access token.
+
+    Beds24 refresh tokens can return HTTP 200 from GET /authentication/details
+    and still fail inventory calendar calls with 401. Never treat the stored
+    credential as an access token.
+    """
+    request = urllib.request.Request(
         API + "/authentication/token",
-        headers={"Accept": "application/json", "refreshToken": refresh, "User-Agent": "AUMARA-OpenAvail/2"},
+        headers={
+            "Accept": "application/json",
+            "refreshToken": refresh,
+            "User-Agent": "AUMARA-OpenAvail/2",
+        },
         method="GET",
     )
     try:
-        with urllib.request.urlopen(r, timeout=45) as resp:
+        with urllib.request.urlopen(request, timeout=45) as resp:
             body = json.loads(resp.read().decode("utf-8"))
     except urllib.error.HTTPError as e:
         raise SystemExit(f"refresh HTTP {e.code}: {e.read()[:800]!r}")
