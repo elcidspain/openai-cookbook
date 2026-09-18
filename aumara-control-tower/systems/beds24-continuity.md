@@ -1,6 +1,6 @@
 # Beds24 continuity record
 
-Last verified: 2026-07-14
+Last verified: 2026-09-18
 
 ## Canonical account map
 
@@ -9,8 +9,9 @@ Last verified: 2026-07-14
 - AUMARA property ID: 324882
 - AUMARA Chalet room ID: 674465
 - AUMARA Superior Chalet room ID: 674466
-- Booking.com AUMARA working property: 16137893
-- Booking.com AUMARA legacy/duplicate: 14953869
+- Booking.com AUMARA working property (continuity label): 16137893
+- Booking.com AUMARA linked to Beds24 property 324882 (V1 `bookingComPropertyCode`, rooms 1495386901/1495386902, rate 66887702): **14953869**
+- Booking.com AUMARA legacy/duplicate label: 14953869 (this is the hotel currently linked to prop 324882 — do not retarget to 16137893 unless live `/channels/settings` or property payload shows 16137893 linked and 14953869 absent)
 - El Cid Country Club Beds24 property: 324903
 - Booking.com El Cid hotel ID: 7090541
 
@@ -19,31 +20,23 @@ Last verified: 2026-07-14
 Beds24 API V2 uses a permanent refresh token generated from a one-time invite code.
 
 1. Open Beds24 API V2 settings: https://beds24.com/control3.php?pagetype=apiv2
-2. Generate an invite code with scopes:
+2. Generate an invite code with scopes (all required; historical invites omitted channels and cannot open Booking rate plans):
    - bookings
    - bookings-personal
    - bookings-financial
    - properties
    - inventory
-3. Exchange the invite code once through GET /api/v2/authentication/setup using header `code`.
-4. Store the returned refresh token only as GitHub Actions secret `BEDS24_REFRESH_TOKEN`.
+   - read:channels
+   - write:channels
+3. Exchange the invite code once through GET /api/v2/authentication/setup using header `code`. CoS obtains the one-time code; never ask for a Beds24 password or username.
+4. Store the returned refresh token only as GitHub Actions secret `BEDS24_REFRESH_CREDENTIAL` (legacy alias: `BEDS24_REFRESH_TOKEN`).
 5. Never store the invite code, refresh token or short-lived token in repository files, email, Airtable or logs.
 6. Use the refresh token at least once every 30 days so it remains valid.
+7. After a channels-scoped refresh is stored, dispatch workflow `beds24-open-booking-channel-rates` (no browser) to open Booking Fully flexible + Weekly for rooms 674465 and 674466.
 
 ## Current verified credential state
 
-A sanitized GitHub Actions probe on 2026-07-14 found no Beds24 credential secret under any of these historical candidate names:
-
-- BEDS24_REFRESH_TOKEN
-- BEDS24_API_TOKEN
-- BEDS24_TOKEN
-- BEDS24_API_KEY
-- BEDS24_INVITE_CODE
-- BEDS24_REFRESH
-
-Evidence: `aumara-control-tower/evidence/beds24-secret-presence.json`.
-
-Therefore the former API connection was not preserved as a reusable secret in the current repository. The operational configuration in Beds24 and the TTLock marketplace connection are real, but they are not equivalent to an external API credential.
+A sanitized GitHub Actions probe on 2026-07-14 found no Beds24 credential secret under historical candidate names (including `BEDS24_REFRESH_TOKEN`). The live connector now uses repository secret `BEDS24_REFRESH_CREDENTIAL`. Token scopes still omit `read:channels` / `write:channels` until a new invite with the checklist above is exchanged.
 
 ## Booking creation control
 
@@ -94,10 +87,12 @@ Do not execute this packet twice. First search by `apiReference`; create only wh
 
 The Beds24 API connector is GREEN only after all of the following pass:
 
-1. secret `BEDS24_REFRESH_TOKEN` exists;
+1. secret `BEDS24_REFRESH_CREDENTIAL` exists;
 2. token exchange succeeds;
-3. property/room read succeeds for property 324882 and room 674466;
-4. idempotency search by apiReference succeeds;
-5. controlled booking creation succeeds;
-6. created booking reads back with dates, guest, room, charge and payment;
-7. corresponding inventory is blocked.
+3. `GET /authentication/details` after exchange includes inventory, properties, bookings, **and** read:channels + write:channels;
+4. property/room read succeeds for property 324882 and room 674466;
+5. idempotency search by apiReference succeeds;
+6. controlled booking creation succeeds;
+7. created booking reads back with dates, guest, room, charge and payment;
+8. corresponding inventory is blocked;
+9. Booking Fully flexible + Weekly rate plans for rooms 674465/674466 are open (workflow `beds24-open-booking-channel-rates`).
