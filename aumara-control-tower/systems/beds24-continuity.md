@@ -1,6 +1,6 @@
 # Beds24 continuity record
 
-Last verified: 2026-07-14
+Last verified: 2026-09-18
 
 ## Canonical account map
 
@@ -14,43 +14,65 @@ Last verified: 2026-07-14
 - El Cid Country Club Beds24 property: 324903
 - Booking.com El Cid hotel ID: 7090541
 
+Hotel-ID note: V1 content audit (2026-08-25) mapped `bookingComPropertyCode=14953869` with room codes `1495386901` / `1495386902`. Continuity still lists **16137893** as the working Booking hotel. Next `open-availability` run records a live `GET /properties?id=324882` classification (`working_16137893_only` / `legacy_14953869_only` / `both_present` / `absent_from_v2_properties`). Do not guess; use that evidence.
+
 ## Authentication architecture
 
 Beds24 API V2 uses a permanent refresh token generated from a one-time invite code.
 
+Canonical secret name (repo + Production): **`BEDS24_REFRESH_CREDENTIAL`**. Never use `BEDS24_PASSWORD` / `BEDS24_USERNAME`. Keep the refresh credential only in this repository's GitHub Actions secrets.
+
 1. Open Beds24 API V2 settings: https://beds24.com/control3.php?pagetype=apiv2
-2. Generate an invite code with scopes:
-   - bookings
-   - bookings-personal
-   - bookings-financial
-   - properties
-   - inventory
-3. Exchange the invite code once through GET /api/v2/authentication/setup using header `code`.
-4. Store the returned refresh token only as GitHub Actions secret `BEDS24_REFRESH_TOKEN`.
-5. Never store the invite code, refresh token or short-lived token in repository files, email, Airtable or logs.
+2. Generate **one** invite code with read+write for every scope listed below (including **channels**).
+3. Exchange the invite once with `GET /api/v2/authentication/setup` using header `code` (workflow **Exchange Beds24 invite code**).
+4. Store the returned refresh token only as GitHub Actions secret `BEDS24_REFRESH_CREDENTIAL` (replace the existing value).
+5. Never store the invite code, refresh token, or short-lived token in repository files, email, Airtable, or logs.
 6. Use the refresh token at least once every 30 days so it remains valid.
+
+### Exact UI path for ONE invite (Ilia / owner)
+
+Do this as a single invite. Scopes cannot be patched onto an existing token.
+
+1. Log in to the Beds24 control panel as the account owner (no password is stored in this repository).
+2. Open **(SETTINGS) MARKETPLACE > API**, or go directly to https://beds24.com/control3.php?pagetype=apiv2
+3. Click **Generate invite code**.
+4. On the scope form, tick **READ and WRITE** for all of the following on this same invite:
+   - `bookings`
+   - `bookings-personal`
+   - `bookings-financial`
+   - `properties`
+   - `inventory`
+   - **`channels`** (this is the missing scope; needed for `GET/POST /channels/settings`)
+5. Leave IP whitelist empty (GitHub Actions egress IPs change). Do not restrict to a linked-properties-only token unless that is intentional.
+6. Click **Generate invite code** to create the code. Copy it (one-time, expires about 24 hours).
+7. Run GitHub Action **Exchange Beds24 invite code** with that code. It writes a refresh-token artifact; it does not print the secret in logs.
+8. Paste the artifact into repository **and** Production secret `BEDS24_REFRESH_CREDENTIAL` (one line, no quotes). Delete the artifact after copy (public repo).
+9. Dispatch **Open AUMARA Booking.com availability**, or push to `main` with commit marker `[open-availability]`.
+
+Resulting token methods that must appear on `GET /authentication/details` after exchange:
+
+- `read:bookings` `write:bookings`
+- `read:bookings-personal` `write:bookings-personal`
+- `read:bookings-financial` `write:bookings-financial`
+- `read:properties` `write:properties`
+- `read:inventory` `write:inventory`
+- **`read:channels` `write:channels`**
 
 ## Current verified credential state
 
-A sanitized GitHub Actions probe on 2026-07-14 found no Beds24 credential secret under any of these historical candidate names:
+Live `open-availability` run 35380827175 (2026-09-18) exchanged `BEDS24_REFRESH_CREDENTIAL` successfully. Token scopes:
 
-- BEDS24_REFRESH_TOKEN
-- BEDS24_API_TOKEN
-- BEDS24_TOKEN
-- BEDS24_API_KEY
-- BEDS24_INVITE_CODE
-- BEDS24_REFRESH
+- present: bookings(+personal/financial), properties, inventory — all read+write
+- **missing: channels** → `GET /channels/settings?propertyId=324882` HTTP 401 `Token not valid`
 
-Evidence: `aumara-control-tower/evidence/beds24-secret-presence.json`.
-
-Therefore the former API connection was not preserved as a reusable secret in the current repository. The operational configuration in Beds24 and the TTLock marketplace connection are real, but they are not equivalent to an external API credential.
+Inventory+price1 for rooms 674465/674466 is green (CHALET numAvail=3 price1=259; Superior numAvail=2 price1=329). Offers bookable. Channel rate-plan open (Fully flexible + Weekly) waits on the one invite above.
 
 ## Booking creation control
 
 Direct booking creation uses:
 
-- `GET https://beds24.com/api/v2/authentication/token` with header `refreshToken`
-- `POST https://beds24.com/api/v2/bookings` with header `token`
+- `GET https://api.beds24.com/v2/authentication/token` with header `refreshToken`
+- `POST https://api.beds24.com/v2/bookings` with header `token`
 
 A new reservation must contain at minimum:
 
@@ -88,16 +110,19 @@ Do not execute this packet twice. First search by `apiReference`; create only wh
 - Business owner: Ilya
 - System owner: AI Ops
 - Credential owner: Ilya / GitHub repository secrets
-- Fallback while API credential is absent: manual reservation in Beds24 calendar and immediate calendar reconciliation
+- Fallback while channels scope is absent: inventory+price1 API writes still run; Booking Fully flexible / Weekly flags stay UI/channel-manager until the invite above is exchanged.
 
 ## Recovery acceptance
 
-The Beds24 API connector is GREEN only after all of the following pass:
+The Beds24 API connector is GREEN for inventory/bookings/properties after:
 
-1. secret `BEDS24_REFRESH_TOKEN` exists;
+1. secret `BEDS24_REFRESH_CREDENTIAL` exists;
 2. token exchange succeeds;
-3. property/room read succeeds for property 324882 and room 674466;
-4. idempotency search by apiReference succeeds;
-5. controlled booking creation succeeds;
-6. created booking reads back with dates, guest, room, charge and payment;
-7. corresponding inventory is blocked.
+3. property/room read succeeds for property 324882 and rooms 674465/674466;
+4. inventory calendar write of `numAvail` + `price1` succeeds through the open window (currently through **2028-12-31**).
+
+The connector is GREEN for Booking **channel rate plans** only after the same checks plus:
+
+5. `GET /authentication/details` shows `read:channels` and `write:channels`;
+6. `GET /channels/settings?propertyId=324882&channel=booking` returns HTTP 200;
+7. Fully flexible + Weekly are enabled and read back.
