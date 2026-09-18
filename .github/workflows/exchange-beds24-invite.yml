@@ -1,8 +1,10 @@
 name: Exchange Beds24 invite code
 
 # CoS supplies the one-time invite code. Never ask anyone to paste a Beds24
-# password or username. Generate the invite at SETTINGS > MARKETPLACE > API
-# with this full scope checklist:
+# password, username, or V1 API Key 1/2. Generate the invite at
+# SETTINGS > MARKETPLACE > API (Generate invite code). If the screen shows
+# "API Key 1" / "API Key 2" that is the WRONG page — go back.
+# Scopes MUST include:
 #   bookings
 #   bookings-personal
 #   bookings-financial
@@ -12,13 +14,15 @@ name: Exchange Beds24 invite code
 #   write:channels
 # After exchange, store the refresh token as repo secret BEDS24_REFRESH_CREDENTIAL
 # then dispatch workflow "Open AUMARA Booking.com channel rates"
-# (beds24-open-booking-channel-rates). No browser.
+# (beds24-open-booking-channel-rates). Prefer V1 JSON first (existing
+# BEDS24_API_KEY + BEDS24_PROP_KEY); invite is only needed if V1 cannot open
+# Weekly. No browser.
 
 on:
   workflow_dispatch:
     inputs:
       invite_code:
-        description: "One-time Beds24 invite code (SETTINGS > MARKETPLACE > API, 24h). Scopes MUST include bookings, bookings-personal, bookings-financial, properties, inventory, read:channels, write:channels. Never a password."
+        description: "One-time Marketplace API invite (NOT API Key 1/2). Scopes MUST include bookings, bookings-personal, bookings-financial, properties, inventory, read:channels, write:channels. Never a password or API key."
         required: true
         type: string
 
@@ -39,6 +43,8 @@ jobs:
     steps:
       - name: Print invite scope checklist (no secrets)
         run: |
+          echo "WRONG PAGE = API Key 1 / API Key 2 (do not paste keys)."
+          echo "RIGHT PAGE = SETTINGS > MARKETPLACE > API > Generate invite code."
           echo "Beds24 invite MUST include these scopes:"
           echo "  bookings"
           echo "  bookings-personal"

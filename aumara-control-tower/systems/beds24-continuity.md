@@ -19,12 +19,16 @@ Hotel-ID note: V1 content audit (2026-08-25) mapped `bookingComPropertyCode=1495
 
 ## Authentication architecture
 
-Beds24 API V2 uses a permanent refresh token generated from a one-time invite code.
+Default AUMARA automation is **API-based**. V1 JSON uses Production `BEDS24_API_KEY` + `BEDS24_PROP_KEY` (never paste keys from the control panel). V2 uses a refresh token from a Marketplace invite.
 
-Canonical secret name (repo + Production): **`BEDS24_REFRESH_CREDENTIAL`**. Never use `BEDS24_PASSWORD` / `BEDS24_USERNAME`. Keep the refresh credential only in this repository's GitHub Actions secrets.
+Canonical V2 secret name (repo + Production): **`BEDS24_REFRESH_CREDENTIAL`**. Never use `BEDS24_PASSWORD` / `BEDS24_USERNAME`. Keep the refresh credential only in this repository's GitHub Actions secrets.
 
-1. Open Beds24 API V2 settings: https://beds24.com/control3.php?pagetype=apiv2
-2. Generate **one** invite code with read+write for every scope listed below (including **channels**). Historical invites omitted channels and cannot open Booking rate plans.
+Try V1 first (`beds24-open-booking-channel-rates`). Do not send Ilia to API Key 1/2.
+
+If a V2 invite is still required (Weekly Booking rate id unknown and no channels scope):
+
+1. Open **SETTINGS > MARKETPLACE > API**. Direct URLs: https://beds24.com/control3.php?pagetype=apiv2 then https://beds24.com/control2.php?pagetype=apiv2. If the page shows **API Key 1 / API Key 2**, it is the wrong page — go back, request Desktop site, use MARKETPLACE not ACCOUNT ACCESS.
+2. Generate **one** invite code with read+write for every scope listed below (including **channels**). Historical invites omitted channels and cannot open Booking rate plans via V2.
    - bookings
    - bookings-personal
    - bookings-financial
@@ -32,11 +36,11 @@ Canonical secret name (repo + Production): **`BEDS24_REFRESH_CREDENTIAL`**. Neve
    - inventory
    - read:channels
    - write:channels
-3. Exchange the invite once with `GET /api/v2/authentication/setup` using header `code` (workflow **Exchange Beds24 invite code**). CoS obtains the one-time code; never ask for a Beds24 password or username.
+3. Exchange the invite once with `GET /api/v2/authentication/setup` using header `code` (workflow **Exchange Beds24 invite code**). CoS obtains the one-time code; never ask for a Beds24 password, username, or V1 API key.
 4. Store the returned refresh token only as GitHub Actions secret `BEDS24_REFRESH_CREDENTIAL` (replace the existing value; legacy alias `BEDS24_REFRESH_TOKEN`).
 5. Never store the invite code, refresh token, or short-lived token in repository files, email, Airtable, or logs.
 6. Use the refresh token at least once every 30 days so it remains valid.
-7. After a channels-scoped refresh is stored, dispatch workflow `beds24-open-booking-channel-rates` (no browser) to open Booking Fully flexible + Weekly for rooms 674465 and 674466.
+7. Dispatch workflow `beds24-open-booking-channel-rates` (marker `[open-channel-rates]`). It tries V1 first and uses V2 `/channels/settings` only when channels-scoped.
 
 ### Exact UI path for ONE invite (Ilia / owner)
 
@@ -74,7 +78,7 @@ Live `open-availability` run 35380827175 (2026-09-18) exchanged `BEDS24_REFRESH_
 - present: bookings(+personal/financial), properties, inventory — all read+write
 - **missing: channels** → `GET /channels/settings?propertyId=324882` HTTP 401 `Token not valid`
 
-Inventory+price1 for rooms 674465/674466 is green (CHALET numAvail=3 price1=259; Superior numAvail=2 price1=329). Offers bookable. Channel rate-plan open (Fully flexible + Weekly) waits on the one invite above, then dispatch of `beds24-open-booking-channel-rates`.
+Inventory+price1 for rooms 674465/674466 is green (CHALET numAvail=3 price1=259; Superior numAvail=2 price1=329). Offers bookable. Channel rate-plan open (Fully flexible + Weekly): dispatch `beds24-open-booking-channel-rates` (V1 Production keys first). V2 `/channels/settings` still waits on the one invite above.
 
 ## Booking creation control
 
@@ -119,7 +123,7 @@ Do not execute this packet twice. First search by `apiReference`; create only wh
 - Business owner: Ilya
 - System owner: AI Ops
 - Credential owner: Ilya / GitHub repository secrets
-- Fallback while channels scope is absent: inventory+price1 API writes still run; Booking Fully flexible / Weekly flags stay UI/channel-manager until the invite above is exchanged.
+- Fallback while channels scope is absent: inventory+price1 API writes still run; `beds24-open-booking-channel-rates` tries Production V1 JSON first. Booking Fully flexible / Weekly V2 flags wait on channels scopes.
 
 ## Recovery acceptance
 
@@ -130,8 +134,9 @@ The Beds24 API connector is GREEN for inventory/bookings/properties after:
 3. property/room read succeeds for property 324882 and rooms 674465/674466;
 4. inventory calendar write of `numAvail` + `price1` succeeds through the open window (currently through **2028-12-31**).
 
-The connector is GREEN for Booking **channel rate plans** only after the same checks plus:
+The connector is GREEN for Booking **channel rate plans** after inventory GREEN plus either:
 
-5. `GET /authentication/details` shows `read:channels` and `write:channels`;
-6. `GET /channels/settings?propertyId=324882&channel=booking` returns HTTP 200;
-7. Fully flexible + Weekly for rooms 674465/674466 are enabled (canonical live path: workflow `beds24-open-booking-channel-rates`).
+5. V1 JSON (`BEDS24_API_KEY` + `BEDS24_PROP_KEY`) opens Fully flexible + Weekly for rooms 674465/674466; or
+6. `GET /authentication/details` shows `read:channels` and `write:channels`, `GET /channels/settings?propertyId=324882&channel=booking` returns HTTP 200, and those plans are enabled.
+
+Canonical live path: workflow `beds24-open-booking-channel-rates` (V1 first, then V2 if scoped).
