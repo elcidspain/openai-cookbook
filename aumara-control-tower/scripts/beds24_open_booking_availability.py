@@ -28,8 +28,9 @@ ROOMS = {
     674465: {"name": "CHALET", "target_num_avail": 3, "price1": 259.0},
     674466: {"name": "Superior Chalet", "target_num_avail": 2, "price1": 329.0},
 }
-FIXED_END = dt.date(2026, 12, 31)
+FIXED_END = dt.date(2028, 12, 31)
 HORIZON_DAYS = 90
+CALENDAR_CHUNK_DAYS = 365
 SAMPLE_AVAIL_DAYS = 14
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 VAULT = ROOT / "evidence" / "beds24-refresh-vault.json"
@@ -50,11 +51,28 @@ CHANNELS_SCOPES_NEEDED = ["read:channels", "write:channels"]
 
 
 def booking_window(now: dt.datetime | None = None) -> tuple[str, str]:
-    """Upcoming nights from today (UTC) through year-end or +90 days."""
+    """Upcoming nights from today (UTC) through 2028-12-31, or +90 days if later."""
     today = (now or dt.datetime.now(dt.timezone.utc)).date()
     start = today
     end = max(FIXED_END, start + dt.timedelta(days=HORIZON_DAYS))
     return start.isoformat(), end.isoformat()
+
+
+def calendar_chunks(
+    start: str, end: str, chunk_days: int = CALENDAR_CHUNK_DAYS
+) -> list[tuple[str, str]]:
+    """Beds24 calendar GET/POST is reliable about a year at a time."""
+    cur = dt.date.fromisoformat(start)
+    last = dt.date.fromisoformat(end)
+    if last < cur:
+        return []
+    out: list[tuple[str, str]] = []
+    delta = max(1, int(chunk_days))
+    while cur <= last:
+        chunk_end = min(cur + dt.timedelta(days=delta - 1), last)
+        out.append((cur.isoformat(), chunk_end.isoformat()))
+        cur = chunk_end + dt.timedelta(days=1)
+    return out
 
 
 def sample_availability_window(start: str, days: int = SAMPLE_AVAIL_DAYS) -> tuple[str, str]:
@@ -443,9 +461,23 @@ def main() -> int:
     has_channels = any("channel" in s for s in scope_set)
     print(f"token_scopes_count={len(scope_set)} has_channels_scope={has_channels}", flush=True)
 
+    # V1 rackRate is the primary Booking price path (not /channels/settings).
+    v1_result = set_v1_rack_rates()
+    RACK_EVIDENCE.parent.mkdir(parents=True, exist_ok=True)
+    RACK_EVIDENCE.write_text(
+        json.dumps(
+            {**v1_result, "checked_at_utc": dt.datetime.now(dt.timezone.utc).isoformat()},
+            ensure_ascii=False,
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    chunks = calendar_chunks(start, end)
     params = [
         ("startDate", start),
-        ("endDate", end),
+        ("endDate", chunks[0][1] if chunks else end),
         ("includePrices", "true"),
         ("includeNumAvail", "true"),
     ]
@@ -457,12 +489,42 @@ def main() -> int:
     if not isinstance(before_data, list):
         before_data = []
 
-    payload = build_calendar_payload(start, end)
-    write_status, write_body = http_json("POST", API + "/inventory/rooms/calendar", token, payload)
+    write_chunks = []
+    write_status, write_body = None, None
+    for chunk_start, chunk_end in chunks:
+        payload = build_calendar_payload(chunk_start, chunk_end)
+        write_status, write_body = http_json(
+            "POST", API + "/inventory/rooms/calendar", token, payload
+        )
+        write_chunks.append(
+            {
+                "from": chunk_start,
+                "to": chunk_end,
+                "http": write_status,
+            }
+        )
     _, after = http_json("GET", cal_url, token)
     after_data = (after or {}).get("data") if isinstance(after, dict) else after
     if not isinstance(after_data, list):
         after_data = []
+
+    far_summary = {}
+    if chunks:
+        far_start, far_end = chunks[-1]
+        far_params = [
+            ("startDate", far_start),
+            ("endDate", far_end),
+            ("includePrices", "true"),
+            ("includeNumAvail", "true"),
+        ]
+        for rid in ROOMS:
+            far_params.append(("roomId", str(rid)))
+        far_url = API + "/inventory/rooms/calendar?" + urllib.parse.urlencode(far_params)
+        far_http, far_body = http_json("GET", far_url, token, raise_http=False)
+        far_data = (far_body or {}).get("data") if isinstance(far_body, dict) else far_body
+        if not isinstance(far_data, list):
+            far_data = []
+        far_summary = {"http": far_http, "window": {"start": far_start, "end": far_end}, "summary": summarize(far_data)}
 
     avail_params = [("startDate", sample_start), ("endDate", sample_end)]
     for rid in ROOMS:
@@ -525,18 +587,6 @@ def main() -> int:
         "invite_scope_doc": "aumara-control-tower/systems/beds24-continuity.md",
     }
 
-    v1_result = set_v1_rack_rates()
-    RACK_EVIDENCE.parent.mkdir(parents=True, exist_ok=True)
-    RACK_EVIDENCE.write_text(
-        json.dumps(
-            {**v1_result, "checked_at_utc": dt.datetime.now(dt.timezone.utc).isoformat()},
-            ensure_ascii=False,
-            indent=2,
-        )
-        + "\n",
-        encoding="utf-8",
-    )
-
     after_summary = summarize(after_data)
     evidence = {
         "checked_at_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
@@ -544,16 +594,20 @@ def main() -> int:
         "booking_hotel_id": BOOKING_HOTEL_ID,
         "rooms": ROOMS,
         "window": {"start": start, "end": end},
+        "calendar_chunks": chunks,
         "auth_details": details_safe,
         "before_summary": summarize(before_data),
         "write_http": write_status,
+        "write_chunks": write_chunks,
         "write_body": write_body[:4] if isinstance(write_body, list) else write_body,
         "after_summary": after_summary,
+        "far_window": far_summary,
         "availability_sample": avail,
         "availability_sample_window": {"start": sample_start, "end": sample_end},
         "offers_probe": offers,
         "channel_settings_probe": channels_probe,
         "v1_rack_rates": v1_result,
+        "v1_rack_rates_primary": True,
         "status": "SUCCESS",
         "secret_exposed": False,
     }

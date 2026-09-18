@@ -43,15 +43,15 @@ class Beds24OpenBookingAvailabilityTests(unittest.TestCase):
         now = dt.datetime(2026, 9, 18, 17, 0, tzinfo=dt.timezone.utc)
         start, end = MODULE.booking_window(now)
         self.assertEqual(start, "2026-09-18")
-        self.assertEqual(end, "2026-12-31")
+        self.assertEqual(end, "2028-12-31")
         self.assertGreaterEqual(start, now.date().isoformat())
         self.assertNotEqual(start, "2026-09-13")
 
     def test_window_extends_when_fixed_end_is_behind_horizon(self):
-        now = dt.datetime(2026, 12, 20, tzinfo=dt.timezone.utc)
+        now = dt.datetime(2028, 12, 20, tzinfo=dt.timezone.utc)
         start, end = MODULE.booking_window(now)
-        self.assertEqual(start, "2026-12-20")
-        self.assertEqual(end, "2027-03-20")
+        self.assertEqual(start, "2028-12-20")
+        self.assertEqual(end, "2029-03-20")
 
     def test_live_window_covers_upcoming_nights(self):
         today = dt.datetime.now(dt.timezone.utc).date()
@@ -60,8 +60,24 @@ class Beds24OpenBookingAvailabilityTests(unittest.TestCase):
         self.assertLessEqual(start, (today + dt.timedelta(days=1)).isoformat())
         self.assertGreaterEqual(
             dt.date.fromisoformat(end),
-            dt.date.fromisoformat(start) + dt.timedelta(days=90),
+            dt.date(2028, 12, 31),
         )
+
+    def test_calendar_chunks_cover_through_2028(self):
+        chunks = MODULE.calendar_chunks("2026-09-18", "2028-12-31")
+        self.assertGreaterEqual(len(chunks), 3)
+        self.assertEqual(chunks[0][0], "2026-09-18")
+        self.assertEqual(chunks[-1][1], "2028-12-31")
+        reconstructed = []
+        for start, end in chunks:
+            self.assertLessEqual(
+                (dt.date.fromisoformat(end) - dt.date.fromisoformat(start)).days,
+                MODULE.CALENDAR_CHUNK_DAYS,
+            )
+            reconstructed.append((start, end))
+        self.assertEqual(reconstructed[0][0], "2026-09-18")
+        self.assertEqual(reconstructed[-1][1], "2028-12-31")
+        self.assertEqual(MODULE.FIXED_END.isoformat(), "2028-12-31")
 
     def test_sample_availability_follows_start(self):
         sample_start, sample_end = MODULE.sample_availability_window("2026-09-18")
@@ -287,6 +303,8 @@ class Beds24OpenBookingAvailabilityTests(unittest.TestCase):
         self.assertIn("channels", text)
         self.assertIn("14953869", text)
         self.assertIn("HOTEL_ACCESS_DENIED", text)
+        self.assertIn("2028-12-31", text)
+        self.assertIn("primary", text.lower())
 
 
 if __name__ == "__main__":

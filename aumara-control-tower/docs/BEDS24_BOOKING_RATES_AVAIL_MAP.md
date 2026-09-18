@@ -22,7 +22,7 @@ Documented invite scopes (from `aumara-control-tower/systems/beds24-continuity.m
 
 | Secret | Workflow / script | API calls | Writes | How Booking.com gets it |
 |---|---|---|---|---|
-| `BEDS24_REFRESH_CREDENTIAL` | `beds24-open-booking-availability.yml` → `beds24_open_booking_availability.py` | `POST /inventory/rooms/calendar` (`numAvail`, `price1`); GET calendar/availability/offers; GET `/channels/settings` (probe) | Daily availability + daily price1 for rooms 674465/674466 through window end (≥2026-12-31) | Beds24 channel manager pushes Rates & Availability to Booking when inventory+prices change. No browser. |
+| `BEDS24_REFRESH_CREDENTIAL` | `beds24-open-booking-availability.yml` → `beds24_open_booking_availability.py` | `POST /inventory/rooms/calendar` (`numAvail`, `price1`); GET calendar/availability/offers; GET `/channels/settings` (probe) | Daily availability + daily price1 for rooms 674465/674466 through **2028-12-31** | Beds24 channel manager pushes Rates & Availability to Booking when inventory+prices change. No browser. |
 | `BEDS24_API_KEY` + `BEDS24_PROP_KEY` (Production) | same workflow job `rack-rates` | V1 `json/setPropertyContent` + `getPropertyContent` with body `{apiKey, propKey}` | Room `rackRate` 674465=259.00, 674466=329.00 | Historical Booking price path. See `BEDS24_BOOKING_MAP.md`. |
 | same V2 secret | `beds24-auth-check.yml` → `beds24_auth_check.py` | token exchange + optional inventory open | same calendar pattern (legacy helper) | same |
 | same | note/booking/finance/photo workflows | bookings, properties, messages, photos | content/notes/bookings — **not** Booking rate open/close | N/A for rate open |
@@ -51,7 +51,7 @@ Root cause: token scopes include inventory/properties/bookings but **not channel
 Extend `beds24_open_booking_availability.py` (this repo):
 
 1. Always refresh→token exchange.
-2. Write `numAvail` + `price1` for both rooms for `[today .. max(2026-12-31, today+90)]`.
+2. Write V1 `rackRate` first (primary Booking prices), then `numAvail` + `price1` for both rooms for `[today .. max(2028-12-31, today+90)]` in ~365-day chunks.
 3. Record sanitized scopes + channels 401 diagnosis in evidence artifact.
 4. Trigger: `workflow_dispatch` **or** push to `main` with commit marker **`[open-availability]`**.
 
