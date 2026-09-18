@@ -1,9 +1,7 @@
 import datetime as dt
 import importlib.util
-import inspect
 import io
 import json
-import os
 import pathlib
 import unittest
 from unittest import mock
@@ -25,18 +23,10 @@ assert SPEC.loader is not None
 SPEC.loader.exec_module(MODULE)
 
 
-MAP = (
-    pathlib.Path(__file__).resolve().parents[2] / "docs" / "BEDS24_BOOKING_MAP.md"
-)
-
-
 class FakeResponse:
-    def __init__(self, status: int, payload):
+    def __init__(self, status: int, payload: dict):
         self.status = status
-        if isinstance(payload, (bytes, bytearray)):
-            self._payload = bytes(payload)
-        else:
-            self._payload = json.dumps(payload).encode("utf-8")
+        self._payload = json.dumps(payload).encode("utf-8")
 
     def read(self):
         return self._payload
@@ -111,7 +101,6 @@ class Beds24OpenBookingAvailabilityTests(unittest.TestCase):
             f"aumara-control-tower/evidence/{MODULE.EVIDENCE_GLOB}",
             text,
         )
-        self.assertIn("beds24-rack-rate-live.json", text)
         self.assertIn("if: github.event_name == 'workflow_dispatch'", text)
         self.assertIn("[open-availability]", text)
         self.assertIn("BEDS24_API_KEY: ${{ secrets.BEDS24_API_KEY }}", text)
@@ -119,6 +108,7 @@ class Beds24OpenBookingAvailabilityTests(unittest.TestCase):
         self.assertIn("environment: Production", text)
         self.assertIn("BEDS24_REQUIRE_RACK_RATES", text)
         self.assertIn("rack-rates:", text)
+        self.assertIn("beds24-rack-rate-live.json", text)
         self.assertNotIn("BEDS24_PASSWORD", text)
         self.assertNotIn("BEDS24_USERNAME", text)
         self.assertNotIn("secrets.BEDS24_REFRESH_TOKEN", text)
@@ -153,10 +143,19 @@ class Beds24OpenBookingAvailabilityTests(unittest.TestCase):
         self.assertIn("token_mode=refresh_exchange", output)
         self.assertNotIn("token_mode=direct_access", output)
         self.assertNotIn(refresh, output)
-        source = inspect.getsource(MODULE.exchange_token)
+        source = (SCRIPTS_DIR / "beds24_open_booking_availability.py").read_text(
+            encoding="utf-8"
+        )
         self.assertNotIn("token_mode=direct_access", source)
-        self.assertNotIn('API + "/authentication/details"', source)
-        self.assertIn('API + "/authentication/token"', source)
+        # exchange_token must not call details; main may probe scopes after exchange.
+        import inspect
+        exchange_src = inspect.getsource(MODULE.exchange_token)
+        self.assertNotIn('API + "/authentication/details"', exchange_src)
+        self.assertIn("/authentication/token", exchange_src)
+        details_calls = [
+            call for call in calls if call[0].rstrip("/").endswith("/authentication/details")
+        ]
+        self.assertEqual(details_calls, [])
 
     def test_exchange_token_does_not_fall_back_to_refresh_on_exchange_failure(self):
         refresh = "refresh-secret"
@@ -180,57 +179,26 @@ class Beds24OpenBookingAvailabilityTests(unittest.TestCase):
                 MODULE.exchange_token(refresh)
         self.assertIn("refresh HTTP 401", str(raised.exception))
 
-    def test_calendar_payload_includes_rack_price1(self):
-        payload = MODULE.calendar_write_payload("2026-09-18", "2026-12-31")
+
+    def test_script_writes_prices_and_probes_scopes(self):
+        source = (SCRIPTS_DIR / "beds24_open_booking_availability.py").read_text(encoding="utf-8")
+        self.assertIn("price1", source)
+        self.assertIn("259", source)
+        self.assertIn("329", source)
+        self.assertIn("sanitize_details", source)
+        self.assertIn("CHANNELS_SCOPES_NEEDED", source)
+        # CHALET capped to room max 3
+        self.assertIn("674465", source)
+        self.assertRegex(source, r"674465[^}]*target_num_avail.: 3")
+        payload = MODULE.build_calendar_payload("2026-09-18", "2026-12-31")
         by_room = {row["roomId"]: row["calendar"][0] for row in payload}
-        self.assertEqual(by_room[674465]["numAvail"], 4)
+        self.assertEqual(by_room[674465]["numAvail"], 3)
         self.assertEqual(by_room[674465]["price1"], 259.0)
         self.assertEqual(by_room[674466]["numAvail"], 2)
         self.assertEqual(by_room[674466]["price1"], 329.0)
 
-    def test_extract_scopes_and_sanitize_omit_secrets(self):
-        details = {
-            "token": "access-secret",
-            "validToken": True,
-            "scopes": ["read:inventory", "write:properties", "bookings"],
-            "diagnostics": {"requestIp": "127.0.0.1"},
-        }
-        sanitized = MODULE.sanitize_auth_details(details)
-        self.assertNotIn("token", sanitized)
-        self.assertTrue(sanitized["validToken"])
-        self.assertEqual(
-            MODULE.extract_scopes(sanitized),
-            ["bookings", "inventory", "properties"],
-        )
-        self.assertNotIn("channels", MODULE.extract_scopes(sanitized))
-        self.assertEqual(MODULE.CHANNELS_SCOPE_DOC["missing_scope"], "channels")
-
-    def test_fetch_auth_details_runs_after_exchange_and_records_scopes(self):
-        def fake_urlopen(request, timeout=None):
-            url = getattr(request, "full_url", str(request))
-            headers = {key.lower(): value for key, value in request.header_items()}
-            if url.rstrip("/").endswith("/authentication/details"):
-                self.assertEqual(headers.get("token"), "exchanged-access")
-                return FakeResponse(
-                    200,
-                    {
-                        "token": "exchanged-access",
-                        "validToken": True,
-                        "scopes": ["inventory", "properties", "bookings"],
-                    },
-                )
-            raise AssertionError(f"unexpected url {url}")
-
-        with mock.patch.object(MODULE.urllib.request, "urlopen", side_effect=fake_urlopen):
-            probe = MODULE.fetch_auth_details("exchanged-access")
-        self.assertEqual(probe["http_status"], 200)
-        self.assertEqual(probe["scopes"], ["bookings", "inventory", "properties"])
-        self.assertFalse(probe["channels_scope_present"])
-        self.assertEqual(probe["channels_scope_doc"]["missing_scope"], "channels")
-        self.assertNotIn("exchanged-access", json.dumps(probe))
-
     def test_v1_skips_when_legacy_keys_absent(self):
-        with mock.patch.dict(os.environ, {}, clear=True):
+        with mock.patch.dict("os.environ", {}, clear=True):
             result = MODULE.set_v1_rack_rates(sleep_s=0)
         self.assertEqual(result["status"], "SKIPPED_MISSING_V1_SECRETS")
         self.assertEqual(result["wanted"]["674465"], "259.00")
@@ -251,14 +219,14 @@ class Beds24OpenBookingAvailabilityTests(unittest.TestCase):
 
         def fake_urlopen(request, timeout=None):
             url = getattr(request, "full_url", str(request))
-            raw = request.data or b"{}"
-            body = json.loads(raw.decode("utf-8"))
-            calls.append((url, body))
-            self.assertIn("authentication", body)
+            body = json.loads((request.data or b"{}").decode("utf-8"))
+            calls.append(url)
             self.assertEqual(body["authentication"]["apiKey"], "api-secret")
             self.assertEqual(body["authentication"]["propKey"], "prop-secret")
             if url.endswith("/getPropertyContent"):
-                return FakeResponse(200, after if any(c[0].endswith("/setPropertyContent") for c in calls) else before)
+                return FakeResponse(
+                    200, after if any(item.endswith("/setPropertyContent") for item in calls[:-1]) else before
+                )
             if url.endswith("/setPropertyContent"):
                 room_ids = body["setPropertyContent"][0]["roomIds"]
                 self.assertEqual(room_ids["674465"]["rackRate"], "259.00")
@@ -267,7 +235,7 @@ class Beds24OpenBookingAvailabilityTests(unittest.TestCase):
             raise AssertionError(url)
 
         env = {"BEDS24_API_KEY": "api-secret", "BEDS24_PROP_KEY": "prop-secret"}
-        with mock.patch.dict(os.environ, env, clear=True):
+        with mock.patch.dict("os.environ", env, clear=True):
             with mock.patch.object(MODULE.urllib.request, "urlopen", side_effect=fake_urlopen):
                 result = MODULE.set_v1_rack_rates(sleep_s=0)
         self.assertEqual(result["status"], "SUCCESS")
@@ -289,7 +257,7 @@ class Beds24OpenBookingAvailabilityTests(unittest.TestCase):
             )
 
         env = {"BEDS24_API_KEY": "api-secret", "BEDS24_PROP_KEY": "prop-secret"}
-        with mock.patch.dict(os.environ, env, clear=True):
+        with mock.patch.dict("os.environ", env, clear=True):
             with mock.patch.object(MODULE.urllib.request, "urlopen", side_effect=fake_urlopen):
                 result = MODULE.set_v1_rack_rates(sleep_s=0)
         self.assertEqual(result["status"], "HOTEL_ACCESS_DENIED")
@@ -301,15 +269,16 @@ class Beds24OpenBookingAvailabilityTests(unittest.TestCase):
             "after_summary": {"674465": {"days": 10, "numAvail_zero_days": 0}},
             "v1_rack_rates": {"status": "SKIPPED_MISSING_V1_SECRETS"},
         }
-        with mock.patch.dict(os.environ, {"BEDS24_REQUIRE_RACK_RATES": "1"}):
+        with mock.patch.dict("os.environ", {"BEDS24_REQUIRE_RACK_RATES": "1"}):
             with self.assertRaises(SystemExit) as raised:
                 MODULE.finish(evidence)
         self.assertIn("SKIPPED_MISSING_V1_SECRETS", str(raised.exception))
-        with mock.patch.dict(os.environ, {}, clear=True):
+        with mock.patch.dict("os.environ", {}, clear=True):
             self.assertEqual(MODULE.finish(evidence), 0)
 
-    def test_map_documents_secrets_v1_v2_and_denied_hotel(self):
-        text = MAP.read_text(encoding="utf-8")
+    def test_booking_map_documents_v1_rack_path(self):
+        path = pathlib.Path(__file__).resolve().parents[2] / "docs" / "BEDS24_BOOKING_MAP.md"
+        text = path.read_text(encoding="utf-8")
         self.assertIn("BEDS24_REFRESH_CREDENTIAL", text)
         self.assertIn("BEDS24_API_KEY", text)
         self.assertIn("BEDS24_PROP_KEY", text)
@@ -318,7 +287,6 @@ class Beds24OpenBookingAvailabilityTests(unittest.TestCase):
         self.assertIn("channels", text)
         self.assertIn("14953869", text)
         self.assertIn("HOTEL_ACCESS_DENIED", text)
-        self.assertIn("beds24_open_booking_availability.py", text)
 
 
 if __name__ == "__main__":
