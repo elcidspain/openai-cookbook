@@ -9,6 +9,6 @@
 | Changes | See this PR. |
 | Tests | `python3 -m unittest aumara-control-tower/scripts/tests/test_beds24_open_booking_availability.py -v` — 15 passed. Auth-check tests still 10 passed. |
 | Stop condition | PR with workflow+script+docs. Channel POST skipped until `read:channels`+`write:channels`. |
-| Recovery point | Branch `cursor/beds24-booking-channel-rates-d78b`. Next safe action: merge, Ilia generates one invite with channels, exchange into `BEDS24_REFRESH_CREDENTIAL`, then `[open-availability]`. |
+| Recovery point | Branch `cursor/beds24-booking-channel-rates-d78b`, PR https://github.com/elcidspain/openai-cookbook/pull/164. Next safe action: merge, Ilia generates one invite with channels, exchange into `BEDS24_REFRESH_CREDENTIAL`, then `[open-availability]`. |
 
 No secrets in this file.
