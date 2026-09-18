@@ -318,6 +318,18 @@ class Beds24OpenBookingAvailabilityTests(unittest.TestCase):
         self.assertTrue(result["write_attempted"])
         self.assertEqual(result["write_http"], 201)
 
+    def test_calendar_chunks_cover_2028_in_year_windows(self):
+        chunks = MODULE.calendar_chunks("2026-09-18", "2028-12-31")
+        self.assertEqual(chunks[0], ("2026-09-18", "2027-09-17"))
+        self.assertEqual(chunks[-1][1], "2028-12-31")
+        self.assertGreaterEqual(len(chunks), 3)
+        self.assertEqual(MODULE.FIXED_END, dt.date(2028, 12, 31))
+        source = (SCRIPTS_DIR / "beds24_open_booking_availability.py").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("read:channels", source)
+        self.assertIn("write:channels", source)
+
 
 if __name__ == "__main__":
     unittest.main()

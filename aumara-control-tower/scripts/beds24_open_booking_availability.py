@@ -33,13 +33,15 @@ ROOMS = {
 }
 FIXED_END = dt.date(2028, 12, 31)
 HORIZON_DAYS = 90
+CALENDAR_CHUNK_DAYS = 365
 SAMPLE_AVAIL_DAYS = 14
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 VAULT = ROOT / "evidence" / "beds24-refresh-vault.json"
 EVIDENCE_GLOB = "beds24-open-booking-availability*.json"
 INVITE_UI_DOC = "aumara-control-tower/systems/beds24-continuity.md"
 
-# One invite must include all of these (read+write). channels was missing.
+# One invite must include all of these. OpenAPI category is `channels`;
+# token methods are `read:channels` / `write:channels`. Historical invites omitted them.
 DOCUMENTED_INVITE_SCOPES = [
     "bookings",
     "bookings-personal",
@@ -47,6 +49,8 @@ DOCUMENTED_INVITE_SCOPES = [
     "properties",
     "inventory",
     "channels",
+    "read:channels",
+    "write:channels",
 ]
 CHANNELS_SCOPES_NEEDED = ["read:channels", "write:channels"]
 TARGET_RATE_PLANS = ("Fully flexible", "Weekly")
@@ -67,11 +71,28 @@ SENSITIVE_PROPERTY_KEYS = {
 
 
 def booking_window(now: dt.datetime | None = None) -> tuple[str, str]:
-    """Upcoming nights from today (UTC) through 2028-12-31 or +90 days."""
+    """Upcoming nights from today (UTC) through 2028-12-31, or +90 days if later."""
     today = (now or dt.datetime.now(dt.timezone.utc)).date()
     start = today
     end = max(FIXED_END, start + dt.timedelta(days=HORIZON_DAYS))
     return start.isoformat(), end.isoformat()
+
+
+def calendar_chunks(
+    start: str, end: str, chunk_days: int = CALENDAR_CHUNK_DAYS
+) -> list[tuple[str, str]]:
+    """Beds24 calendar GET/POST is reliable about a year at a time."""
+    cur = dt.date.fromisoformat(start)
+    last = dt.date.fromisoformat(end)
+    if last < cur:
+        return []
+    out: list[tuple[str, str]] = []
+    delta = max(1, int(chunk_days))
+    while cur <= last:
+        chunk_end = min(cur + dt.timedelta(days=delta - 1), last)
+        out.append((cur.isoformat(), chunk_end.isoformat()))
+        cur = chunk_end + dt.timedelta(days=1)
+    return out
 
 
 def sample_availability_window(start: str, days: int = SAMPLE_AVAIL_DAYS) -> tuple[str, str]:
@@ -600,9 +621,11 @@ def main() -> int:
     has_channels = any("channel" in s for s in scope_set)
     print(f"token_scopes_count={len(scope_set)} has_channels_scope={has_channels}", flush=True)
 
+    chunks = calendar_chunks(start, end)
+    near_start, near_end = chunks[0] if chunks else (start, end)
     params = [
-        ("startDate", start),
-        ("endDate", end),
+        ("startDate", near_start),
+        ("endDate", near_end),
         ("includePrices", "true"),
         ("includeNumAvail", "true"),
     ]
@@ -614,12 +637,40 @@ def main() -> int:
     if not isinstance(before_data, list):
         before_data = []
 
-    payload = build_calendar_payload(start, end)
-    write_status, write_body = http_json("POST", API + "/inventory/rooms/calendar", token, payload)
+    write_chunks = []
+    write_status, write_body = None, None
+    for chunk_start, chunk_end in chunks:
+        payload = build_calendar_payload(chunk_start, chunk_end)
+        write_status, write_body = http_json(
+            "POST", API + "/inventory/rooms/calendar", token, payload
+        )
+        write_chunks.append({"from": chunk_start, "to": chunk_end, "http": write_status})
     _, after = http_json("GET", cal_url, token)
     after_data = (after or {}).get("data") if isinstance(after, dict) else after
     if not isinstance(after_data, list):
         after_data = []
+
+    far_summary: dict[str, Any] = {}
+    if chunks:
+        far_start, far_end = chunks[-1]
+        far_params = [
+            ("startDate", far_start),
+            ("endDate", far_end),
+            ("includePrices", "true"),
+            ("includeNumAvail", "true"),
+        ]
+        for rid in ROOMS:
+            far_params.append(("roomId", str(rid)))
+        far_url = API + "/inventory/rooms/calendar?" + urllib.parse.urlencode(far_params)
+        far_http, far_body = http_json("GET", far_url, token, raise_http=False)
+        far_data = (far_body or {}).get("data") if isinstance(far_body, dict) else far_body
+        if not isinstance(far_data, list):
+            far_data = []
+        far_summary = {
+            "http": far_http,
+            "window": {"start": far_start, "end": far_end},
+            "summary": summarize(far_data),
+        }
 
     avail_params = [("startDate", sample_start), ("endDate", sample_end)]
     for rid in ROOMS:
@@ -673,11 +724,14 @@ def main() -> int:
         "hotel_linkage": property_linkage,
         "rooms": ROOMS,
         "window": {"start": start, "end": end},
+        "calendar_chunks": chunks,
         "auth_details": details_safe,
         "before_summary": summarize(before_data),
         "write_http": write_status,
+        "write_chunks": write_chunks,
         "write_body": write_body[:4] if isinstance(write_body, list) else write_body,
         "after_summary": after_summary,
+        "far_window": far_summary,
         "availability_sample": avail,
         "availability_sample_window": {"start": sample_start, "end": sample_end},
         "offers_probe": offers,
