@@ -102,6 +102,7 @@ class Beds24OpenBookingAvailabilityTests(unittest.TestCase):
             text,
         )
         self.assertIn("if: github.event_name == 'workflow_dispatch'", text)
+        self.assertIn("[open-availability]", text)
         self.assertNotIn("BEDS24_PASSWORD", text)
         self.assertNotIn("BEDS24_USERNAME", text)
         self.assertNotIn("secrets.BEDS24_REFRESH_TOKEN", text)
