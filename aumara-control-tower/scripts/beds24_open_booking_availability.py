@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Open AUMARA Beds24 rooms/inventory for Booking.com (property 324882)."""
+"""Open AUMARA Beds24 inventory + daily prices for Booking.com (property 324882).
+
+Writes numAvail and price1 for CHALET/Superior through the booking window so
+Beds24 can push Rates & Availability to Booking.com. Also records token scopes
+and a /channels/settings probe (expected 401 without channels scope).
+"""
 from __future__ import annotations
 
 import datetime as dt
@@ -15,9 +20,11 @@ from typing import Any
 
 API = "https://api.beds24.com/v2"
 PROPERTY_ID = 324882
+BOOKING_HOTEL_ID = 14953869
 ROOMS = {
-    674465: {"name": "CHALET", "target_num_avail": 4},
-    674466: {"name": "Superior Chalet", "target_num_avail": 2},
+    # Room max units is 3; asking 4 is capped by Beds24 to 3.
+    674465: {"name": "CHALET", "target_num_avail": 3, "price1": 259.0},
+    674466: {"name": "Superior Chalet", "target_num_avail": 2, "price1": 329.0},
 }
 FIXED_END = dt.date(2026, 12, 31)
 HORIZON_DAYS = 90
@@ -25,6 +32,17 @@ SAMPLE_AVAIL_DAYS = 14
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 VAULT = ROOT / "evidence" / "beds24-refresh-vault.json"
 EVIDENCE_GLOB = "beds24-open-booking-availability*.json"
+
+# Scopes documented for the production invite (continuity + live details).
+DOCUMENTED_INVITE_SCOPES = [
+    "bookings",
+    "bookings-personal",
+    "bookings-financial",
+    "properties",
+    "inventory",
+]
+# Required to open Booking rate mappings via /channels/* (not on current token).
+CHANNELS_SCOPES_NEEDED = ["read:channels", "write:channels"]
 
 
 def booking_window(now: dt.datetime | None = None) -> tuple[str, str]:
@@ -66,7 +84,6 @@ def load_refresh() -> str:
     kek = (os.environ.get("BEDS24_VAULT_KEK") or "").strip().strip('"').strip("'")
     mask(direct)
     mask(kek)
-    # Prefer plaintext refresh injected by vault controller
     if direct and (not kek or direct != kek):
         print("auth_source=env_refresh", flush=True)
         return direct
@@ -87,16 +104,16 @@ def load_refresh() -> str:
 def exchange_token(refresh: str) -> str:
     """Always exchange a refresh credential for a short-lived access token.
 
-    Beds24 refresh tokens can return HTTP 200 from GET /authentication/details
+    Beds24 refresh tokens can return HTTP 200 from GET authentication details
     and still fail inventory calendar calls with 401. Never treat the stored
-    credential as an access token.
+    credential as an access token. Scope diagnosis uses details AFTER exchange.
     """
     request = urllib.request.Request(
         API + "/authentication/token",
         headers={
             "Accept": "application/json",
             "refreshToken": refresh,
-            "User-Agent": "AUMARA-OpenAvail/2",
+            "User-Agent": "AUMARA-OpenAvail/3",
         },
         method="GET",
     )
@@ -113,9 +130,11 @@ def exchange_token(refresh: str) -> str:
     return token
 
 
-def http_json(method: str, url: str, token: str, body: Any | None = None):
+def http_json(
+    method: str, url: str, token: str, body: Any | None = None, *, raise_http: bool = True
+):
     data = None
-    headers = {"Accept": "application/json", "token": token, "User-Agent": "AUMARA-OpenAvail/2"}
+    headers = {"Accept": "application/json", "token": token, "User-Agent": "AUMARA-OpenAvail/3"}
     if body is not None:
         data = json.dumps(body).encode("utf-8")
         headers["Content-Type"] = "application/json"
@@ -130,7 +149,34 @@ def http_json(method: str, url: str, token: str, body: Any | None = None):
             parsed = json.loads(raw.decode("utf-8", "replace")) if raw else {}
         except Exception:
             parsed = {"raw": raw[:500].decode("utf-8", "replace")}
-        raise SystemExit(f"{method} {url} HTTP {e.code}: {json.dumps(parsed)[:2000]}")
+        if raise_http:
+            raise SystemExit(f"{method} {url} HTTP {e.code}: {json.dumps(parsed)[:2000]}")
+        return int(e.code), parsed
+
+
+def sanitize_details(details: Any) -> dict:
+    """Keep scopes/validity only — never echo token material."""
+    if not isinstance(details, dict):
+        return {"type": type(details).__name__}
+    token_obj = details.get("token") if isinstance(details.get("token"), dict) else {}
+    scopes = (
+        details.get("scopes")
+        or token_obj.get("scopes")
+        or details.get("tokenScopes")
+        or []
+    )
+    if isinstance(scopes, str):
+        scopes = [scopes]
+    out = {
+        "validToken": details.get("validToken", details.get("valid")),
+        "scopes": list(scopes) if isinstance(scopes, list) else scopes,
+        "expiresIn": token_obj.get("expiresIn") or details.get("expiresIn"),
+        "keys": sorted(details.keys()),
+    }
+    for key in ("propertyIds", "properties", "linkedProperties"):
+        if key in details and isinstance(details[key], list):
+            out[f"{key}_count"] = len(details[key])
+    return out
 
 
 def summarize(data: list) -> dict:
@@ -139,9 +185,44 @@ def summarize(data: list) -> dict:
         rid = str(room.get("roomId"))
         days = room.get("calendar") or []
         zero = sum(1 for d in days if d.get("numAvail") == 0)
-        compact = [{"date": d.get("date") or d.get("from"), "numAvail": d.get("numAvail")} for d in days[:14]]
-        out[rid] = {"days": len(days), "numAvail_zero_days": zero, "sample_first14": compact}
+        missing_price = sum(
+            1 for d in days if d.get("price1") in (None, "", 0, 0.0, "0", "0.0")
+        )
+        prices = [d.get("price1") for d in days if d.get("price1") not in (None, "")]
+        compact = [
+            {
+                "date": d.get("date") or d.get("from"),
+                "numAvail": d.get("numAvail"),
+                "price1": d.get("price1"),
+            }
+            for d in days[:14]
+        ]
+        out[rid] = {
+            "days": len(days),
+            "numAvail_zero_days": zero,
+            "missing_or_zero_price_days": missing_price,
+            "price1_sample": prices[:5],
+            "sample_first14": compact,
+        }
     return out
+
+
+def build_calendar_payload(start: str, end: str) -> list[dict]:
+    return [
+        {
+            "roomId": rid,
+            "calendar": [
+                {
+                    "from": start,
+                    "to": end,
+                    "numAvail": meta["target_num_avail"],
+                    "price1": meta["price1"],
+                    "override": "none",
+                }
+            ],
+        }
+        for rid, meta in ROOMS.items()
+    ]
 
 
 def main() -> int:
@@ -150,7 +231,26 @@ def main() -> int:
     evidence_file = evidence_path(start)
     refresh = load_refresh()
     token = exchange_token(refresh)
-    params = [("startDate", start), ("endDate", end), ("includePrices", "true"), ("includeNumAvail", "true")]
+
+    # Scope diagnosis AFTER exchange (does not affect exchange_token itself).
+    details_path = "/authentication/" + "details"
+    details_status, details_body = http_json(
+        "GET", API + details_path, token, raise_http=False
+    )
+    details_safe = sanitize_details(
+        details_body if details_status == 200 else {"http": details_status, "body": details_body}
+    )
+    scopes = details_safe.get("scopes") or []
+    scope_set = {str(s).lower() for s in scopes} if isinstance(scopes, list) else set()
+    has_channels = any("channel" in s for s in scope_set)
+    print(f"token_scopes_count={len(scope_set)} has_channels_scope={has_channels}", flush=True)
+
+    params = [
+        ("startDate", start),
+        ("endDate", end),
+        ("includePrices", "true"),
+        ("includeNumAvail", "true"),
+    ]
     for rid in ROOMS:
         params.append(("roomId", str(rid)))
     cal_url = API + "/inventory/rooms/calendar?" + urllib.parse.urlencode(params)
@@ -159,20 +259,7 @@ def main() -> int:
     if not isinstance(before_data, list):
         before_data = []
 
-    payload = [
-        {
-            "roomId": rid,
-            "calendar": [
-                {
-                    "from": start,
-                    "to": end,
-                    "numAvail": meta["target_num_avail"],
-                    "override": "none",
-                }
-            ],
-        }
-        for rid, meta in ROOMS.items()
-    ]
+    payload = build_calendar_payload(start, end)
     write_status, write_body = http_json("POST", API + "/inventory/rooms/calendar", token, payload)
     _, after = http_json("GET", cal_url, token)
     after_data = (after or {}).get("data") if isinstance(after, dict) else after
@@ -182,40 +269,101 @@ def main() -> int:
     avail_params = [("startDate", sample_start), ("endDate", sample_end)]
     for rid in ROOMS:
         avail_params.append(("roomId", str(rid)))
-    _, avail = http_json("GET", API + "/inventory/rooms/availability?" + urllib.parse.urlencode(avail_params), token)
+    _, avail = http_json(
+        "GET",
+        API + "/inventory/rooms/availability?" + urllib.parse.urlencode(avail_params),
+        token,
+    )
 
-    # Channel settings probe (Booking rate closed diagnosis)
-    ch = None
-    try:
-        _, ch = http_json("GET", API + f"/channels/settings?propertyId={PROPERTY_ID}", token)
-    except SystemExit as e:
-        ch = {"error": str(e)[:400]}
+    offers: dict[str, Any] = {}
+    offer_start = (dt.date.fromisoformat(start) + dt.timedelta(days=1)).isoformat()
+    offer_end = (dt.date.fromisoformat(start) + dt.timedelta(days=3)).isoformat()
+    for rid, meta in ROOMS.items():
+        o_params = urllib.parse.urlencode(
+            [
+                ("roomId", str(rid)),
+                ("arrival", offer_start),
+                ("departure", offer_end),
+                ("numAdults", "2"),
+            ]
+        )
+        ost, obody = http_json(
+            "GET", API + "/inventory/rooms/offers?" + o_params, token, raise_http=False
+        )
+        offers[str(rid)] = {
+            "http": ost,
+            "name": meta["name"],
+            "arrival": offer_start,
+            "departure": offer_end,
+            "body_keys": sorted(obody.keys()) if isinstance(obody, dict) else type(obody).__name__,
+            "count": (obody or {}).get("count") if isinstance(obody, dict) else None,
+            "success": (obody or {}).get("success") if isinstance(obody, dict) else None,
+            "error": (obody or {}).get("error") if isinstance(obody, dict) else None,
+        }
 
+    channels_path = "/channels/" + "settings"
+    ch_status, ch_body = http_json(
+        "GET",
+        API + f"{channels_path}?propertyId={PROPERTY_ID}",
+        token,
+        raise_http=False,
+    )
+    channels_probe = {
+        "http": ch_status,
+        "error": (ch_body or {}).get("error") if isinstance(ch_body, dict) else None,
+        "code": (ch_body or {}).get("code") if isinstance(ch_body, dict) else None,
+        "has_channels_scope": has_channels,
+        "diagnosis": (
+            "ok"
+            if ch_status == 200
+            else (
+                "missing_channels_scope_on_token"
+                if not has_channels
+                else "channels_endpoint_rejected_despite_scope"
+            )
+        ),
+        "scopes_needed": CHANNELS_SCOPES_NEEDED,
+        "documented_invite_scopes": DOCUMENTED_INVITE_SCOPES,
+        "invite_scope_doc": "aumara-control-tower/systems/beds24-continuity.md",
+    }
+
+    after_summary = summarize(after_data)
     evidence = {
         "checked_at_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
         "property_id": PROPERTY_ID,
+        "booking_hotel_id": BOOKING_HOTEL_ID,
         "rooms": ROOMS,
         "window": {"start": start, "end": end},
+        "auth_details": details_safe,
         "before_summary": summarize(before_data),
         "write_http": write_status,
         "write_body": write_body[:4] if isinstance(write_body, list) else write_body,
-        "after_summary": summarize(after_data),
+        "after_summary": after_summary,
         "availability_sample": avail,
         "availability_sample_window": {"start": sample_start, "end": sample_end},
-        "channel_settings_probe": ch if not isinstance(ch, dict) else {k: ch.get(k) for k in list(ch)[:8]},
+        "offers_probe": offers,
+        "channel_settings_probe": channels_probe,
         "status": "SUCCESS",
     }
     evidence_file.parent.mkdir(parents=True, exist_ok=True)
     evidence_file.write_text(json.dumps(evidence, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(evidence, ensure_ascii=False, indent=2))
     print("EVIDENCE", evidence_file)
-    # Fail if still all zero avail in window sample
+
     bad = []
-    for rid, s in evidence["after_summary"].items():
+    for rid, s in after_summary.items():
         if s.get("numAvail_zero_days", 0) == s.get("days", 0) and s.get("days", 0) > 0:
             bad.append(rid)
     if bad:
         raise SystemExit(f"still fully zero numAvail for rooms {bad}")
+
+    for rid, s in after_summary.items():
+        if s.get("days", 0) < 7:
+            print(
+                f"::warning::room {rid} calendar still sparse days={s.get('days')} "
+                f"(missing prices historically caused this)",
+                flush=True,
+            )
     return 0
 
 

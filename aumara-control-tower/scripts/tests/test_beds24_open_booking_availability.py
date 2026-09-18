@@ -141,7 +141,15 @@ class Beds24OpenBookingAvailabilityTests(unittest.TestCase):
             encoding="utf-8"
         )
         self.assertNotIn("token_mode=direct_access", source)
-        self.assertNotIn('API + "/authentication/details"', source)
+        # exchange_token must not call details; main may probe scopes after exchange.
+        import inspect
+        exchange_src = inspect.getsource(MODULE.exchange_token)
+        self.assertNotIn('API + "/authentication/details"', exchange_src)
+        self.assertIn("/authentication/token", exchange_src)
+        details_calls = [
+            call for call in calls if call[0].rstrip("/").endswith("/authentication/details")
+        ]
+        self.assertEqual(details_calls, [])
 
     def test_exchange_token_does_not_fall_back_to_refresh_on_exchange_failure(self):
         refresh = "refresh-secret"
@@ -164,6 +172,24 @@ class Beds24OpenBookingAvailabilityTests(unittest.TestCase):
             with self.assertRaises(SystemExit) as raised:
                 MODULE.exchange_token(refresh)
         self.assertIn("refresh HTTP 401", str(raised.exception))
+
+
+    def test_script_writes_prices_and_probes_scopes(self):
+        source = (SCRIPTS_DIR / "beds24_open_booking_availability.py").read_text(encoding="utf-8")
+        self.assertIn("price1", source)
+        self.assertIn("259", source)
+        self.assertIn("329", source)
+        self.assertIn("sanitize_details", source)
+        self.assertIn("CHANNELS_SCOPES_NEEDED", source)
+        # CHALET capped to room max 3
+        self.assertIn("674465", source)
+        self.assertRegex(source, r"674465[^}]*target_num_avail.: 3")
+        payload = MODULE.build_calendar_payload("2026-09-18", "2026-12-31")
+        by_room = {row["roomId"]: row["calendar"][0] for row in payload}
+        self.assertEqual(by_room[674465]["numAvail"], 3)
+        self.assertEqual(by_room[674465]["price1"], 259.0)
+        self.assertEqual(by_room[674466]["numAvail"], 2)
+        self.assertEqual(by_room[674466]["price1"], 329.0)
 
 
 if __name__ == "__main__":
