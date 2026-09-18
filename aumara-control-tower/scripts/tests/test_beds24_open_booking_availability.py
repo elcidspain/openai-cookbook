@@ -1,7 +1,11 @@
 import datetime as dt
 import importlib.util
+import io
+import json
 import pathlib
 import unittest
+from unittest import mock
+from urllib.error import HTTPError
 
 SCRIPTS_DIR = pathlib.Path(__file__).resolve().parents[1]
 WORKFLOW = (
@@ -17,6 +21,21 @@ SPEC = importlib.util.spec_from_file_location(
 MODULE = importlib.util.module_from_spec(SPEC)
 assert SPEC.loader is not None
 SPEC.loader.exec_module(MODULE)
+
+
+class FakeResponse:
+    def __init__(self, status: int, payload: dict):
+        self.status = status
+        self._payload = json.dumps(payload).encode("utf-8")
+
+    def read(self):
+        return self._payload
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        return False
 
 
 class Beds24OpenBookingAvailabilityTests(unittest.TestCase):
@@ -47,7 +66,7 @@ class Beds24OpenBookingAvailabilityTests(unittest.TestCase):
     def test_sample_availability_follows_start(self):
         sample_start, sample_end = MODULE.sample_availability_window("2026-09-18")
         self.assertEqual(sample_start, "2026-09-18")
-        self.assertEqual(sample_end, "2026-09-25")
+        self.assertEqual(sample_end, "2026-10-02")
 
     def test_evidence_path_uses_start_stamp(self):
         path = MODULE.evidence_path("2026-09-18")
@@ -86,6 +105,64 @@ class Beds24OpenBookingAvailabilityTests(unittest.TestCase):
         self.assertNotIn("BEDS24_PASSWORD", text)
         self.assertNotIn("BEDS24_USERNAME", text)
         self.assertNotIn("secrets.BEDS24_REFRESH_TOKEN", text)
+
+    def test_exchange_token_ignores_details_200_and_returns_exchanged_token(self):
+        refresh = "refresh-secret"
+        exchanged = "exchanged-access"
+        calls = []
+
+        def fake_urlopen(request, timeout=None):
+            url = getattr(request, "full_url", str(request))
+            headers = {
+                key.lower(): value for key, value in request.header_items()
+            }
+            calls.append((url, headers, timeout))
+            if url.rstrip("/").endswith("/authentication/details"):
+                return FakeResponse(200, {"validToken": True})
+            if url.rstrip("/").endswith("/authentication/token"):
+                self.assertEqual(headers.get("refreshtoken"), refresh)
+                return FakeResponse(200, {"token": exchanged})
+            raise AssertionError(f"unexpected url {url}")
+
+        with mock.patch.object(MODULE.urllib.request, "urlopen", side_effect=fake_urlopen):
+            with mock.patch("sys.stdout", new_callable=io.StringIO) as stdout:
+                token = MODULE.exchange_token(refresh)
+
+        self.assertEqual(token, exchanged)
+        self.assertNotEqual(token, refresh)
+        token_calls = [call for call in calls if call[0].rstrip("/").endswith("/authentication/token")]
+        self.assertEqual(len(token_calls), 1)
+        output = stdout.getvalue()
+        self.assertIn("token_mode=refresh_exchange", output)
+        self.assertNotIn("token_mode=direct_access", output)
+        self.assertNotIn(refresh, output)
+        source = (SCRIPTS_DIR / "beds24_open_booking_availability.py").read_text(
+            encoding="utf-8"
+        )
+        self.assertNotIn("token_mode=direct_access", source)
+        self.assertNotIn('API + "/authentication/details"', source)
+
+    def test_exchange_token_does_not_fall_back_to_refresh_on_exchange_failure(self):
+        refresh = "refresh-secret"
+
+        def fake_urlopen(request, timeout=None):
+            url = getattr(request, "full_url", str(request))
+            if url.rstrip("/").endswith("/authentication/details"):
+                return FakeResponse(200, {"validToken": True})
+            if url.rstrip("/").endswith("/authentication/token"):
+                raise HTTPError(
+                    url,
+                    401,
+                    "Unauthorized",
+                    hdrs={},
+                    fp=io.BytesIO(b'{"error":"Token not valid"}'),
+                )
+            raise AssertionError(f"unexpected url {url}")
+
+        with mock.patch.object(MODULE.urllib.request, "urlopen", side_effect=fake_urlopen):
+            with self.assertRaises(SystemExit) as raised:
+                MODULE.exchange_token(refresh)
+        self.assertIn("refresh HTTP 401", str(raised.exception))
 
 
 if __name__ == "__main__":
