@@ -21,7 +21,7 @@ ROOMS = {
 }
 FIXED_END = dt.date(2026, 12, 31)
 HORIZON_DAYS = 90
-SAMPLE_AVAIL_DAYS = 7
+SAMPLE_AVAIL_DAYS = 14
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 VAULT = ROOT / "evidence" / "beds24-refresh-vault.json"
 EVIDENCE_GLOB = "beds24-open-booking-availability*.json"
