@@ -8,12 +8,14 @@ on:
       - ".github/workflows/beds24-open-booking-availability.yml"
       - "aumara-control-tower/scripts/beds24_open_booking_availability.py"
       - "aumara-control-tower/scripts/tests/test_beds24_open_booking_availability.py"
+      - "aumara-control-tower/docs/BEDS24_BOOKING_MAP.md"
   push:
     branches: [main]
     paths:
       - ".github/workflows/beds24-open-booking-availability.yml"
       - "aumara-control-tower/scripts/beds24_open_booking_availability.py"
       - "aumara-control-tower/scripts/tests/test_beds24_open_booking_availability.py"
+      - "aumara-control-tower/docs/BEDS24_BOOKING_MAP.md"
 
 permissions:
   contents: read
@@ -44,6 +46,8 @@ jobs:
       BEDS24_REFRESH_CREDENTIAL: ${{ secrets.BEDS24_REFRESH_CREDENTIAL }}
       # Scripts also accept the legacy env name; map both from the same secret
       BEDS24_REFRESH_TOKEN: ${{ secrets.BEDS24_REFRESH_CREDENTIAL }}
+      BEDS24_API_KEY: ${{ secrets.BEDS24_API_KEY }}
+      BEDS24_PROP_KEY: ${{ secrets.BEDS24_PROP_KEY }}
     steps:
       - uses: actions/checkout@v4
       - name: Open Booking.com inventory calendar
@@ -53,6 +57,38 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: beds24-open-booking-availability-evidence
-          path: aumara-control-tower/evidence/beds24-open-booking-availability*.json
+          path: |
+            aumara-control-tower/evidence/beds24-open-booking-availability*.json
+            aumara-control-tower/evidence/beds24-rack-rate-live.json
+          if-no-files-found: warn
+          retention-days: 7
+
+  rack-rates:
+    # V1 rackRate secrets live in the Production environment. Keep this job
+    # after V2 inventory so Booking still gets numAvail even if Production
+    # approval is pending.
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[open-availability]'))
+    needs: [test, open-availability]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: Production
+    env:
+      BEDS24_REFRESH_CREDENTIAL: ${{ secrets.BEDS24_REFRESH_CREDENTIAL }}
+      BEDS24_REFRESH_TOKEN: ${{ secrets.BEDS24_REFRESH_CREDENTIAL }}
+      BEDS24_API_KEY: ${{ secrets.BEDS24_API_KEY }}
+      BEDS24_PROP_KEY: ${{ secrets.BEDS24_PROP_KEY }}
+      BEDS24_REQUIRE_RACK_RATES: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set V1 rack rates after V2 inventory
+        run: python aumara-control-tower/scripts/beds24_open_booking_availability.py
+      - name: Upload rack-rate evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: beds24-rack-rate-evidence
+          path: |
+            aumara-control-tower/evidence/beds24-open-booking-availability*.json
+            aumara-control-tower/evidence/beds24-rack-rate-live.json
           if-no-files-found: warn
           retention-days: 7
