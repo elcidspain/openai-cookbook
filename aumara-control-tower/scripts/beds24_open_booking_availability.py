@@ -19,11 +19,30 @@ ROOMS = {
     674465: {"name": "CHALET", "target_num_avail": 4},
     674466: {"name": "Superior Chalet", "target_num_avail": 2},
 }
-START = "2026-09-13"
-END = "2026-12-31"
+FIXED_END = dt.date(2026, 12, 31)
+HORIZON_DAYS = 90
+SAMPLE_AVAIL_DAYS = 7
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 VAULT = ROOT / "evidence" / "beds24-refresh-vault.json"
-EVIDENCE = ROOT / "evidence" / "beds24-open-booking-availability-20260913.json"
+EVIDENCE_GLOB = "beds24-open-booking-availability*.json"
+
+
+def booking_window(now: dt.datetime | None = None) -> tuple[str, str]:
+    """Upcoming nights from today (UTC) through year-end or +90 days."""
+    today = (now or dt.datetime.now(dt.timezone.utc)).date()
+    start = today
+    end = max(FIXED_END, start + dt.timedelta(days=HORIZON_DAYS))
+    return start.isoformat(), end.isoformat()
+
+
+def sample_availability_window(start: str, days: int = SAMPLE_AVAIL_DAYS) -> tuple[str, str]:
+    start_d = dt.date.fromisoformat(start)
+    return start_d.isoformat(), (start_d + dt.timedelta(days=days)).isoformat()
+
+
+def evidence_path(start: str) -> pathlib.Path:
+    stamp = start.replace("-", "")
+    return ROOT / "evidence" / f"beds24-open-booking-availability-{stamp}.json"
 
 
 def mask(v: str) -> None:
@@ -128,9 +147,12 @@ def summarize(data: list) -> dict:
 
 
 def main() -> int:
+    start, end = booking_window()
+    sample_start, sample_end = sample_availability_window(start)
+    evidence_file = evidence_path(start)
     refresh = load_refresh()
     token = exchange_token(refresh)
-    params = [("startDate", START), ("endDate", END), ("includePrices", "true"), ("includeNumAvail", "true")]
+    params = [("startDate", start), ("endDate", end), ("includePrices", "true"), ("includeNumAvail", "true")]
     for rid in ROOMS:
         params.append(("roomId", str(rid)))
     cal_url = API + "/inventory/rooms/calendar?" + urllib.parse.urlencode(params)
@@ -144,8 +166,8 @@ def main() -> int:
             "roomId": rid,
             "calendar": [
                 {
-                    "from": START,
-                    "to": END,
+                    "from": start,
+                    "to": end,
                     "numAvail": meta["target_num_avail"],
                     "override": "none",
                 }
@@ -159,7 +181,7 @@ def main() -> int:
     if not isinstance(after_data, list):
         after_data = []
 
-    avail_params = [("startDate", "2026-09-19"), ("endDate", "2026-09-26")]
+    avail_params = [("startDate", sample_start), ("endDate", sample_end)]
     for rid in ROOMS:
         avail_params.append(("roomId", str(rid)))
     _, avail = http_json("GET", API + "/inventory/rooms/availability?" + urllib.parse.urlencode(avail_params), token)
@@ -175,19 +197,20 @@ def main() -> int:
         "checked_at_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
         "property_id": PROPERTY_ID,
         "rooms": ROOMS,
-        "window": {"start": START, "end": END},
+        "window": {"start": start, "end": end},
         "before_summary": summarize(before_data),
         "write_http": write_status,
         "write_body": write_body[:4] if isinstance(write_body, list) else write_body,
         "after_summary": summarize(after_data),
-        "availability_19_26": avail,
+        "availability_sample": avail,
+        "availability_sample_window": {"start": sample_start, "end": sample_end},
         "channel_settings_probe": ch if not isinstance(ch, dict) else {k: ch.get(k) for k in list(ch)[:8]},
         "status": "SUCCESS",
     }
-    EVIDENCE.parent.mkdir(parents=True, exist_ok=True)
-    EVIDENCE.write_text(json.dumps(evidence, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    evidence_file.parent.mkdir(parents=True, exist_ok=True)
+    evidence_file.write_text(json.dumps(evidence, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(evidence, ensure_ascii=False, indent=2))
-    print("EVIDENCE", EVIDENCE)
+    print("EVIDENCE", evidence_file)
     # Fail if still all zero avail in window sample
     bad = []
     for rid, s in evidence["after_summary"].items():
