@@ -1,6 +1,8 @@
+import datetime as dt
 import importlib.util
 import io
 import json
+import os
 import pathlib
 import unittest
 from unittest import mock
@@ -161,12 +163,17 @@ class Beds24OpenBookingChannelRatesTests(unittest.TestCase):
             "BEDS24_REFRESH_CREDENTIAL: ${{ secrets.BEDS24_REFRESH_CREDENTIAL }}",
             text,
         )
-        self.assertIn("if: github.event_name == 'workflow_dispatch'", text)
-        self.assertNotIn("[open-availability]", text)
+        self.assertIn("BEDS24_API_KEY: ${{ secrets.BEDS24_API_KEY }}", text)
+        self.assertIn("BEDS24_PROP_KEY: ${{ secrets.BEDS24_PROP_KEY }}", text)
+        self.assertIn("environment: Production", text)
+        self.assertIn("[open-channel-rates]", text)
+        self.assertIn("beds24_v1_booking_rates.py", text)
         self.assertNotIn("BEDS24_PASSWORD", text)
         self.assertNotIn("BEDS24_USERNAME", text)
         self.assertIn("actions/upload-artifact@v4", text)
         self.assertIn("beds24-open-booking-channel-rates", text)
+        self.assertIn("API Key", text)
+        self.assertIn("MARKETPLACE", text)
 
     def test_invite_workflow_lists_channel_scopes_and_next_step(self):
         text = INVITE_WORKFLOW.read_text(encoding="utf-8")
@@ -243,11 +250,178 @@ class Beds24OpenBookingChannelRatesTests(unittest.TestCase):
         self.assertIn("/authentication/token", source)
 
     def test_script_does_not_reference_passwords(self):
-        source = (SCRIPTS_DIR / "beds24_open_booking_channel_rates.py").read_text(
-            encoding="utf-8"
-        )
-        self.assertNotIn("BEDS24_PASSWORD", source)
-        self.assertNotIn("BEDS24_USERNAME", source)
+        for name in (
+            "beds24_open_booking_channel_rates.py",
+            "beds24_v1_booking_rates.py",
+        ):
+            source = (SCRIPTS_DIR / name).read_text(encoding="utf-8")
+            self.assertNotIn("BEDS24_PASSWORD", source)
+            self.assertNotIn("BEDS24_USERNAME", source)
+
+    def test_v1_absent_keys_do_not_call_network(self):
+        v1 = MODULE.load_v1_module()
+        with mock.patch.dict(
+            os.environ, {"BEDS24_API_KEY": "", "BEDS24_PROP_KEY": ""}
+        ):
+            result = v1.run_v1(
+                classify=MODULE.classify_plan,
+                opener=lambda *a, **k: (_ for _ in ()).throw(AssertionError("network")),
+            )
+        self.assertEqual(result["status"], "V1_KEYS_ABSENT")
+        self.assertTrue(result["do_not_paste_api_keys"] if "do_not_paste_api_keys" in result else result["mobile_invite_nav"]["do_not_paste_api_keys"])
+        self.assertIn("Generate invite code", result["mobile_invite_nav"]["right_page"]["must_see"])
+        self.assertIn("API Key 1", result["mobile_invite_nav"]["wrong_page"]["signals"][0])
+
+    def test_v1_opens_existing_weekly_and_flexible_rates(self):
+        v1 = MODULE.load_v1_module()
+        calls = []
+
+        def opener(req, timeout=90):
+            url = req.full_url
+            payload = json.loads(req.data.decode("utf-8"))
+            calls.append(url.rsplit("/", 1)[-1])
+            auth = payload.get("authentication") or {}
+            self.assertNotIn("password", json.dumps(auth).lower())
+            if url.endswith("/getProperty"):
+                body = {
+                    "getProperty": [
+                        {
+                            "bookingComPropertyCode": "14953869",
+                            "roomTypes": [
+                                {
+                                    "roomId": "674465",
+                                    "name": "Chalet",
+                                    "bookingComEnableInventory": 1,
+                                    "bookingComEnableBooking": 1,
+                                    "bookingComRateCode": "66887702",
+                                    "dailyPriceCount": "1",
+                                },
+                                {
+                                    "roomId": "674466",
+                                    "name": "Superior Chalet",
+                                    "bookingComEnableInventory": 1,
+                                    "bookingComEnableBooking": 1,
+                                    "bookingComRateCode": "66887702",
+                                    "dailyPriceCount": "1",
+                                },
+                            ],
+                        }
+                    ]
+                }
+            elif url.endswith("/getRates"):
+                body = {
+                    "getRates": [
+                        {
+                            "rateId": "1",
+                            "roomId": "674465",
+                            "name": "Fully flexible",
+                            "roomPriceEnable": "0",
+                            "minNights": "1",
+                            "bookingcomRateCode": "66887702",
+                            "lastNight": "2025-01-01",
+                        },
+                        {
+                            "rateId": "2",
+                            "roomId": "674465",
+                            "name": "Weekly",
+                            "roomPriceEnable": "0",
+                            "minNights": "7",
+                            "bookingcomRateCode": "999",
+                            "lastNight": "2025-01-01",
+                        },
+                        {
+                            "rateId": "3",
+                            "roomId": "674466",
+                            "name": "Fully flexible",
+                            "roomPriceEnable": "1",
+                            "minNights": "1",
+                            "bookingcomRateCode": "66887702",
+                            "lastNight": "2028-12-31",
+                        },
+                        {
+                            "rateId": "4",
+                            "roomId": "674466",
+                            "name": "Weekly",
+                            "roomPriceEnable": "1",
+                            "minNights": "7",
+                            "bookingcomRateCode": "999",
+                            "lastNight": "2028-12-31",
+                        },
+                    ]
+                }
+            elif url.endswith("/getDailyPriceSetup"):
+                body = {
+                    "dailyPrices": [
+                        {
+                            "dailyPriceNumber": "1",
+                            "name": "Fully flexible",
+                            "bookingComEnable": "0",
+                            "minStay": "2",
+                        }
+                    ]
+                }
+            elif url.endswith("/getV2RefreshToken"):
+                body = {"error": "not available"}
+            elif url.endswith("/setRates"):
+                body = {"success": True, "setRates": payload.get("setRates")}
+            elif url.endswith("/setDailyPriceSetup"):
+                body = {"success": True}
+            elif url.endswith("/setRoomDates"):
+                body = {"success": True}
+            else:
+                raise AssertionError(url)
+            return FakeResponse(200, body)
+
+        with mock.patch.dict(
+            os.environ,
+            {"BEDS24_API_KEY": "v1-api-secret", "BEDS24_PROP_KEY": "v1-prop-secret"},
+        ):
+            result = v1.run_v1(
+                classify=MODULE.classify_plan,
+                opener=opener,
+                sleep_s=0,
+                now=dt.datetime(2026, 9, 18, tzinfo=dt.timezone.utc),
+            )
+        dumped = json.dumps(result)
+        self.assertNotIn("v1-api-secret", dumped)
+        self.assertNotIn("v1-prop-secret", dumped)
+        self.assertEqual(result["status"], "SUCCESS")
+        self.assertIn("setRates", calls)
+        self.assertIn("setRoomDates", calls)
+        self.assertCountEqual(result["opens"], ["fully_flexible", "weekly"])
+
+    def test_v1_success_makes_missing_v2_scope_nonfatal(self):
+        tmp = pathlib.Path(self.id().replace(".", "_") + "-evidence.json")
+        self.addCleanup(lambda: tmp.exists() and tmp.unlink())
+
+        def fake_http(method, url, token, body=None, raise_http=True):
+            if url.rstrip("/").endswith("/authentication/details"):
+                return 200, {"validToken": True, "scopes": ["inventory", "properties"]}
+            if "/properties" in url:
+                return 200, {"data": [{"id": 324882, "bookingComPropertyCode": "14953869"}]}
+            raise AssertionError(f"unexpected {method} {url}")
+
+        v1_ok = {
+            "status": "SUCCESS",
+            "opens": ["fully_flexible", "weekly"],
+            "methods_tried": [],
+            "mobile_invite_nav": {"do_not_paste_api_keys": True},
+        }
+        with mock.patch.object(MODULE, "load_v1_module") as load_v1:
+            load_v1.return_value.run_v1.return_value = dict(v1_ok)
+            load_v1.return_value.V1_CALL_GAP_SEC = 0
+            load_v1.return_value.MOBILE_INVITE_NAV = v1_ok["mobile_invite_nav"]
+            with mock.patch.object(MODULE, "load_refresh", return_value="refresh-secret"):
+                with mock.patch.object(MODULE, "exchange_token", return_value="access-token"):
+                    with mock.patch.object(MODULE, "http_json", side_effect=fake_http):
+                        with mock.patch.object(MODULE, "evidence_path", return_value=tmp):
+                            with mock.patch("sys.stdout", new_callable=io.StringIO):
+                                code = MODULE.main()
+        self.assertEqual(code, 0)
+        evidence = json.loads(tmp.read_text(encoding="utf-8"))
+        self.assertEqual(evidence["status"], "SUCCESS")
+        self.assertEqual(evidence["opened_via"], "v1_json")
+        self.assertNotIn("refresh-secret", json.dumps(evidence))
 
 
 if __name__ == "__main__":

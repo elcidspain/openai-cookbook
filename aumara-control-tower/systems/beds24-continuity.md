@@ -17,10 +17,14 @@ Last verified: 2026-09-18
 
 ## Authentication architecture
 
-Beds24 API V2 uses a permanent refresh token generated from a one-time invite code.
+Default AUMARA automation is **API-based**. V1 JSON uses Production `BEDS24_API_KEY` + `BEDS24_PROP_KEY` (never paste keys from the control panel). V2 uses a refresh token from a Marketplace invite.
 
-1. Open Beds24 API V2 settings: https://beds24.com/control3.php?pagetype=apiv2
-2. Generate an invite code with scopes (all required; historical invites omitted channels and cannot open Booking rate plans):
+Try V1 first (`beds24-open-booking-channel-rates`). Do not send Ilia to API Key 1/2.
+
+If a V2 invite is still required (Weekly Booking rate id unknown and no channels scope):
+
+1. Open **SETTINGS > MARKETPLACE > API**. Direct URLs: https://beds24.com/control3.php?pagetype=apiv2 then https://beds24.com/control2.php?pagetype=apiv2. If the page shows **API Key 1 / API Key 2**, it is the wrong page — go back, request Desktop site, use MARKETPLACE not ACCOUNT ACCESS.
+2. Tap **Generate invite code** with scopes:
    - bookings
    - bookings-personal
    - bookings-financial
@@ -28,11 +32,11 @@ Beds24 API V2 uses a permanent refresh token generated from a one-time invite co
    - inventory
    - read:channels
    - write:channels
-3. Exchange the invite code once through GET /api/v2/authentication/setup using header `code`. CoS obtains the one-time code; never ask for a Beds24 password or username.
+3. Exchange the invite code once through GET /api/v2/authentication/setup using header `code`. CoS obtains the one-time code; never ask for a Beds24 password, username, or V1 API key.
 4. Store the returned refresh token only as GitHub Actions secret `BEDS24_REFRESH_CREDENTIAL` (legacy alias: `BEDS24_REFRESH_TOKEN`).
 5. Never store the invite code, refresh token or short-lived token in repository files, email, Airtable or logs.
 6. Use the refresh token at least once every 30 days so it remains valid.
-7. After a channels-scoped refresh is stored, dispatch workflow `beds24-open-booking-channel-rates` (no browser) to open Booking Fully flexible + Weekly for rooms 674465 and 674466.
+7. Dispatch workflow `beds24-open-booking-channel-rates` (marker `[open-channel-rates]`). It tries V1 first and uses V2 `/channels/settings` only when channels-scoped.
 
 ## Current verified credential state
 

@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
 """Open Booking.com Fully flexible + Weekly rate plans for AUMARA (property 324882).
 
-Fail-closed unless the exchanged token has read:channels and write:channels.
-API-only: refresh credential exchange, then /channels/settings. No browser login.
+Order:
+1. V1 JSON (BEDS24_API_KEY + BEDS24_PROP_KEY) — enable Booking export, setRates,
+   setDailyPriceSetup, setRoomDates. Also probe getV2RefreshToken in-memory.
+2. V2 /channels/settings when a channels-scoped refresh exists (stored secret or
+   a V1-minted refresh that actually carries channels).
 
-One-shot path: store a channels-scoped refresh in BEDS24_REFRESH_CREDENTIAL,
-then workflow_dispatch beds24-open-booking-channel-rates.
+Ilia must not paste V1 API keys. No browser login. No passwords.
 """
 from __future__ import annotations
 
 import datetime as dt
 import hashlib
+import importlib.util
 import json
 import os
 import pathlib
@@ -55,6 +58,8 @@ EVIDENCE_GLOB = "beds24-open-booking-channel-rates*.json"
 EXIT_MISSING_CHANNELS_SCOPE = 2
 EXIT_CHANNELS_GET_FAILED = 3
 EXIT_NO_MATCHING_RATE_PLANS = 4
+EXIT_V1_PARTIAL = 5
+SCRIPTS_DIR = pathlib.Path(__file__).resolve().parent
 
 NAME_KEYS = (
     "name",
@@ -96,6 +101,17 @@ HOTEL_ID_KEYS = {
     "bookingcomhotelid",
     "bookingid",
 }
+
+
+def load_v1_module():
+    spec = importlib.util.spec_from_file_location(
+        "beds24_v1_booking_rates",
+        SCRIPTS_DIR / "beds24_v1_booking_rates.py",
+    )
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    return module
 
 
 def evidence_path(now: dt.datetime | None = None) -> pathlib.Path:
@@ -515,9 +531,7 @@ def settings_preview(body: Any) -> Any:
     return rows
 
 
-def main() -> int:
-    evidence_file = evidence_path()
-    refresh = load_refresh()
+def run_v2(refresh: str, evidence: dict[str, Any]) -> int:
     token = exchange_token(refresh)
 
     details_path = "/authentication/" + "details"
@@ -543,30 +557,16 @@ def main() -> int:
     found_ids = collect_hotel_ids(prop_body)
     targeting = targeting_decision(found_ids)
 
-    evidence: dict[str, Any] = {
-        "checked_at_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
-        "property_id": PROPERTY_ID,
-        "rooms": ROOMS,
-        "booking_rate_code": BOOKING_RATE_CODE,
-        "auth_details": details_safe,
-        "properties_http": prop_status,
-        "targeting": targeting,
-        "scopes_needed": CHANNELS_SCOPES_NEEDED,
-        "documented_invite_scopes": DOCUMENTED_INVITE_SCOPES,
-        "invite_scope_doc": "aumara-control-tower/systems/beds24-continuity.md",
-        "missing_channel_scopes": missing,
-        "channel_get_attempts": channel_attempts,
-        "secret_exposed": False,
-    }
+    evidence["auth_details"] = details_safe
+    evidence["properties_http"] = prop_status
+    evidence["targeting"] = targeting
+    evidence["missing_channel_scopes"] = missing
+    evidence["channel_get_attempts"] = channel_attempts
 
     if missing:
         print("MISSING_CHANNELS_SCOPE", ",".join(missing), flush=True)
-        return fail_with_evidence(
-            evidence_file,
-            evidence,
-            "MISSING_CHANNELS_SCOPE",
-            EXIT_MISSING_CHANNELS_SCOPE,
-        )
+        evidence["v2_status"] = "MISSING_CHANNELS_SCOPE"
+        return EXIT_MISSING_CHANNELS_SCOPE
 
     query_sets = [
         [("propertyId", str(PROPERTY_ID))],
@@ -603,12 +603,8 @@ def main() -> int:
         evidence["channels_get_error"] = (
             (settings_body or {}).get("error") if isinstance(settings_body, dict) else None
         )
-        return fail_with_evidence(
-            evidence_file,
-            evidence,
-            "CHANNELS_GET_FAILED",
-            EXIT_CHANNELS_GET_FAILED,
-        )
+        evidence["v2_status"] = "CHANNELS_GET_FAILED"
+        return EXIT_CHANNELS_GET_FAILED
 
     data = settings_data(settings_body)
     listed = list_booking_rate_plans(data)
@@ -628,18 +624,12 @@ def main() -> int:
         if row.get("kind") in {"fully_flexible", "weekly"}
     ]
     if not target_found:
-        return fail_with_evidence(
-            evidence_file,
-            evidence,
-            "NO_MATCHING_RATE_PLANS",
-            EXIT_NO_MATCHING_RATE_PLANS,
-        )
+        evidence["v2_status"] = "NO_MATCHING_RATE_PLANS"
+        return EXIT_NO_MATCHING_RATE_PLANS
 
     if dry_run_enabled():
-        evidence["status"] = "DRY_RUN"
+        evidence["v2_status"] = "DRY_RUN"
         evidence["write_skipped"] = True
-        write_evidence(evidence_file, evidence)
-        print(json.dumps(evidence, ensure_ascii=False, indent=2))
         return 0
 
     if mutation["opened"]:
@@ -651,12 +641,8 @@ def main() -> int:
             (post_body or {}).get("error") if isinstance(post_body, dict) else None
         )
         if not (200 <= int(post_status or 0) < 300):
-            return fail_with_evidence(
-                evidence_file,
-                evidence,
-                "CHANNELS_POST_FAILED",
-                1,
-            )
+            evidence["v2_status"] = "CHANNELS_POST_FAILED"
+            return 1
         rb_status, rb_body = http_json(
             "GET",
             API + channels_path + "?" + urllib.parse.urlencode([("propertyId", str(PROPERTY_ID))]),
@@ -672,10 +658,110 @@ def main() -> int:
         evidence["write_http"] = None
         evidence["write_skipped"] = "already_open"
 
-    evidence["status"] = "SUCCESS"
-    write_evidence(evidence_file, evidence)
-    print(json.dumps(evidence, ensure_ascii=False, indent=2))
+    evidence["v2_status"] = "SUCCESS"
     return 0
+
+
+def main() -> int:
+    evidence_file = evidence_path()
+    v1_mod = load_v1_module()
+    v1_sleep = 0.0 if (os.environ.get("BEDS24_V1_NO_SLEEP") or "").strip() else v1_mod.V1_CALL_GAP_SEC
+    v1_result = v1_mod.run_v1(
+        classify=classify_plan,
+        dry_run=dry_run_enabled(),
+        sleep_s=v1_sleep,
+    )
+    minted = v1_result.pop("minted_v2_refresh", None)
+    if minted:
+        mask(minted)
+
+    evidence: dict[str, Any] = {
+        "checked_at_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
+        "property_id": PROPERTY_ID,
+        "rooms": ROOMS,
+        "booking_rate_code": BOOKING_RATE_CODE,
+        "path_order": ["v1_json", "v2_channels"],
+        "v1": v1_result,
+        "scopes_needed": CHANNELS_SCOPES_NEEDED,
+        "documented_invite_scopes": DOCUMENTED_INVITE_SCOPES,
+        "invite_scope_doc": "aumara-control-tower/systems/beds24-continuity.md",
+        "mobile_invite_nav": v1_mod.MOBILE_INVITE_NAV,
+        "do_not_paste_api_keys": True,
+        "secret_exposed": False,
+        "channel_get_attempts": [],
+        "missing_channel_scopes": CHANNELS_SCOPES_NEEDED,
+    }
+    print(f"v1_status={v1_result.get('status')}", flush=True)
+
+    stored_refresh = None
+    try:
+        stored_refresh = load_refresh()
+    except SystemExit as exc:
+        evidence["v2_refresh_load"] = str(exc)
+
+    candidates: list[tuple[str, str]] = []
+    if stored_refresh:
+        candidates.append(("BEDS24_REFRESH_CREDENTIAL", stored_refresh))
+    if minted and minted != stored_refresh:
+        candidates.append(("v1_getV2RefreshToken_ephemeral", minted))
+
+    v2_code = EXIT_MISSING_CHANNELS_SCOPE
+    if not candidates:
+        evidence["v2_status"] = "REFRESH_ABSENT"
+    else:
+        last_missing = True
+        for source, refresh in candidates:
+            evidence["v2_auth_source"] = source
+            v2_code = run_v2(refresh, evidence)
+            if v2_code == 0 or evidence.get("v2_status") not in {
+                "MISSING_CHANNELS_SCOPE",
+                None,
+            }:
+                last_missing = evidence.get("v2_status") == "MISSING_CHANNELS_SCOPE"
+                if v2_code == 0:
+                    break
+            if evidence.get("v2_status") == "MISSING_CHANNELS_SCOPE":
+                last_missing = True
+                continue
+            break
+        if last_missing and v2_code == EXIT_MISSING_CHANNELS_SCOPE:
+            evidence["v2_status"] = "MISSING_CHANNELS_SCOPE"
+
+    v1_status = v1_result.get("status")
+    v2_status = evidence.get("v2_status")
+    if v2_status == "SUCCESS":
+        evidence["status"] = "SUCCESS"
+        evidence["opened_via"] = "v2_channels"
+        write_evidence(evidence_file, evidence)
+        print(json.dumps({k: evidence[k] for k in evidence if k != "settings_preview"}, ensure_ascii=False, indent=2))
+        return 0
+    if v1_status == "SUCCESS":
+        evidence["status"] = "SUCCESS"
+        evidence["opened_via"] = "v1_json"
+        evidence["v2_skipped_or_unscoped"] = v2_status
+        write_evidence(evidence_file, evidence)
+        print(json.dumps({k: evidence[k] for k in evidence if k != "settings_preview"}, ensure_ascii=False, indent=2))
+        return 0
+    if v1_status == "PARTIAL":
+        return fail_with_evidence(
+            evidence_file,
+            evidence,
+            "V1_PARTIAL_NEED_WEEKLY_RATE_ID_OR_CHANNELS",
+            EXIT_V1_PARTIAL,
+        )
+    if v2_code == EXIT_MISSING_CHANNELS_SCOPE:
+        return fail_with_evidence(
+            evidence_file,
+            evidence,
+            "MISSING_CHANNELS_SCOPE",
+            EXIT_MISSING_CHANNELS_SCOPE,
+        )
+    return fail_with_evidence(
+        evidence_file,
+        evidence,
+        str(v2_status or v1_status or "FAILED"),
+        v2_code if v2_code else 1,
+    )
 
 
 if __name__ == "__main__":

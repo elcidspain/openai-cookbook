@@ -1,10 +1,14 @@
 name: Open AUMARA Booking.com channel rates
 
-# Live writes are workflow_dispatch only. After CoS stores a channels-scoped
-# refresh token in BEDS24_REFRESH_CREDENTIAL, dispatch this workflow — no browser
-# and no passwords. Invite scopes must include:
-#   bookings, bookings-personal, bookings-financial, properties, inventory,
-#   read:channels, write:channels
+# Live writes: workflow_dispatch, or a main push whose commit message contains
+# [open-channel-rates]. Path order:
+#   1. V1 JSON with Production secrets BEDS24_API_KEY + BEDS24_PROP_KEY
+#      (api.beds24.com/json getRates/setRates, setDailyPriceSetup, setRoomDates,
+#      optional getV2RefreshToken). Ilia must NOT paste API keys.
+#   2. V2 /channels/settings only when a channels-scoped refresh exists
+#      (BEDS24_REFRESH_CREDENTIAL or an in-memory V1 mint).
+# Invite fallback (only if V1 cannot open Weekly): SETTINGS > MARKETPLACE > API
+# Generate invite — NEVER the V1 API Key 1/2 page.
 
 on:
   workflow_dispatch:
@@ -13,12 +17,14 @@ on:
     paths:
       - ".github/workflows/beds24-open-booking-channel-rates.yml"
       - "aumara-control-tower/scripts/beds24_open_booking_channel_rates.py"
+      - "aumara-control-tower/scripts/beds24_v1_booking_rates.py"
       - "aumara-control-tower/scripts/tests/test_beds24_open_booking_channel_rates.py"
   push:
     branches: [main]
     paths:
       - ".github/workflows/beds24-open-booking-channel-rates.yml"
       - "aumara-control-tower/scripts/beds24_open_booking_channel_rates.py"
+      - "aumara-control-tower/scripts/beds24_v1_booking_rates.py"
       - "aumara-control-tower/scripts/tests/test_beds24_open_booking_channel_rates.py"
 
 permissions:
@@ -38,17 +44,20 @@ jobs:
         run: python -m unittest aumara-control-tower/scripts/tests/test_beds24_open_booking_channel_rates.py -v
 
   open-channel-rates:
-    # Live channel writes stay opt-in. Do not run on push/PR even after merge.
-    if: github.event_name == 'workflow_dispatch'
+    # Live writes stay opt-in.
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[open-channel-rates]'))
     needs: test
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
+    environment: Production
     env:
+      BEDS24_API_KEY: ${{ secrets.BEDS24_API_KEY }}
+      BEDS24_PROP_KEY: ${{ secrets.BEDS24_PROP_KEY }}
       BEDS24_REFRESH_CREDENTIAL: ${{ secrets.BEDS24_REFRESH_CREDENTIAL }}
       BEDS24_REFRESH_TOKEN: ${{ secrets.BEDS24_REFRESH_CREDENTIAL }}
     steps:
       - uses: actions/checkout@v4
-      - name: Open Booking.com Fully flexible + Weekly rate plans
+      - name: Open Booking.com Fully flexible + Weekly (V1 first, then V2 if scoped)
         run: python aumara-control-tower/scripts/beds24_open_booking_channel_rates.py
       - name: Upload channel-rate evidence
         if: always()
