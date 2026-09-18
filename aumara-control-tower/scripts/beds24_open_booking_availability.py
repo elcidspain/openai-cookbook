@@ -142,7 +142,8 @@ def summarize(data: list) -> dict:
         rid = str(room.get("roomId"))
         days = room.get("calendar") or []
         zero = sum(1 for d in days if d.get("numAvail") == 0)
-        out[rid] = {"days": len(days), "numAvail_zero_days": zero, "sample": days[:2]}
+        compact = [{"date": d.get("date") or d.get("from"), "numAvail": d.get("numAvail")} for d in days[:14]]
+        out[rid] = {"days": len(days), "numAvail_zero_days": zero, "sample_first14": compact}
     return out
 
 
