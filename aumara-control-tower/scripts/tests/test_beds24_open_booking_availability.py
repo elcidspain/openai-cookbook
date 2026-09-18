@@ -43,15 +43,15 @@ class Beds24OpenBookingAvailabilityTests(unittest.TestCase):
         now = dt.datetime(2026, 9, 18, 17, 0, tzinfo=dt.timezone.utc)
         start, end = MODULE.booking_window(now)
         self.assertEqual(start, "2026-09-18")
-        self.assertEqual(end, "2026-12-31")
+        self.assertEqual(end, "2028-12-31")
         self.assertGreaterEqual(start, now.date().isoformat())
         self.assertNotEqual(start, "2026-09-13")
 
     def test_window_extends_when_fixed_end_is_behind_horizon(self):
-        now = dt.datetime(2026, 12, 20, tzinfo=dt.timezone.utc)
+        now = dt.datetime(2028, 12, 20, tzinfo=dt.timezone.utc)
         start, end = MODULE.booking_window(now)
-        self.assertEqual(start, "2026-12-20")
-        self.assertEqual(end, "2027-03-20")
+        self.assertEqual(start, "2028-12-20")
+        self.assertEqual(end, "2029-03-20")
 
     def test_live_window_covers_upcoming_nights(self):
         today = dt.datetime.now(dt.timezone.utc).date()
@@ -190,6 +190,18 @@ class Beds24OpenBookingAvailabilityTests(unittest.TestCase):
         self.assertEqual(by_room[674465]["price1"], 259.0)
         self.assertEqual(by_room[674466]["numAvail"], 2)
         self.assertEqual(by_room[674466]["price1"], 329.0)
+
+    def test_calendar_chunks_cover_2028_in_year_windows(self):
+        chunks = MODULE.calendar_chunks("2026-09-18", "2028-12-31")
+        self.assertEqual(chunks[0], ("2026-09-18", "2027-09-17"))
+        self.assertEqual(chunks[-1][1], "2028-12-31")
+        self.assertGreaterEqual(len(chunks), 3)
+        self.assertEqual(MODULE.FIXED_END, dt.date(2028, 12, 31))
+        source = (SCRIPTS_DIR / "beds24_open_booking_availability.py").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("read:channels", source)
+        self.assertIn("write:channels", source)
 
 
 if __name__ == "__main__":

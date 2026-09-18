@@ -1,0 +1,60 @@
+name: Open AUMARA Booking.com channel rates
+
+# Live writes are workflow_dispatch only. After CoS stores a channels-scoped
+# refresh token in BEDS24_REFRESH_CREDENTIAL, dispatch this workflow — no browser
+# and no passwords. Invite scopes must include:
+#   bookings, bookings-personal, bookings-financial, properties, inventory,
+#   read:channels, write:channels
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/beds24-open-booking-channel-rates.yml"
+      - "aumara-control-tower/scripts/beds24_open_booking_channel_rates.py"
+      - "aumara-control-tower/scripts/tests/test_beds24_open_booking_channel_rates.py"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/beds24-open-booking-channel-rates.yml"
+      - "aumara-control-tower/scripts/beds24_open_booking_channel_rates.py"
+      - "aumara-control-tower/scripts/tests/test_beds24_open_booking_channel_rates.py"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: beds24-open-booking-channel-rates-${{ github.event_name }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check channel-rate helpers and workflow wiring
+        run: python -m unittest aumara-control-tower/scripts/tests/test_beds24_open_booking_channel_rates.py -v
+
+  open-channel-rates:
+    # Live channel writes stay opt-in. Do not run on push/PR even after merge.
+    if: github.event_name == 'workflow_dispatch'
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      BEDS24_REFRESH_CREDENTIAL: ${{ secrets.BEDS24_REFRESH_CREDENTIAL }}
+      BEDS24_REFRESH_TOKEN: ${{ secrets.BEDS24_REFRESH_CREDENTIAL }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Open Booking.com Fully flexible + Weekly rate plans
+        run: python aumara-control-tower/scripts/beds24_open_booking_channel_rates.py
+      - name: Upload channel-rate evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: beds24-open-booking-channel-rates-evidence
+          path: aumara-control-tower/evidence/beds24-open-booking-channel-rates*.json
+          if-no-files-found: warn
+          retention-days: 7

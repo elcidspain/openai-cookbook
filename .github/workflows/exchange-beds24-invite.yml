@@ -1,10 +1,24 @@
 name: Exchange Beds24 invite code
 
+# CoS supplies the one-time invite code. Never ask anyone to paste a Beds24
+# password or username. Generate the invite at SETTINGS > MARKETPLACE > API
+# with this full scope checklist:
+#   bookings
+#   bookings-personal
+#   bookings-financial
+#   properties
+#   inventory
+#   read:channels
+#   write:channels
+# After exchange, store the refresh token as repo secret BEDS24_REFRESH_CREDENTIAL
+# then dispatch workflow "Open AUMARA Booking.com channel rates"
+# (beds24-open-booking-channel-rates). No browser.
+
 on:
   workflow_dispatch:
     inputs:
       invite_code:
-        description: "One-time Beds24 invite code from SETTINGS > MARKETPLACE > API (expires in 24h)"
+        description: "One-time Beds24 invite code (SETTINGS > MARKETPLACE > API, 24h). Scopes MUST include bookings, bookings-personal, bookings-financial, properties, inventory, read:channels, write:channels. Never a password."
         required: true
         type: string
 
@@ -23,6 +37,18 @@ jobs:
     env:
       INVITE_CODE: ${{ inputs.invite_code }}
     steps:
+      - name: Print invite scope checklist (no secrets)
+        run: |
+          echo "Beds24 invite MUST include these scopes:"
+          echo "  bookings"
+          echo "  bookings-personal"
+          echo "  bookings-financial"
+          echo "  properties"
+          echo "  inventory"
+          echo "  read:channels"
+          echo "  write:channels"
+          echo "Never paste a Beds24 password. After exchange, store BEDS24_REFRESH_CREDENTIAL then dispatch beds24-open-booking-channel-rates."
+
       - name: GET /authentication/setup and write refreshToken artifact
         shell: bash
         run: |
@@ -183,10 +209,15 @@ jobs:
 
           (OUT / "beds24-refresh-token.txt").write_text(refresh + "\n", encoding="utf-8")
           (OUT / "beds24-next-step.txt").write_text(
-              "1. Open the GitHub repo Settings → Environments → Production\n"
-              "2. Update secret BEDS24_REFRESH_CREDENTIAL with the exact contents of beds24-refresh-token.txt (one line, no quotes)\n"
+              "Invite scopes required: bookings, bookings-personal, bookings-financial, "
+              "properties, inventory, read:channels, write:channels\n"
+              "1. Open GitHub repo Settings → Secrets and variables → Actions "
+              "(also Environments → Production if that environment is used)\n"
+              "2. Update secret BEDS24_REFRESH_CREDENTIAL with the exact contents of "
+              "beds24-refresh-token.txt (one line, no quotes)\n"
               "3. Delete this artifact after copying the token (public repo)\n"
-              "4. Run workflow: Update Beds24 Photos AUMARA 324882\n",
+              "4. Dispatch workflow: Open AUMARA Booking.com channel rates "
+              "(beds24-open-booking-channel-rates) — no browser, no passwords\n",
               encoding="utf-8",
           )
           evidence["status"] = "SUCCESS"
@@ -199,7 +230,7 @@ jobs:
               "refresh_token_length": evidence["refresh_token_length"],
               "expiresIn": evidence["expiresIn"],
               "artifact": "beds24-refresh-token",
-              "next": "Paste beds24-refresh-token.txt into Production secret BEDS24_REFRESH_CREDENTIAL, then run Update Beds24 Photos AUMARA 324882",
+              "next": "Store beds24-refresh-token.txt as secret BEDS24_REFRESH_CREDENTIAL, then dispatch beds24-open-booking-channel-rates (scopes must include read:channels and write:channels)",
           }, ensure_ascii=False))
           PY
 
