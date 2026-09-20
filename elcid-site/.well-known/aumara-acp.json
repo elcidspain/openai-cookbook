@@ -1,0 +1,35 @@
+{
+  "protocol_name": "acp",
+  "protocol_version": "2026-01-30",
+  "protocol": {
+    "name": "acp",
+    "version": "2026-01-30",
+    "supported_versions": ["2025-09-29", "2026-01-30"]
+  },
+  "api_base_url": "https://www.aumara.me",
+  "supported_transports": ["rest"],
+  "transports": ["rest"],
+  "capabilities": {
+    "services": []
+  },
+  "checkout_mode": "human-mediated-only",
+  "continue_url": "https://beds24.com/booking2.php?propid=324882",
+  "endpoints": {
+    "human_checkout": "https://beds24.com/booking2.php?propid=324882",
+    "guest_openapi": "https://www.aumara.me/openapi.json",
+    "agent_card": "https://www.aumara.me/.well-known/agent-card.json",
+    "continue_url": "https://beds24.com/booking2.php?propid=324882"
+  },
+  "payment_policy": {
+    "agent_auto_charge": false,
+    "agent_hold": false,
+    "agent_reservation": false,
+    "reservation_completes_in": "Beds24/Booking human UI",
+    "checkout_urls": {
+      "all": "https://beds24.com/booking2.php?propid=324882",
+      "chalet": "https://beds24.com/booking2.php?propid=324882&roomid=674465",
+      "superiorChalet": "https://beds24.com/booking2.php?propid=324882&roomid=674466"
+    },
+    "note": "Payment and reservation complete only when a human finishes checkout in Beds24/Booking. Agents may discover availability and return booking URLs; they never create, hold, or charge."
+  }
+}
