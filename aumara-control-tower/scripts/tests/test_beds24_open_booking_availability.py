@@ -107,6 +107,26 @@ class Beds24OpenBookingAvailabilityTests(unittest.TestCase):
         self.assertNotIn("BEDS24_USERNAME", text)
         self.assertNotIn("secrets.BEDS24_REFRESH_TOKEN", text)
 
+    def test_continuity_and_map_document_channels_invite(self):
+        continuity = (
+            pathlib.Path(__file__).resolve().parents[2]
+            / "systems"
+            / "beds24-continuity.md"
+        ).read_text(encoding="utf-8")
+        mapping = (
+            pathlib.Path(__file__).resolve().parents[2]
+            / "docs"
+            / "BEDS24_BOOKING_RATES_AVAIL_MAP.md"
+        ).read_text(encoding="utf-8")
+        self.assertIn("channels", continuity.lower())
+        self.assertIn("read:channels", continuity)
+        self.assertIn("write:channels", continuity)
+        self.assertIn("control3.php?pagetype=apiv2", continuity)
+        self.assertIn("BEDS24_REFRESH_CREDENTIAL", continuity)
+        self.assertIn("2028-12-31", mapping)
+        self.assertIn("Fully flexible", mapping)
+        self.assertIn("Never use `BEDS24_PASSWORD` / `BEDS24_USERNAME`", continuity)
+
     def test_exchange_token_ignores_details_200_and_returns_exchanged_token(self):
         refresh = "refresh-secret"
         exchanged = "exchanged-access"
@@ -184,12 +204,119 @@ class Beds24OpenBookingAvailabilityTests(unittest.TestCase):
         # CHALET capped to room max 3
         self.assertIn("674465", source)
         self.assertRegex(source, r"674465[^}]*target_num_avail.: 3")
-        payload = MODULE.build_calendar_payload("2026-09-18", "2026-12-31")
+        payload = MODULE.build_calendar_payload("2026-09-18", "2028-12-31")
         by_room = {row["roomId"]: row["calendar"][0] for row in payload}
         self.assertEqual(by_room[674465]["numAvail"], 3)
         self.assertEqual(by_room[674465]["price1"], 259.0)
         self.assertEqual(by_room[674466]["numAvail"], 2)
         self.assertEqual(by_room[674466]["price1"], 329.0)
+        self.assertEqual(by_room[674465]["to"], "2028-12-31")
+        self.assertIn("channels", MODULE.DOCUMENTED_INVITE_SCOPES)
+        self.assertEqual(MODULE.FIXED_END.isoformat(), "2028-12-31")
+
+    def test_hotel_id_hits_classify_working_vs_legacy(self):
+        payload = {
+            "id": 324882,
+            "channelLinks": {"booking": 1},
+            "roomTypes": [{"id": 674465, "bookingHotel": "16137893"}],
+        }
+        hits = MODULE.hotel_id_hits(payload)
+        self.assertEqual(hits[MODULE.HOTEL_WORKING], ["$.roomTypes[0].bookingHotel"])
+        self.assertEqual(hits[MODULE.HOTEL_LEGACY], [])
+        self.assertEqual(MODULE.classify_hotel_linkage(hits), "working_16137893_only")
+        both = MODULE.hotel_id_hits({"a": "16137893", "b": "14953869"})
+        self.assertEqual(MODULE.classify_hotel_linkage(both), "both_present")
+        none = MODULE.hotel_id_hits({"id": 324882})
+        self.assertEqual(MODULE.classify_hotel_linkage(none), "absent_from_v2_properties")
+
+    def test_enable_target_rate_plans_only_opens_named_plans(self):
+        data = [
+            {
+                "channel": "booking",
+                "properties": [
+                    {
+                        "id": 324882,
+                        "roomTypes": [
+                            {
+                                "id": 674465,
+                                "ratePlans": [
+                                    {"name": "Fully flexible", "enabled": False, "closed": True},
+                                    {"name": "Weekly", "enabled": False},
+                                    {"name": "Non-refundable", "enabled": False},
+                                ],
+                            }
+                        ],
+                    }
+                ],
+            }
+        ]
+        updated, flipped = MODULE.enable_target_rate_plans(data)
+        plans = updated[0]["properties"][0]["roomTypes"][0]["ratePlans"]
+        self.assertTrue(plans[0]["enabled"])
+        self.assertFalse(plans[0]["closed"])
+        self.assertTrue(plans[1]["enabled"])
+        self.assertFalse(plans[2]["enabled"])
+        self.assertGreaterEqual(flipped, 2)
+
+    def test_channel_rate_open_skips_write_on_missing_scope_401(self):
+        calls = []
+
+        def fake_http(method, url, token, body=None, *, raise_http=True):
+            calls.append((method, url, body))
+            if method == "GET" and "/channels/settings" in url:
+                return 401, {"error": "Token not valid", "code": 401}
+            raise AssertionError(f"unexpected {method} {url}")
+
+        with mock.patch.object(MODULE, "http_json", side_effect=fake_http):
+            result = MODULE.open_booking_channel_rate_plans("access-token", has_channels=False)
+        self.assertEqual(result["status"], "SKIPPED_MISSING_CHANNELS_SCOPE")
+        self.assertFalse(result["write_attempted"])
+        self.assertEqual([c[0] for c in calls], ["GET"])
+        self.assertIn("channels", result["documented_invite_scopes"])
+
+    def test_channel_rate_open_posts_when_scoped_get_succeeds(self):
+        get_body = {
+            "data": [
+                {
+                    "channel": "booking",
+                    "properties": [
+                        {
+                            "id": 324882,
+                            "roomTypes": [
+                                {
+                                    "id": 674465,
+                                    "ratePlans": [
+                                        {"name": "Fully flexible", "enabled": False},
+                                        {"name": "Weekly", "enabled": False},
+                                    ],
+                                }
+                            ],
+                        }
+                    ],
+                }
+            ]
+        }
+        calls = []
+
+        def fake_http(method, url, token, body=None, *, raise_http=True):
+            calls.append((method, url, body))
+            if method == "GET" and "/channels/settings" in url:
+                return 200, get_body
+            if method == "POST" and url.endswith("/channels/settings"):
+                self.assertEqual(token, "access-token")
+                plans = body[0]["properties"][0]["roomTypes"][0]["ratePlans"]
+                self.assertTrue(plans[0]["enabled"])
+                self.assertTrue(plans[1]["enabled"])
+                return 201, [{"success": True}]
+            raise AssertionError(f"unexpected {method} {url}")
+
+        with mock.patch.object(MODULE, "http_json", side_effect=fake_http):
+            result = MODULE.open_booking_channel_rate_plans("access-token", has_channels=True)
+        methods = [c[0] for c in calls]
+        self.assertEqual(methods, ["GET", "POST", "GET"])
+        self.assertEqual(result["status"], "OPENED")
+        self.assertTrue(result["write_attempted"])
+        self.assertEqual(result["write_http"], 201)
 
     def test_calendar_chunks_cover_2028_in_year_windows(self):
         chunks = MODULE.calendar_chunks("2026-09-18", "2028-12-31")
