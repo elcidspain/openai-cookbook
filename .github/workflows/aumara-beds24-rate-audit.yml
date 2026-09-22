@@ -66,6 +66,15 @@ jobs:
               "includeAccountAccess": False,
           })
 
+          def shape(v,depth=0):
+              if depth>3: return type(v).__name__
+              if isinstance(v,dict):
+                  return {"type":"dict","keys":list(v.keys()),"children":{k:shape(val,depth+1) for k,val in v.items()}}
+              if isinstance(v,list):
+                  return {"type":"list","len":len(v),"first":shape(v[0],depth+1) if v else None}
+              return type(v).__name__
+
+          property_shape=shape(property_data)
           prop_obj={}
           if isinstance(property_data,list):
               prop_obj=next((x for x in property_data if isinstance(x,dict)),{})
@@ -122,6 +131,7 @@ jobs:
               "status":"SUCCESS",
               "checkedAtUtc":dt.datetime.now(dt.timezone.utc).isoformat(),
               "property":safe_property,
+              "propertyResponseShape":property_shape,
               "rooms":room_summary,
               "dailyPriceSetup":setups,
               "rates":rates,
