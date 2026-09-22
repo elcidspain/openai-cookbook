@@ -1,0 +1,507 @@
+{
+  "status": "SUCCESS",
+  "checkedAtUtc": "2026-09-22T06:31:51.915909+00:00",
+  "targets": {
+    "6967585": {
+      "roomId": "674465",
+      "name": "Weekly",
+      "oldPrice": "259.00"
+    },
+    "6967586": {
+      "roomId": "674465",
+      "name": "Fully flexible",
+      "oldPrice": "259.00"
+    },
+    "6967587": {
+      "roomId": "674466",
+      "name": "Weekly",
+      "oldPrice": "329.00"
+    },
+    "6967588": {
+      "roomId": "674466",
+      "name": "Fully flexible",
+      "oldPrice": "329.00"
+    }
+  },
+  "before": {
+    "6967585": {
+      "rateId": "6967585",
+      "roomId": "674465",
+      "name": "Weekly",
+      "minNights": "7",
+      "maxNights": "30",
+      "roomPrice": "259.00",
+      "roomPriceEnable": "1",
+      "channelManagement": "2",
+      "bookingcomRateCode": "",
+      "channel000": "1",
+      "channel999": "1"
+    },
+    "6967586": {
+      "rateId": "6967586",
+      "roomId": "674465",
+      "name": "Fully flexible",
+      "minNights": "1",
+      "maxNights": "30",
+      "roomPrice": "259.00",
+      "roomPriceEnable": "1",
+      "channelManagement": "2",
+      "bookingcomRateCode": "66887702",
+      "channel000": "1",
+      "channel999": "1"
+    },
+    "6967587": {
+      "rateId": "6967587",
+      "roomId": "674466",
+      "name": "Weekly",
+      "minNights": "7",
+      "maxNights": "30",
+      "roomPrice": "329.00",
+      "roomPriceEnable": "1",
+      "channelManagement": "2",
+      "bookingcomRateCode": "",
+      "channel000": "1",
+      "channel999": "1"
+    },
+    "6967588": {
+      "rateId": "6967588",
+      "roomId": "674466",
+      "name": "Fully flexible",
+      "minNights": "1",
+      "maxNights": "30",
+      "roomPrice": "329.00",
+      "roomPriceEnable": "1",
+      "channelManagement": "2",
+      "bookingcomRateCode": "66887702",
+      "channel000": "1",
+      "channel999": "1"
+    }
+  },
+  "writes": {
+    "6967585": {
+      "http": 200,
+      "response": [
+        {
+          "success": "Rate processed with 1 modifications",
+          "rateId": 6967585
+        }
+      ]
+    },
+    "6967586": {
+      "http": 200,
+      "response": [
+        {
+          "success": "Rate processed with 1 modifications",
+          "rateId": 6967586
+        }
+      ]
+    },
+    "6967587": {
+      "http": 200,
+      "response": [
+        {
+          "success": "Rate processed with 1 modifications",
+          "rateId": 6967587
+        }
+      ]
+    },
+    "6967588": {
+      "http": 200,
+      "response": [
+        {
+          "success": "Rate processed with 1 modifications",
+          "rateId": 6967588
+        }
+      ]
+    }
+  },
+  "after": {
+    "6967585": {
+      "rateId": "6967585",
+      "roomId": "674465",
+      "name": "Weekly",
+      "minNights": "7",
+      "maxNights": "30",
+      "roomPrice": "259.00",
+      "roomPriceEnable": "0",
+      "channelManagement": "2",
+      "bookingcomRateCode": "",
+      "channel000": "1",
+      "channel999": "1"
+    },
+    "6967586": {
+      "rateId": "6967586",
+      "roomId": "674465",
+      "name": "Fully flexible",
+      "minNights": "1",
+      "maxNights": "30",
+      "roomPrice": "259.00",
+      "roomPriceEnable": "0",
+      "channelManagement": "2",
+      "bookingcomRateCode": "66887702",
+      "channel000": "1",
+      "channel999": "1"
+    },
+    "6967587": {
+      "rateId": "6967587",
+      "roomId": "674466",
+      "name": "Weekly",
+      "minNights": "7",
+      "maxNights": "30",
+      "roomPrice": "329.00",
+      "roomPriceEnable": "0",
+      "channelManagement": "2",
+      "bookingcomRateCode": "",
+      "channel000": "1",
+      "channel999": "1"
+    },
+    "6967588": {
+      "rateId": "6967588",
+      "roomId": "674466",
+      "name": "Fully flexible",
+      "minNights": "1",
+      "maxNights": "30",
+      "roomPrice": "329.00",
+      "roomPriceEnable": "0",
+      "channelManagement": "2",
+      "bookingcomRateCode": "66887702",
+      "channel000": "1",
+      "channel999": "1"
+    }
+  },
+  "dailyPriceSetup": {
+    "Chalet": [
+      {
+        "roomId": "674465",
+        "dailyPriceCount": "1",
+        "dailyPrices": [
+          {
+            "dailyPriceNumber": "1",
+            "name": "main",
+            "color": "6dbf00",
+            "maxPeople": "0",
+            "minStay": "2",
+            "maxStay": "365",
+            "offerId": "1",
+            "extraPerson": "0.00",
+            "extraChild": "0.00",
+            "minAdvance": "1",
+            "maxAdvance": "999",
+            "linkRoomId": "0",
+            "linkDailyPriceNum": "0",
+            "linkOffset": "0.00",
+            "linkPercent": "0.0",
+            "directEnable": "1",
+            "agentEnable": "1",
+            "agentCodes": "",
+            "agodaapiEnable": "1",
+            "airbnbxmlEnable": "1",
+            "asiatravelcomEnable": "1",
+            "atraveodeEnable": "1",
+            "bedandbreakfasteuEnable": "1",
+            "bedandbreakfastnlEnable": "1",
+            "bookeasycomauEnable": "1",
+            "bookingapiEnable": "1",
+            "bookvisitEnable": "1",
+            "bookitEnable": "1",
+            "budgetplacescomEnable": "1",
+            "ctripEnable": "1",
+            "despegarcomEnable": "1",
+            "expediacomEnable": "1",
+            "feratelEnable": "1",
+            "flipkeycomEnable": "1",
+            "goibiboEnable": "1",
+            "guestlinkcoukEnable": "1",
+            "homeawaycomEnable": "1",
+            "homeToGoEnable": "1",
+            "hostelinternationalEnable": "1",
+            "hostelsclubcomEnable": "1",
+            "hostelworldcomEnable": "1",
+            "hotelbedscomEnable": "1",
+            "hrsdeEnable": "1",
+            "jomresEnable": "1",
+            "lastminutecomEnable": "1",
+            "lateroomscomEnable": "1",
+            "nineflatscomEnable": "1",
+            "odigeoEnable": "1",
+            "ostrovokruEnable": "1",
+            "otaEnable": "1",
+            "tablethotelscomEnable": "1",
+            "tomastravelEnable": "1",
+            "traumEnable": "1",
+            "travelokacomEnable": "1",
+            "traviaEnable": "1",
+            "triprentalsEnable": "1",
+            "travelocitycomEnable": "1",
+            "vacation-staycomEnable": "1",
+            "webroomsconzEnable": "1",
+            "wimducomEnable": "1",
+            "agodacomRateCode": "",
+            "bookingcomRateCode": "66887702",
+            "bookvisitRateCode": "",
+            "budgetplacescomRateCode": "",
+            "ctripRateCode": "",
+            "despegarcomRateCode": "",
+            "expediacomRateCode": "",
+            "feratelRateCode": "",
+            "goibiboRateCode": "",
+            "hostelworldcomRateCode": "",
+            "hotelbedscomRateCode": "",
+            "hrsdeRateCode": "0",
+            "jomresRateCode": "",
+            "lastminutecomRateCode": "",
+            "lateroomscomRateCode": "",
+            "odigeoRateCode": "",
+            "ostrovokruRateCode": "",
+            "otaRateCode": "",
+            "tablethotelscomRateCode": "",
+            "tomastravelRateCode": "",
+            "travelocitycomRateCode": "",
+            "travelokacomRateCode": "",
+            "traviaRateCode": ""
+          }
+        ]
+      }
+    ],
+    "Superior Chalet": [
+      {
+        "roomId": "674466",
+        "dailyPriceCount": "1",
+        "dailyPrices": [
+          {
+            "dailyPriceNumber": "1",
+            "name": "main1",
+            "color": "00bcbc",
+            "maxPeople": "0",
+            "minStay": "2",
+            "maxStay": "365",
+            "offerId": "1",
+            "extraPerson": "0.00",
+            "extraChild": "0.00",
+            "minAdvance": "1",
+            "maxAdvance": "999",
+            "linkRoomId": "0",
+            "linkDailyPriceNum": "0",
+            "linkOffset": "110.00",
+            "linkPercent": "0.0",
+            "directEnable": "1",
+            "agentEnable": "1",
+            "agentCodes": "",
+            "agodaapiEnable": "1",
+            "airbnbxmlEnable": "1",
+            "asiatravelcomEnable": "1",
+            "atraveodeEnable": "1",
+            "bedandbreakfasteuEnable": "1",
+            "bedandbreakfastnlEnable": "1",
+            "bookeasycomauEnable": "1",
+            "bookingapiEnable": "1",
+            "bookvisitEnable": "1",
+            "bookitEnable": "1",
+            "budgetplacescomEnable": "1",
+            "ctripEnable": "1",
+            "despegarcomEnable": "1",
+            "expediacomEnable": "1",
+            "feratelEnable": "1",
+            "flipkeycomEnable": "1",
+            "goibiboEnable": "1",
+            "guestlinkcoukEnable": "1",
+            "homeawaycomEnable": "1",
+            "homeToGoEnable": "1",
+            "hostelinternationalEnable": "1",
+            "hostelsclubcomEnable": "1",
+            "hostelworldcomEnable": "1",
+            "hotelbedscomEnable": "1",
+            "hrsdeEnable": "1",
+            "jomresEnable": "1",
+            "lastminutecomEnable": "1",
+            "lateroomscomEnable": "1",
+            "nineflatscomEnable": "1",
+            "odigeoEnable": "1",
+            "ostrovokruEnable": "1",
+            "otaEnable": "1",
+            "tablethotelscomEnable": "1",
+            "tomastravelEnable": "1",
+            "traumEnable": "1",
+            "travelokacomEnable": "1",
+            "traviaEnable": "1",
+            "triprentalsEnable": "1",
+            "travelocitycomEnable": "1",
+            "vacation-staycomEnable": "1",
+            "webroomsconzEnable": "1",
+            "wimducomEnable": "1",
+            "agodacomRateCode": "",
+            "bookingcomRateCode": "66887702",
+            "bookvisitRateCode": "",
+            "budgetplacescomRateCode": "",
+            "ctripRateCode": "",
+            "despegarcomRateCode": "",
+            "expediacomRateCode": "",
+            "feratelRateCode": "",
+            "goibiboRateCode": "",
+            "hostelworldcomRateCode": "",
+            "hotelbedscomRateCode": "",
+            "hrsdeRateCode": "0",
+            "jomresRateCode": "",
+            "lastminutecomRateCode": "",
+            "lateroomscomRateCode": "",
+            "odigeoRateCode": "",
+            "ostrovokruRateCode": "",
+            "otaRateCode": "",
+            "tablethotelscomRateCode": "",
+            "tomastravelRateCode": "",
+            "travelocitycomRateCode": "",
+            "travelokacomRateCode": "",
+            "traviaRateCode": ""
+          }
+        ]
+      }
+    ]
+  },
+  "roomDates": {
+    "Chalet": {
+      "20261015": {
+        "i": 4,
+        "p1": "210.00",
+        "m": "2"
+      },
+      "20261016": {
+        "i": 4,
+        "p1": "231.00",
+        "m": "2"
+      },
+      "20261017": {
+        "i": 4,
+        "p1": "231.00",
+        "m": "2"
+      },
+      "20261018": {
+        "i": 4,
+        "p1": "210.00",
+        "m": "2"
+      },
+      "20261019": {
+        "i": 4,
+        "p1": "210.00",
+        "m": "2"
+      },
+      "20261020": {
+        "i": 4,
+        "p1": "210.00",
+        "m": "2"
+      }
+    },
+    "Superior Chalet": {
+      "20261015": {
+        "i": 2,
+        "p1": "250.00",
+        "m": "2"
+      },
+      "20261016": {
+        "i": 2,
+        "p1": "275.00",
+        "m": "2"
+      },
+      "20261017": {
+        "i": 2,
+        "p1": "275.00",
+        "m": "2"
+      },
+      "20261018": {
+        "i": 2,
+        "p1": "250.00",
+        "m": "2"
+      },
+      "20261019": {
+        "i": 2,
+        "p1": "250.00",
+        "m": "2"
+      },
+      "20261020": {
+        "i": 2,
+        "p1": "250.00",
+        "m": "2"
+      }
+    }
+  },
+  "liveQuotes": {
+    "20261015-20261017": {
+      "http": 200,
+      "body": {
+        "checkIn": "20261015",
+        "lastNight": "20261016",
+        "checkOut": "20261017",
+        "propId": 324882,
+        "numAdult": 2,
+        "674465": {
+          "roomId": "674465",
+          "propId": "324882",
+          "roomsavail": 4,
+          "price": 441,
+          "priceFormated": "€441",
+          "currency": "EUR"
+        },
+        "674466": {
+          "roomId": "674466",
+          "propId": "324882",
+          "roomsavail": 2,
+          "price": 525,
+          "priceFormated": "€525",
+          "currency": "EUR"
+        }
+      }
+    },
+    "20261016-20261018": {
+      "http": 200,
+      "body": {
+        "checkIn": "20261016",
+        "lastNight": "20261017",
+        "checkOut": "20261018",
+        "propId": 324882,
+        "numAdult": 2,
+        "674465": {
+          "roomId": "674465",
+          "propId": "324882",
+          "roomsavail": 4,
+          "price": 462,
+          "priceFormated": "€462",
+          "currency": "EUR"
+        },
+        "674466": {
+          "roomId": "674466",
+          "propId": "324882",
+          "roomsavail": 2,
+          "price": 550,
+          "priceFormated": "€550",
+          "currency": "EUR"
+        }
+      }
+    },
+    "20261102-20261104": {
+      "http": 200,
+      "body": {
+        "checkIn": "20261102",
+        "lastNight": "20261103",
+        "checkOut": "20261104",
+        "propId": 324882,
+        "numAdult": 2,
+        "674465": {
+          "roomId": "674465",
+          "propId": "324882",
+          "roomsavail": 4,
+          "price": 340,
+          "priceFormated": "€340",
+          "currency": "EUR"
+        },
+        "674466": {
+          "roomId": "674466",
+          "propId": "324882",
+          "roomsavail": 2,
+          "price": 500,
+          "priceFormated": "€500",
+          "currency": "EUR"
+        }
+      }
+    }
+  },
+  "mismatches": []
+}
