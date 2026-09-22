@@ -1,6 +1,6 @@
 {
   "status": "SUCCESS",
-  "checkedAtUtc": "2026-09-22T06:27:53.723929+00:00",
+  "checkedAtUtc": "2026-09-22T07:16:20.852743+00:00",
   "property": {
     "name": null,
     "propId": null,
@@ -8,9 +8,6 @@
     "city": null,
     "country": null,
     "postcode": null,
-    "phone": null,
-    "mobile": null,
-    "email": null,
     "web": null,
     "airbnbPropertyCode": null,
     "airbnbCurrency": null,
@@ -192,7 +189,7 @@
       "pricesPer": "1",
       "color": "",
       "roomPrice": "259.00",
-      "roomPriceEnable": "1",
+      "roomPriceEnable": "0",
       "roomPriceGuests": "0",
       "1pPrice": "0.00",
       "1pPriceEnable": "0",
@@ -344,7 +341,7 @@
       "pricesPer": "1",
       "color": "",
       "roomPrice": "259.00",
-      "roomPriceEnable": "1",
+      "roomPriceEnable": "0",
       "roomPriceGuests": "0",
       "1pPrice": "0.00",
       "1pPriceEnable": "0",
@@ -648,7 +645,7 @@
       "pricesPer": "1",
       "color": "",
       "roomPrice": "329.00",
-      "roomPriceEnable": "1",
+      "roomPriceEnable": "0",
       "roomPriceGuests": "0",
       "1pPrice": "0.00",
       "1pPriceEnable": "0",
@@ -800,7 +797,7 @@
       "pricesPer": "1",
       "color": "",
       "roomPrice": "329.00",
-      "roomPriceEnable": "1",
+      "roomPriceEnable": "0",
       "roomPriceGuests": "0",
       "1pPrice": "0.00",
       "1pPriceEnable": "0",
@@ -935,7 +932,11 @@
     }
   ],
   "rateLinks": {
-    "error": "rateId not specified",
-    "errorCode": 4005
+    "6952922": [],
+    "6967585": [],
+    "6967586": [],
+    "6952923": [],
+    "6967587": [],
+    "6967588": []
   }
 }
