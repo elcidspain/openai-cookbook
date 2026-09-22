@@ -30,6 +30,8 @@ jobs:
           import datetime as dt, json, os, pathlib, time, urllib.error, urllib.request
 
           cfg=json.loads(pathlib.Path("aumara/config/rate-canonical.json").read_text(encoding="utf-8"))
+          active_path=pathlib.Path("aumara/config/revenue-active.json")
+          active=json.loads(active_path.read_text(encoding="utf-8")) if active_path.exists() else {}
           api=(os.environ.get("BEDS24_API_KEY") or "").strip()
           prop=(os.environ.get("BEDS24_PROP_KEY") or "").strip()
           if not (api and prop): raise SystemExit("Missing Beds24 Production API/PROP keys")
@@ -73,6 +75,14 @@ jobs:
                   expected["674465"][k]=weekend(int(row["chalet"]),d)
                   expected["674466"][k]=weekend(int(row["superior"]),d)
                   d+=dt.timedelta(days=1)
+
+          # An APPLIED revenue overlay supersedes canonical p1 only for its explicit dates.
+          if active.get("status")=="APPLIED":
+              for rid,dates in (active.get("prices") or {}).items():
+                  if rid not in expected: continue
+                  for k,item in (dates or {}).items():
+                      if k in expected[rid] and isinstance(item,dict) and item.get("p1") is not None:
+                          expected[rid][k]=int(round(float(item["p1"])))
 
           windows=[
               (dt.date(2026,10,15),dt.date(2026,12,31)),
