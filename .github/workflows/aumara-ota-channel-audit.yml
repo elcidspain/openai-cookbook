@@ -1,0 +1,126 @@
+name: AUMARA OTA Channel Audit
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "aumara/jobs/aumara-ota-channel-audit.json"
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    environment: Production
+    env:
+      BEDS24_API_KEY: ${{ secrets.BEDS24_API_KEY }}
+      BEDS24_PROP_KEY: ${{ secrets.BEDS24_PROP_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Audit live OTA mappings and booking sources
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import collections, datetime as dt, json, os, pathlib, time, urllib.error, urllib.request
+
+          api=(os.environ.get("BEDS24_API_KEY") or "").strip()
+          prop=(os.environ.get("BEDS24_PROP_KEY") or "").strip()
+          if not (api and prop): raise SystemExit("Missing Beds24 credentials")
+          print(f"::add-mask::{api}"); print(f"::add-mask::{prop}")
+          auth={"authentication":{"apiKey":api,"propKey":prop}}
+
+          def call(path,payload):
+              body=dict(payload); body.update(auth)
+              req=urllib.request.Request(
+                  f"https://api.beds24.com/json/{path}",
+                  data=json.dumps(body).encode(),
+                  headers={"Content-Type":"application/json","Accept":"application/json","User-Agent":"AUMARA-ota-audit/1.0"},
+                  method="POST")
+              try:
+                  with urllib.request.urlopen(req,timeout=90) as r:
+                      raw=r.read(); st=int(r.status)
+              except urllib.error.HTTPError as e:
+                  raw=e.read(); st=int(e.code)
+              try: data=json.loads(raw.decode("utf-8","replace")) if raw else {}
+              except: data={"raw":raw.decode("utf-8","replace")[:1000]}
+              time.sleep(2.2)
+              if not 200 <= st < 300: raise RuntimeError(f"{path} HTTP {st}: {data}")
+              return data
+
+          propdata=call("getProperty",{"includeRooms":True,"includeRoomUnits":False})
+          root=(propdata.get("getProperty") or [{}])[0] if isinstance(propdata,dict) else {}
+          rooms=root.get("roomTypes") or []
+          safe_rooms=[]
+          for r in rooms:
+              safe_rooms.append({k:r.get(k) for k in [
+                  "roomId","name","qty",
+                  "bookingComEnableInventory","bookingComEnableBooking","bookingComRoomCode","bookingComRateCode",
+                  "airbnbComEnableInventory","airbnbComEnableBooking","airbnbComRoomCode","airbnbRoomCode",
+                  "agodaComEnableInventory","agodaComEnablePrice","agodaComEnableBooking","agodaComRoomCode",
+                  "expediaComEnableInventory","expediaComEnablePrice","expediaComEnableBooking","expediaComRoomCode","expediaComRateCode"
+              ]})
+
+          bookings=call("getBookings",{
+              "arrivalFrom":"2026-07-01",
+              "arrivalTo":"2027-03-31",
+              "limit":1000
+          })
+          if isinstance(bookings,dict):
+              rows=bookings.get("getBookings") or bookings.get("bookings") or []
+          else:
+              rows=bookings if isinstance(bookings,list) else []
+
+          by_source=collections.Counter()
+          samples=[]
+          for b in rows:
+              if not isinstance(b,dict): continue
+              sid=str(b.get("apiSourceId") or b.get("sourceId") or "")
+              src=str(b.get("apiSource") or b.get("source") or "")
+              key=f"{sid}:{src}"
+              by_source[key]+=1
+              if len(samples)<100:
+                  samples.append({
+                      "bookId":b.get("bookId"),
+                      "roomId":b.get("roomId"),
+                      "status":b.get("status"),
+                      "firstNight":b.get("firstNight"),
+                      "lastNight":b.get("lastNight"),
+                      "apiSourceId":b.get("apiSourceId"),
+                      "apiSource":b.get("apiSource"),
+                      "referer":b.get("referer"),
+                      "bookingSource":b.get("bookingSource")
+                  })
+
+          evidence={
+              "status":"SUCCESS",
+              "checkedAtUtc":dt.datetime.now(dt.timezone.utc).isoformat(),
+              "property":{
+                  "propId":root.get("propId"),"name":root.get("name"),
+                  "bookingComPropertyCode":root.get("bookingComPropertyCode"),
+                  "airbnbPropertyCode":root.get("airbnbPropertyCode"),
+                  "agodaComPropertyCode":root.get("agodaComPropertyCode"),
+                  "expediaComPropertyCode":root.get("expediaComPropertyCode"),
+                  "odigeoPropertyCode":root.get("odigeoPropertyCode"),
+                  "cTripPropertyCode":root.get("cTripPropertyCode"),
+                  "despegarComPropertyCode":root.get("despegarComPropertyCode")
+              },
+              "rooms":safe_rooms,
+              "bookingSources":dict(by_source),
+              "bookingSamples":samples
+          }
+          p=pathlib.Path("aumara/evidence/aumara-ota-channel-audit.json")
+          p.parent.mkdir(parents=True,exist_ok=True)
+          p.write_text(json.dumps(evidence,indent=2,ensure_ascii=False)+"\n",encoding="utf-8")
+          print(json.dumps({"status":"SUCCESS","property":evidence["property"],"bookingSources":evidence["bookingSources"],"rooms":safe_rooms},ensure_ascii=False,indent=2))
+          PY
+      - name: Commit audit evidence
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add aumara/evidence/aumara-ota-channel-audit.json
+          git diff --cached --quiet || git commit -m "Record AUMARA OTA channel audit"
+          git pull --rebase origin main
+          git push origin HEAD:main
