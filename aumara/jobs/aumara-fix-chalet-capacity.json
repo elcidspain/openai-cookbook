@@ -1,0 +1,8 @@
+{
+  "task": "Fix Chalet guest capacity",
+  "propertyId": 324882,
+  "roomId": 674465,
+  "maxPeople": 4,
+  "maxAdult": 4,
+  "requestedAt": "2026-09-22T07:22:00Z"
+}
