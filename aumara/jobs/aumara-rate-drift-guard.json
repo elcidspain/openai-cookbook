@@ -1,5 +1,7 @@
 {
   "task": "Run AUMARA rate drift guard now",
   "propertyId": 324882,
-  "requestedAt": "2026-09-22T06:35:00Z"
+  "requestedAt": "2026-09-22T07:07:00Z",
+  "reason": "verify APPLIED revenue overlay",
+  "revision": 1
 }
