@@ -5,6 +5,8 @@ on:
   push:
     paths:
       - "aumara/jobs/aumara-revenue-shadow.json"
+  schedule:
+    - cron: "23 4 * * *"
 
 permissions:
   contents: write
