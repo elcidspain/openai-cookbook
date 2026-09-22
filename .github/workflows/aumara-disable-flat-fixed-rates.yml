@@ -1,0 +1,163 @@
+name: AUMARA Disable Flat Fixed Rates
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "aumara/jobs/aumara-disable-flat-fixed-rates.json"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: aumara-rate-write-324882
+  cancel-in-progress: false
+
+jobs:
+  disable-flat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: Production
+    env:
+      BEDS24_API_KEY: ${{ secrets.BEDS24_API_KEY }}
+      BEDS24_PROP_KEY: ${{ secrets.BEDS24_PROP_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Disable flat fixed room prices and verify daily price remains authoritative
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import datetime as dt, json, os, pathlib, time, urllib.error, urllib.request
+
+          TARGETS = {
+              "6967585": {"roomId":"674465","name":"Weekly","oldPrice":"259.00"},
+              "6967586": {"roomId":"674465","name":"Fully flexible","oldPrice":"259.00"},
+              "6967587": {"roomId":"674466","name":"Weekly","oldPrice":"329.00"},
+              "6967588": {"roomId":"674466","name":"Fully flexible","oldPrice":"329.00"},
+          }
+          api=(os.environ.get("BEDS24_API_KEY") or "").strip()
+          prop=(os.environ.get("BEDS24_PROP_KEY") or "").strip()
+          if not (api and prop): raise SystemExit("Missing Beds24 Production API/PROP keys")
+          print(f"::add-mask::{api}"); print(f"::add-mask::{prop}")
+          auth={"authentication":{"apiKey":api,"propKey":prop}}
+          evidence={
+              "status":"RUNNING",
+              "checkedAtUtc":dt.datetime.now(dt.timezone.utc).isoformat(),
+              "targets":TARGETS,"before":{},"writes":{},"after":{},
+              "dailyPriceSetup":{},"roomDates":{},"liveQuotes":{},"mismatches":[]
+          }
+
+          def call(path,payload,auth_on=True):
+              body=dict(payload)
+              if auth_on: body.update(auth)
+              req=urllib.request.Request(
+                  f"https://api.beds24.com/json/{path}",
+                  data=json.dumps(body).encode(),
+                  headers={"Content-Type":"application/json","Accept":"application/json","User-Agent":"AUMARA-flat-rate-cleanup/1.0"},
+                  method="POST")
+              try:
+                  with urllib.request.urlopen(req,timeout=90) as r:
+                      raw=r.read(); st=int(r.status)
+              except urllib.error.HTTPError as e:
+                  raw=e.read(); st=int(e.code)
+              try: data=json.loads(raw.decode("utf-8","replace")) if raw else {}
+              except: data={"raw":raw.decode("utf-8","replace")[:1000]}
+              time.sleep(2.2)
+              return st,data
+
+          def rates_by_id():
+              st,data=call("getRates",{})
+              if not 200 <= st < 300: raise RuntimeError(f"getRates HTTP {st}: {data}")
+              return {str(x.get("rateId")):x for x in data if isinstance(x,dict)}
+
+          before=rates_by_id()
+          for rid,t in TARGETS.items():
+              x=before.get(rid)
+              if not x: raise RuntimeError(f"Missing target rate {rid}")
+              evidence["before"][rid]={k:x.get(k) for k in [
+                  "rateId","roomId","name","minNights","maxNights","roomPrice","roomPriceEnable",
+                  "channelManagement","bookingcomRateCode","channel000","channel999"
+              ]}
+              if str(x.get("roomId")) != t["roomId"]:
+                  raise RuntimeError(f"Room mismatch for rate {rid}")
+              if str(x.get("roomPriceEnable")) != "1":
+                  evidence["mismatches"].append({"rateId":rid,"kind":"unexpected_pre_state","roomPriceEnable":x.get("roomPriceEnable")})
+
+          # Safety gate: canonical daily price rows must be live on direct, Booking.com and Airbnb first.
+          for room_name,room_id in {"Chalet":"674465","Superior Chalet":"674466"}.items():
+              st,setup=call("getDailyPriceSetup",{"roomId":room_id})
+              if not 200 <= st < 300: raise RuntimeError(f"getDailyPriceSetup {room_id} HTTP {st}")
+              evidence["dailyPriceSetup"][room_name]=setup
+              row=setup[0]["dailyPrices"][0]
+              required={"directEnable":"1","bookingapiEnable":"1","airbnbxmlEnable":"1"}
+              for k,want in required.items():
+                  if str(row.get(k)) != want:
+                      raise RuntimeError(f"Safety gate failed {room_name} {k}={row.get(k)}")
+              if row.get("bookingcomRateCode") != "66887702":
+                  raise RuntimeError(f"Safety gate Booking.com rate code failed for {room_name}")
+              st2,dates=call("getRoomDates",{"roomId":room_id,"from":"20261015","to":"20261020"})
+              if not 200 <= st2 < 300: raise RuntimeError(f"getRoomDates {room_id} HTTP {st2}")
+              evidence["roomDates"][room_name]=dates
+              for day in ("20261015","20261016","20261017","20261018"):
+                  if not (isinstance(dates.get(day),dict) and dates[day].get("p1")):
+                      raise RuntimeError(f"Safety gate missing p1 {room_name} {day}")
+
+          # Disable price value only. Keep the rate definitions/mappings for later repurposing.
+          for rid,t in TARGETS.items():
+              st,out=call("setRate",{
+                  "action":"modify",
+                  "rateId":rid,
+                  "roomId":t["roomId"],
+                  "roomPriceEnable":"0"
+              })
+              evidence["writes"][rid]={"http":st,"response":out}
+              if not 200 <= st < 300:
+                  raise RuntimeError(f"setRate {rid} HTTP {st}: {out}")
+
+          after=rates_by_id()
+          for rid,t in TARGETS.items():
+              x=after.get(rid,{})
+              evidence["after"][rid]={k:x.get(k) for k in [
+                  "rateId","roomId","name","minNights","maxNights","roomPrice","roomPriceEnable",
+                  "channelManagement","bookingcomRateCode","channel000","channel999"
+              ]}
+              if str(x.get("roomPriceEnable")) != "0":
+                  evidence["mismatches"].append({"rateId":rid,"expected":"roomPriceEnable=0","actual":x.get("roomPriceEnable")})
+              # mapping/restriction preservation checks
+              for k in ("roomId","name","minNights","maxNights","channelManagement","bookingcomRateCode","channel000","channel999"):
+                  if str(x.get(k)) != str(before[rid].get(k)):
+                      evidence["mismatches"].append({"rateId":rid,"field":k,"before":before[rid].get(k),"after":x.get(k)})
+
+          # Public live quotes: 2-night stays must now resolve from Daily Prices.
+          for ci,co in [("20261015","20261017"),("20261016","20261018"),("20261102","20261104")]:
+              st,q=call("getAvailabilities",{
+                  "checkIn":ci,"checkOut":co,"propId":"324882","numAdult":"2","numChild":"0","ignoreAvail":True
+              },auth_on=False)
+              evidence["liveQuotes"][f"{ci}-{co}"]={"http":st,"body":q}
+              if not 200 <= st < 300:
+                  evidence["mismatches"].append({"quote":f"{ci}-{co}","http":st})
+
+          evidence["status"]="SUCCESS" if not evidence["mismatches"] else "FAILED"
+          p=pathlib.Path("aumara/evidence/aumara-disable-flat-fixed-rates.json")
+          p.parent.mkdir(parents=True,exist_ok=True)
+          p.write_text(json.dumps(evidence,indent=2,ensure_ascii=False)+"\n",encoding="utf-8")
+          print(json.dumps({
+              "status":evidence["status"],
+              "after":{rid:x.get("roomPriceEnable") for rid,x in evidence["after"].items()},
+              "quotes":evidence["liveQuotes"],
+              "mismatches":evidence["mismatches"][:20]
+          },ensure_ascii=False))
+          if evidence["mismatches"]:
+              raise SystemExit(f"Verification failed: {len(evidence['mismatches'])} mismatches")
+          PY
+
+      - name: Commit cleanup evidence
+        if: always()
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add aumara/evidence/aumara-disable-flat-fixed-rates.json
+          git diff --cached --quiet || git commit -m "Record AUMARA flat fixed rate cleanup"
+          git pull --rebase origin main
+          git push origin HEAD:main
