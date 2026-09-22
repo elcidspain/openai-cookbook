@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - "aumara/jobs/aumara-rate-drift-guard.json"
+      - "aumara/config/revenue-active.json"
   schedule:
     - cron: "17 5 * * *"
 
