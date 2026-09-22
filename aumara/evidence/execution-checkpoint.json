@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "project": "AUMARA",
+  "updatedAt": "2026-09-22T07:50:00Z",
+  "doNotRestartFromScratch": true,
+  "completed": {
+    "canonicalRates": "SUCCESS",
+    "legacyFlatRatesDisabled": "SUCCESS",
+    "revenueShadow": "SUCCESS",
+    "revenueApply": "SUCCESS",
+    "driftGuard": "SUCCESS",
+    "latestRevenueChain": {
+      "shadowRunId": 35698461150,
+      "applyRunId": 35698512519,
+      "driftGuardRunId": 35698575627
+    }
+  },
+  "activeState": {
+    "beds24PropertyId": 324882,
+    "roomIds": {
+      "chalet": 674465,
+      "superiorChalet": 674466
+    },
+    "inventory": {
+      "chalet": 4,
+      "superiorChalet": 2
+    },
+    "canonicalFile": "aumara/config/rate-canonical.json",
+    "revenuePolicyFile": "aumara/config/revenue-policy.json",
+    "activeOverlayFile": "aumara/config/revenue-active.json",
+    "legacyFlatRateIds": [
+      "6967585",
+      "6967586",
+      "6967587",
+      "6967588"
+    ],
+    "legacyFlatRatesMustRemainDisabled": true
+  },
+  "geo": {
+    "publicOrigin": {
+      "latitude": 38.79353655,
+      "longitude": -0.02037598
+    },
+    "verificationAnchor": {
+      "latitude": 38.7936312,
+      "longitude": -0.0194621
+    },
+    "cadastralReference": "8982501YH5988S",
+    "aumaraGeoResource": "https://www.aumara.me/geo.json",
+    "nearbyCave": {
+      "name": "Cova de les Calaveres",
+      "latitude": 38.7931506,
+      "longitude": -0.0173104,
+      "approxStraightLineDistanceMetres": 194
+    }
+  },
+  "executionRules": [
+    "Do not use browser UI as the critical write path for Beds24 pricing.",
+    "Use GitHub Production workflows and Beds24 API for price writes.",
+    "Read this checkpoint before continuing after interruption.",
+    "Do not rerun completed canonical-rate recovery unless drift guard reports failure.",
+    "Treat AUMARA public origin and six house coordinates as authoritative from AUMARA_WORLD_GEOREFERENCE_v1.json."
+  ],
+  "next": [
+    "Verify aumara.me deploy exposes /geo.json and updated guest-info/llms/MCP/A2A coordinates.",
+    "Verify public agent discovery continues to pass after geo publication."
+  ]
+}
