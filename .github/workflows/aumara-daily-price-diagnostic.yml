@@ -1,0 +1,90 @@
+name: AUMARA Daily Price Diagnostic
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "aumara/jobs/aumara-daily-price-diagnostic.json"
+
+permissions:
+  contents: write
+
+jobs:
+  diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: Production
+    env:
+      BEDS24_API_KEY: ${{ secrets.BEDS24_API_KEY }}
+      BEDS24_PROP_KEY: ${{ secrets.BEDS24_PROP_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read daily price setup and live quotes
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib, time, urllib.error, urllib.request
+          api=(os.environ.get("BEDS24_API_KEY") or "").strip()
+          prop=(os.environ.get("BEDS24_PROP_KEY") or "").strip()
+          print(f"::add-mask::{api}"); print(f"::add-mask::{prop}")
+          auth={"authentication":{"apiKey":api,"propKey":prop}}
+          out={"status":"SUCCESS","rooms":{},"quotes":{}}
+
+          def call(path,payload):
+              body=dict(payload); body.update(auth)
+              req=urllib.request.Request(
+                  f"https://api.beds24.com/json/{path}",
+                  data=json.dumps(body).encode(),
+                  headers={"Content-Type":"application/json","Accept":"application/json"},
+                  method="POST")
+              try:
+                  with urllib.request.urlopen(req,timeout=90) as r:
+                      raw=r.read(); st=int(r.status)
+              except urllib.error.HTTPError as e:
+                  raw=e.read(); st=int(e.code)
+              try: data=json.loads(raw.decode("utf-8","replace")) if raw else {}
+              except: data={"raw":raw.decode("utf-8","replace")[:1000]}
+              time.sleep(2.2)
+              return st,data
+
+          for name,rid in {"Chalet":"674465","Superior Chalet":"674466"}.items():
+              st,setup=call("getDailyPriceSetup",{"roomId":rid})
+              st2,dates=call("getRoomDates",{"roomId":rid,"from":"20261015","to":"20261020"})
+              st3,rates=call("getRates",{"roomId":rid})
+              out["rooms"][name]={
+                  "roomId":rid,
+                  "dailyPriceSetupHttp":st,
+                  "dailyPriceSetup":setup,
+                  "roomDatesHttp":st2,
+                  "roomDates":dates,
+                  "ratesHttp":st3,
+                  "rates":rates
+              }
+
+          for ci,co in [("20261015","20261016"),("20261016","20261017"),("20261102","20261103")]:
+              payload={"checkIn":ci,"checkOut":co,"propId":"324882","numAdult":"2","numChild":"0","ignoreAvail":True}
+              # public endpoint: deliberately omit auth
+              req=urllib.request.Request(
+                  "https://api.beds24.com/json/getAvailabilities",
+                  data=json.dumps(payload).encode(),
+                  headers={"Content-Type":"application/json","Accept":"application/json"},
+                  method="POST")
+              with urllib.request.urlopen(req,timeout=90) as r:
+                  out["quotes"][f"{ci}-{co}"]=json.loads(r.read().decode("utf-8","replace"))
+              time.sleep(2.2)
+
+          p=pathlib.Path("aumara/evidence/aumara-daily-price-diagnostic.json")
+          p.parent.mkdir(parents=True,exist_ok=True)
+          p.write_text(json.dumps(out,indent=2,ensure_ascii=False)+"\n",encoding="utf-8")
+          print(json.dumps({"status":"SUCCESS","rooms":list(out["rooms"]),"quoteKeys":list(out["quotes"])},ensure_ascii=False))
+          PY
+
+      - name: Commit diagnostic evidence
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add aumara/evidence/aumara-daily-price-diagnostic.json
+          git diff --cached --quiet || git commit -m "Record AUMARA daily price diagnostic"
+          git pull --rebase origin main
+          git push origin HEAD:main
