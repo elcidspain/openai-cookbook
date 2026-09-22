@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "mode": "shadow",
+  "horizonDays": 120,
+  "protectedMonths": [
+    7,
+    8
+  ],
+  "currency": "EUR",
+  "sourceOfTruth": "aumara/config/rate-canonical.json",
+  "inputs": [
+    "Beds24 remaining inventory",
+    "lead time",
+    "canonical seasonal base",
+    "Friday/Saturday uplift"
+  ],
+  "rules": {
+    "occupancyDefinition": "1 - availableUnits / totalUnits",
+    "totalUnitsByRoomId": {
+      "674465": 4,
+      "674466": 2
+    },
+    "adjustments": [
+      {
+        "maxLeadDays": 7,
+        "maxOccupancyPct": 24,
+        "adjustPct": -15,
+        "reason": "last-minute empty"
+      },
+      {
+        "maxLeadDays": 7,
+        "maxOccupancyPct": 49,
+        "adjustPct": -8,
+        "reason": "last-minute soft"
+      },
+      {
+        "maxLeadDays": 21,
+        "maxOccupancyPct": 24,
+        "adjustPct": -10,
+        "reason": "near-term empty"
+      },
+      {
+        "maxLeadDays": 21,
+        "maxOccupancyPct": 49,
+        "adjustPct": -5,
+        "reason": "near-term soft"
+      },
+      {
+        "maxLeadDays": 45,
+        "maxOccupancyPct": 24,
+        "adjustPct": -5,
+        "reason": "mid-term empty"
+      },
+      {
+        "maxLeadDays": 9999,
+        "minOccupancyPct": 75,
+        "adjustPct": 15,
+        "reason": "high compression"
+      },
+      {
+        "maxLeadDays": 9999,
+        "minOccupancyPct": 50,
+        "adjustPct": 5,
+        "reason": "healthy pickup"
+      },
+      {
+        "maxLeadDays": 9999,
+        "adjustPct": 0,
+        "reason": "hold base"
+      }
+    ],
+    "hardFloorPctOfCanonical": 85,
+    "standardFloorPctOfCanonical": 90,
+    "ceilingPctOfCanonical": 130,
+    "maxAbsMovePctPerApplyRun": 10,
+    "rounding": "nearest whole EUR",
+    "minStayMutationAllowed": false,
+    "availabilityMutationAllowed": false,
+    "fixedRateMutationAllowed": false
+  }
+}
