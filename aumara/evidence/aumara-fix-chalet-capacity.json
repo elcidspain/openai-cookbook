@@ -1,0 +1,63 @@
+{
+  "status": "SUCCESS",
+  "checkedAtUtc": "2026-09-22T07:22:51.004273+00:00",
+  "before": {
+    "roomId": "674465",
+    "name": "Chalet",
+    "qty": "4",
+    "maxPeople": "3",
+    "maxAdult": "3",
+    "maxChildren": "2",
+    "bookingComRoomCode": "1495386901",
+    "bookingComRateCode": "66887702",
+    "airbnbRoomCode": "1759764557896676605"
+  },
+  "writeResponse": {
+    "setProperty": [
+      {
+        "roomTypes": [
+          {
+            "maxPeople": "4",
+            "maxAdult": "4",
+            "roomId": 674465,
+            "action": "modify"
+          }
+        ]
+      }
+    ]
+  },
+  "after": {
+    "roomId": "674465",
+    "name": "Chalet",
+    "qty": "4",
+    "maxPeople": "4",
+    "maxAdult": "4",
+    "maxChildren": "2",
+    "bookingComRoomCode": "1495386901",
+    "bookingComRateCode": "66887702",
+    "airbnbRoomCode": "1759764557896676605"
+  },
+  "publicQuote4Adults": {
+    "checkIn": "20261015",
+    "lastNight": "20261016",
+    "checkOut": "20261017",
+    "propId": 324882,
+    "numAdult": 4,
+    "674465": {
+      "roomId": "674465",
+      "propId": "324882",
+      "roomsavail": 4,
+      "price": 419,
+      "priceFormated": "€419",
+      "currency": "EUR"
+    },
+    "674466": {
+      "roomId": "674466",
+      "propId": "324882",
+      "roomsavail": 2,
+      "price": 499,
+      "priceFormated": "€499",
+      "currency": "EUR"
+    }
+  }
+}
