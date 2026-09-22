@@ -1,0 +1,159 @@
+name: AUMARA Rate Repair
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "aumara/jobs/aumara-rate-repair.json"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: aumara-rate-write-324882
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: Production
+    env:
+      BEDS24_API_KEY: ${{ secrets.BEDS24_API_KEY }}
+      BEDS24_PROP_KEY: ${{ secrets.BEDS24_PROP_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Repair only detected AUMARA pricing drift
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import datetime as dt, json, os, pathlib, time, urllib.error, urllib.request
+
+          cfg=json.loads(pathlib.Path("aumara/config/rate-canonical.json").read_text(encoding="utf-8"))
+          api=(os.environ.get("BEDS24_API_KEY") or "").strip()
+          prop=(os.environ.get("BEDS24_PROP_KEY") or "").strip()
+          if not (api and prop): raise SystemExit("Missing Beds24 Production API/PROP keys")
+          print(f"::add-mask::{api}"); print(f"::add-mask::{prop}")
+          auth={"authentication":{"apiKey":api,"propKey":prop}}
+          evidence={"status":"RUNNING","before":{},"writes":{},"after":{},"mismatches":[]}
+
+          def call(path,payload):
+              body=dict(payload); body.update(auth)
+              req=urllib.request.Request(
+                  f"https://api.beds24.com/json/{path}",
+                  data=json.dumps(body).encode(),
+                  headers={"Content-Type":"application/json","Accept":"application/json","User-Agent":"AUMARA-rate-repair/1.0"},
+                  method="POST")
+              try:
+                  with urllib.request.urlopen(req,timeout=90) as r:
+                      raw=r.read(); st=int(r.status)
+              except urllib.error.HTTPError as e:
+                  raw=e.read(); st=int(e.code)
+              try: data=json.loads(raw.decode("utf-8","replace")) if raw else {}
+              except: data={"raw":raw.decode("utf-8","replace")[:1000]}
+              time.sleep(2.2)
+              if not 200 <= st < 300: raise RuntimeError(f"{path} HTTP {st}: {data}")
+              return data
+
+          def month_end(y,m):
+              return (dt.date(y+1,1,1) if m==12 else dt.date(y,m+1,1))-dt.timedelta(days=1)
+
+          def weekend(base,d):
+              return int(base*1.10+0.5) if d.weekday() in (4,5) else int(base)
+
+          expected={"674465":{},"674466":{}}
+          for row in cfg["monthlyBase"]:
+              y,m=int(row["year"]),int(row["month"])
+              start=dt.date(y,m,1)
+              if (y,m)==(2026,10): start=dt.date(2026,10,15)
+              end=month_end(y,m)
+              d=start
+              while d<=end:
+                  k=d.strftime("%Y%m%d")
+                  expected["674465"][k]=weekend(int(row["chalet"]),d)
+                  expected["674466"][k]=weekend(int(row["superior"]),d)
+                  d+=dt.timedelta(days=1)
+
+          windows=[
+              (dt.date(2026,10,15),dt.date(2026,12,31)),
+              (dt.date(2027,1,1),dt.date(2027,12,31)),
+              (dt.date(2028,1,1),dt.date(2028,12,31)),
+          ]
+
+          # Read current values and write only mismatched p1 dates.
+          for rid in ("674465","674466"):
+              actual={}
+              for a,b in windows:
+                  data=call("getRoomDates",{"roomId":rid,"from":a.strftime("%Y%m%d"),"to":b.strftime("%Y%m%d")})
+                  for k,v in data.items():
+                      if k in expected[rid] and isinstance(v,dict):
+                          actual[k]=v.get("p1")
+              evidence["before"][rid]=actual
+              changed={}
+              for k,want in expected[rid].items():
+                  got=actual.get(k)
+                  try: ok=float(got)==float(want)
+                  except: ok=False
+                  if not ok:
+                      changed[k]={"p1":str(want)}
+              if changed:
+                  out=call("setRoomDates",{"roomId":rid,"dates":changed})
+                  evidence["writes"][rid]={"changedCount":len(changed),"response":out}
+              else:
+                  evidence["writes"][rid]={"changedCount":0}
+
+          # Re-disable only the four known legacy flat rates if somebody re-enables them.
+          rates=call("getRates",{})
+          byid={str(x.get("rateId")):x for x in rates if isinstance(x,dict)}
+          for rate_id,room_id in {
+              "6967585":"674465","6967586":"674465","6967587":"674466","6967588":"674466"
+          }.items():
+              if str(byid.get(rate_id,{}).get("roomPriceEnable"))!="0":
+                  out=call("setRate",{"action":"modify","rateId":rate_id,"roomId":room_id,"roomPriceEnable":"0"})
+                  evidence["writes"][f"rate:{rate_id}"]=out
+
+          # Verify every canonical date after repair.
+          for rid in ("674465","674466"):
+              actual={}
+              for a,b in windows:
+                  data=call("getRoomDates",{"roomId":rid,"from":a.strftime("%Y%m%d"),"to":b.strftime("%Y%m%d")})
+                  for k,v in data.items():
+                      if k in expected[rid] and isinstance(v,dict):
+                          actual[k]=v.get("p1")
+              evidence["after"][rid]=actual
+              for k,want in expected[rid].items():
+                  got=actual.get(k)
+                  try: ok=float(got)==float(want)
+                  except: ok=False
+                  if not ok:
+                      evidence["mismatches"].append({"roomId":rid,"date":k,"expected":want,"actual":got})
+
+          rates=call("getRates",{})
+          byid={str(x.get("rateId")):x for x in rates if isinstance(x,dict)}
+          for rate_id in ("6967585","6967586","6967587","6967588"):
+              if str(byid.get(rate_id,{}).get("roomPriceEnable"))!="0":
+                  evidence["mismatches"].append({"rateId":rate_id,"expected":"roomPriceEnable=0","actual":byid.get(rate_id,{}).get("roomPriceEnable")})
+
+          evidence["status"]="SUCCESS" if not evidence["mismatches"] else "FAILED"
+          p=pathlib.Path("aumara/evidence/aumara-rate-repair.json")
+          p.parent.mkdir(parents=True,exist_ok=True)
+          p.write_text(json.dumps(evidence,indent=2,ensure_ascii=False)+"\n",encoding="utf-8")
+          print(json.dumps({
+              "status":evidence["status"],
+              "writes":evidence["writes"],
+              "mismatches":evidence["mismatches"][:20]
+          },ensure_ascii=False,indent=2))
+          if evidence["mismatches"]:
+              raise SystemExit(f"Repair verification failed: {len(evidence['mismatches'])} mismatches")
+          PY
+
+      - name: Commit repair evidence
+        if: always()
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add aumara/evidence/aumara-rate-repair.json
+          git diff --cached --quiet || git commit -m "Record AUMARA rate repair evidence"
+          git pull --rebase origin main
+          git push origin HEAD:main
