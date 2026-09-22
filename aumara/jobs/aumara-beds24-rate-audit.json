@@ -1,15 +1,16 @@
 {
   "task": "AUMARA Beds24 rate architecture audit",
   "propertyId": 324882,
-  "requestedAt": "2026-09-22T06:25:00Z",
+  "requestedAt": "2026-09-22T07:17:00Z",
   "scope": [
-    "rooms",
-    "units",
+    "roomTypes",
+    "roomUnits",
+    "dependentRoomLinks",
+    "bookingAssignmentLinks",
     "dailyPriceSetup",
     "rates",
-    "rateLinks",
-    "Booking.com mapping",
-    "Airbnb mapping"
+    "rateLinks"
   ],
-  "mode": "read-only"
+  "mode": "read-only",
+  "revision": 1
 }
