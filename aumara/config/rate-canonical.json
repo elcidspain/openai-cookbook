@@ -1,0 +1,171 @@
+{
+  "schemaVersion": 1,
+  "property": {
+    "brand": "AUMARA",
+    "beds24PropertyId": 324882,
+    "currency": "EUR"
+  },
+  "effectiveFrom": "2026-10-15",
+  "horizonThrough": "2028-12-31",
+  "rooms": {
+    "chalet": {
+      "roomId": 674465,
+      "name": "Chalet"
+    },
+    "superiorChalet": {
+      "roomId": 674466,
+      "name": "Superior Chalet"
+    }
+  },
+  "policy": {
+    "julyAugust": "preserve existing peak pricing",
+    "weekendDays": [
+      "FRI",
+      "SAT"
+    ],
+    "weekendUpliftPct": 10,
+    "rounding": "nearest whole EUR",
+    "channelSource": "Beds24 Daily Price p1",
+    "fixedFlatRatesForbidden": true
+  },
+  "monthlyBase": [
+    {
+      "year": 2026,
+      "month": 10,
+      "chalet": 210,
+      "superior": 250
+    },
+    {
+      "year": 2026,
+      "month": 11,
+      "chalet": 170,
+      "superior": 250
+    },
+    {
+      "year": 2026,
+      "month": 12,
+      "chalet": 220,
+      "superior": 310
+    },
+    {
+      "year": 2027,
+      "month": 1,
+      "chalet": 220,
+      "superior": 320
+    },
+    {
+      "year": 2027,
+      "month": 2,
+      "chalet": 220,
+      "superior": 320
+    },
+    {
+      "year": 2027,
+      "month": 3,
+      "chalet": 230,
+      "superior": 330
+    },
+    {
+      "year": 2027,
+      "month": 4,
+      "chalet": 240,
+      "superior": 340
+    },
+    {
+      "year": 2027,
+      "month": 5,
+      "chalet": 250,
+      "superior": 350
+    },
+    {
+      "year": 2027,
+      "month": 6,
+      "chalet": 166,
+      "superior": 260
+    },
+    {
+      "year": 2027,
+      "month": 9,
+      "chalet": 218,
+      "superior": 302
+    },
+    {
+      "year": 2027,
+      "month": 10,
+      "chalet": 218,
+      "superior": 260
+    },
+    {
+      "year": 2027,
+      "month": 11,
+      "chalet": 177,
+      "superior": 260
+    },
+    {
+      "year": 2027,
+      "month": 12,
+      "chalet": 229,
+      "superior": 322
+    },
+    {
+      "year": 2028,
+      "month": 1,
+      "chalet": 229,
+      "superior": 333
+    },
+    {
+      "year": 2028,
+      "month": 2,
+      "chalet": 229,
+      "superior": 333
+    },
+    {
+      "year": 2028,
+      "month": 3,
+      "chalet": 239,
+      "superior": 343
+    },
+    {
+      "year": 2028,
+      "month": 4,
+      "chalet": 250,
+      "superior": 354
+    },
+    {
+      "year": 2028,
+      "month": 5,
+      "chalet": 260,
+      "superior": 364
+    },
+    {
+      "year": 2028,
+      "month": 6,
+      "chalet": 173,
+      "superior": 270
+    },
+    {
+      "year": 2028,
+      "month": 9,
+      "chalet": 227,
+      "superior": 314
+    },
+    {
+      "year": 2028,
+      "month": 10,
+      "chalet": 227,
+      "superior": 270
+    },
+    {
+      "year": 2028,
+      "month": 11,
+      "chalet": 184,
+      "superior": 270
+    },
+    {
+      "year": 2028,
+      "month": 12,
+      "chalet": 238,
+      "superior": 335
+    }
+  ]
+}
