@@ -1,7 +1,7 @@
 {
   "task": "AUMARA Beds24 rate architecture audit",
   "propertyId": 324882,
-  "requestedAt": "2026-09-22T07:18:30Z",
+  "requestedAt": "2026-09-22T07:20:00Z",
   "scope": [
     "roomTypes",
     "roomUnits",
@@ -12,6 +12,6 @@
     "rateLinks"
   ],
   "mode": "read-only",
-  "revision": 2,
-  "reason": "inspect sanitized getProperty response shape"
+  "revision": 3,
+  "reason": "unwrap legacy getProperty and inspect real units"
 }
