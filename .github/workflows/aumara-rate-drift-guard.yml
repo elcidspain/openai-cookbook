@@ -2,6 +2,9 @@ name: AUMARA Rate Drift Guard
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - "aumara/jobs/aumara-rate-drift-guard.json"
   schedule:
     - cron: "17 5 * * *"
 
