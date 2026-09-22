@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "status": "PROPOSED",
+  "status": "APPLIED",
   "sourceShadowGeneratedAtUtc": "2026-09-22T07:03:31.403690+00:00",
   "window": {
     "from": "2026-10-15",
@@ -382,5 +382,7 @@
         "rule": "mid-term empty"
       }
     }
-  }
+  },
+  "appliedAtUtc": "2026-09-22T07:06:37.025820+00:00",
+  "skipped": []
 }
