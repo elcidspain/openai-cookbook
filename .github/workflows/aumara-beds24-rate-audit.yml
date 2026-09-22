@@ -76,7 +76,9 @@ jobs:
 
           property_shape=shape(property_data)
           prop_obj={}
-          if isinstance(property_data,list):
+          if isinstance(property_data,dict) and isinstance(property_data.get("getProperty"),list):
+              prop_obj=next((x for x in property_data["getProperty"] if isinstance(x,dict)),{})
+          elif isinstance(property_data,list):
               prop_obj=next((x for x in property_data if isinstance(x,dict)),{})
           elif isinstance(property_data,dict):
               prop_obj=property_data
