@@ -1,0 +1,118 @@
+name: AUMARA Fix Chalet Capacity
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "aumara/jobs/aumara-fix-chalet-capacity.json"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: aumara-property-write-324882
+  cancel-in-progress: false
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    environment: Production
+    env:
+      BEDS24_API_KEY: ${{ secrets.BEDS24_API_KEY }}
+      BEDS24_PROP_KEY: ${{ secrets.BEDS24_PROP_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fix Chalet guest capacity and verify
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import datetime as dt, json, os, pathlib, time, urllib.error, urllib.request
+
+          ROOM_ID="674465"
+          api=(os.environ.get("BEDS24_API_KEY") or "").strip()
+          prop=(os.environ.get("BEDS24_PROP_KEY") or "").strip()
+          if not (api and prop): raise SystemExit("Missing Beds24 Production API/PROP keys")
+          print(f"::add-mask::{api}"); print(f"::add-mask::{prop}")
+          auth={"authentication":{"apiKey":api,"propKey":prop}}
+          evidence={"status":"RUNNING","checkedAtUtc":dt.datetime.now(dt.timezone.utc).isoformat()}
+
+          def call(path,payload,auth_on=True):
+              body=dict(payload)
+              if auth_on: body.update(auth)
+              req=urllib.request.Request(
+                  f"https://api.beds24.com/json/{path}",
+                  data=json.dumps(body).encode(),
+                  headers={"Content-Type":"application/json","Accept":"application/json","User-Agent":"AUMARA-capacity-fix/1.0"},
+                  method="POST")
+              try:
+                  with urllib.request.urlopen(req,timeout=90) as r:
+                      raw=r.read(); st=int(r.status)
+              except urllib.error.HTTPError as e:
+                  raw=e.read(); st=int(e.code)
+              try: data=json.loads(raw.decode("utf-8","replace")) if raw else {}
+              except: data={"raw":raw.decode("utf-8","replace")[:1000]}
+              time.sleep(2.2)
+              if not 200 <= st < 300: raise RuntimeError(f"{path} HTTP {st}: {data}")
+              return data
+
+          def get_room():
+              raw=call("getProperty",{"includeRooms":True,"includeRoomUnits":True,"includeAccountAccess":False})
+              props=raw.get("getProperty",[]) if isinstance(raw,dict) else []
+              if not props: raise RuntimeError("getProperty missing property")
+              rooms=props[0].get("roomTypes",[])
+              room=next((x for x in rooms if str(x.get("roomId"))==ROOM_ID),None)
+              if not room: raise RuntimeError("Chalet room not found")
+              return room
+
+          before=get_room()
+          evidence["before"]={k:before.get(k) for k in ["roomId","name","qty","maxPeople","maxAdult","maxChildren","bookingComRoomCode","bookingComRateCode","airbnbRoomCode"]}
+          if str(before.get("qty"))!="4": raise RuntimeError(f"Safety gate: Chalet qty is {before.get('qty')}, expected 4")
+          if str(before.get("name"))!="Chalet": raise RuntimeError(f"Safety gate: unexpected room name {before.get('name')}")
+
+          out=call("setProperty",{
+              "setProperty":[{
+                  "action":"modify",
+                  "roomTypes":[{
+                      "action":"modify",
+                      "roomId":ROOM_ID,
+                      "maxPeople":"4",
+                      "maxAdult":"4"
+                  }]
+              }]
+          })
+          evidence["writeResponse"]=out
+
+          after=get_room()
+          evidence["after"]={k:after.get(k) for k in ["roomId","name","qty","maxPeople","maxAdult","maxChildren","bookingComRoomCode","bookingComRateCode","airbnbRoomCode"]}
+          if str(after.get("maxPeople"))!="4" or str(after.get("maxAdult"))!="4":
+              raise RuntimeError(f"Read-back failed: {evidence['after']}")
+          for k in ["qty","bookingComRoomCode","bookingComRateCode","airbnbRoomCode"]:
+              if str(after.get(k))!=str(before.get(k)):
+                  raise RuntimeError(f"Unexpected change to {k}: {before.get(k)} -> {after.get(k)}")
+
+          quote=call("getAvailabilities",{
+              "checkIn":"20261015","checkOut":"20261017","propId":"324882",
+              "numAdult":"4","numChild":"0","ignoreAvail":True
+          },auth_on=False)
+          evidence["publicQuote4Adults"]=quote
+          chalet=quote.get(ROOM_ID,{}) if isinstance(quote,dict) else {}
+          if chalet.get("price") is None:
+              raise RuntimeError("4-adult Chalet quote still has no price")
+
+          evidence["status"]="SUCCESS"
+          p=pathlib.Path("aumara/evidence/aumara-fix-chalet-capacity.json")
+          p.parent.mkdir(parents=True,exist_ok=True)
+          p.write_text(json.dumps(evidence,indent=2,ensure_ascii=False)+"\n",encoding="utf-8")
+          print(json.dumps({"status":"SUCCESS","before":evidence["before"],"after":evidence["after"],"quote":chalet},ensure_ascii=False,indent=2))
+          PY
+      - name: Commit capacity evidence
+        if: always()
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add aumara/evidence/aumara-fix-chalet-capacity.json
+          git diff --cached --quiet || git commit -m "Record AUMARA Chalet capacity fix"
+          git pull --rebase origin main
+          git push origin HEAD:main
