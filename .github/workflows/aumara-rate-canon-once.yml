@@ -7,7 +7,7 @@ on:
       - "aumara/jobs/aumara-rate-canon-20260922.json"
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: aumara-rate-canon-324882
@@ -23,6 +23,9 @@ jobs:
       BEDS24_API_KEY: ${{ secrets.BEDS24_API_KEY }}
       BEDS24_PROP_KEY: ${{ secrets.BEDS24_PROP_KEY }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Apply and verify canonical AUMARA rates
         shell: bash
         run: |
@@ -73,6 +76,8 @@ jobs:
               "after": {},
               "write_status": {},
               "mismatches": [],
+              "sentinels_before": {},
+              "sentinels_after": {},
           }
 
           def save():
@@ -171,6 +176,7 @@ jobs:
               return body if isinstance(body, dict) else {}
 
           # Backup existing p1 for all affected dates in three API windows per room.
+          sentinels = [dt.date(2027,7,1), dt.date(2027,8,1), dt.date(2028,7,1), dt.date(2028,8,1)]
           windows = [
               (dt.date(2026,10,15), dt.date(2026,12,31)),
               (dt.date(2027,1,1), dt.date(2027,12,31)),
@@ -184,6 +190,11 @@ jobs:
                       if k in expected[name] and isinstance(v, dict):
                           current[k] = v.get("p1")
               evidence["before"][name] = current
+              evidence["sentinels_before"][name] = {}
+              for sd in sentinels:
+                  one = get_chunk(room_id, sd, sd)
+                  item = one.get(sd.strftime("%Y%m%d"), {}) if isinstance(one, dict) else {}
+                  evidence["sentinels_before"][name][sd.isoformat()] = item.get("p1") if isinstance(item, dict) else None
               save()
 
           # One write per room; only p1 is changed. Availability/min-stay/overrides are untouched.
@@ -204,6 +215,17 @@ jobs:
                       if k in expected[name] and isinstance(v, dict):
                           actual[k] = v.get("p1")
               evidence["after"][name] = actual
+              evidence["sentinels_after"][name] = {}
+              for sd in sentinels:
+                  one = get_chunk(room_id, sd, sd)
+                  item = one.get(sd.strftime("%Y%m%d"), {}) if isinstance(one, dict) else {}
+                  evidence["sentinels_after"][name][sd.isoformat()] = item.get("p1") if isinstance(item, dict) else None
+                  if evidence["sentinels_after"][name][sd.isoformat()] != evidence["sentinels_before"][name][sd.isoformat()]:
+                      evidence["mismatches"].append({
+                          "room":name, "date":sd.isoformat(), "kind":"preserve_jul_aug",
+                          "before":evidence["sentinels_before"][name][sd.isoformat()],
+                          "after":evidence["sentinels_after"][name][sd.isoformat()]
+                      })
               for k,want in expected[name].items():
                   got = actual.get(k)
                   try:
@@ -218,6 +240,8 @@ jobs:
               print(json.dumps(evidence["mismatches"][:20], ensure_ascii=False))
               raise SystemExit(f"Verification failed: {len(evidence['mismatches'])} mismatches")
 
+          evidence["status"] = "SUCCESS"
+          save()
           print(json.dumps({
               "status":"SUCCESS",
               "property":PROPERTY_ID,
@@ -232,6 +256,25 @@ jobs:
               }
           }, ensure_ascii=False))
           PY
+
+      - name: Publish sanitized rate evidence
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p aumara/evidence
+          src="${RUNNER_TEMP}/aumara-rate-canon/evidence.json"
+          dst="aumara/evidence/aumara-rate-canon-20260922.json"
+          if [ -f "$src" ]; then
+            cp "$src" "$dst"
+          else
+            printf '%s\n' '{"status":"NO_EVIDENCE","task":"AUMARA canonical rates 2026-2028"}' > "$dst"
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$dst"
+          git diff --cached --quiet || git commit -m "Record AUMARA rate sync evidence"
+          git pull --rebase origin main
+          git push origin HEAD:main
 
       - name: Upload rate evidence
         if: always()
