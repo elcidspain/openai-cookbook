@@ -1,0 +1,7 @@
+{
+  "task": "Run AUMARA revenue shadow",
+  "propertyId": 324882,
+  "mode": "read-only",
+  "horizonDays": 120,
+  "requestedAt": "2026-09-22T07:00:00Z"
+}
