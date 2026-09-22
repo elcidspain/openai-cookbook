@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - "aumara/jobs/aumara-revenue-apply.json"
+      - "aumara/evidence/aumara-revenue-shadow.json"
 
 permissions:
   contents: write
@@ -24,7 +25,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Apply validated revenue overlay
+      - name: Apply fresh validated revenue shadow
         shell: bash
         run: |
           python3 - <<'PY'
@@ -32,19 +33,19 @@ jobs:
           import urllib.error, urllib.request
 
           root=pathlib.Path(".")
-          active_path=root/"aumara/config/revenue-active.json"
           shadow_path=root/"aumara/evidence/aumara-revenue-shadow.json"
           policy_path=root/"aumara/config/revenue-policy.json"
-          active=json.loads(active_path.read_text(encoding="utf-8"))
+          active_path=root/"aumara/config/revenue-active.json"
           shadow=json.loads(shadow_path.read_text(encoding="utf-8"))
           policy=json.loads(policy_path.read_text(encoding="utf-8"))
 
-          if active.get("status")!="PROPOSED":
-              raise SystemExit(f"Refusing apply: overlay status is {active.get('status')}")
-          if active.get("sourceShadowGeneratedAtUtc")!=shadow.get("generatedAtUtc"):
-              raise SystemExit("Refusing apply: overlay does not match current shadow evidence")
-          if int(active.get("changedRoomDates",0))>100:
-              raise SystemExit("Refusing apply: too many changed room-dates")
+          now_utc=dt.datetime.now(dt.timezone.utc)
+          if shadow.get("status")!="SUCCESS" or shadow.get("mode")!="shadow":
+              raise SystemExit("Refusing apply: shadow is not SUCCESS/read-only")
+          generated=dt.datetime.fromisoformat(str(shadow["generatedAtUtc"]).replace("Z","+00:00"))
+          age_min=(now_utc-generated).total_seconds()/60
+          if age_min < -5 or age_min > 180:
+              raise SystemExit(f"Refusing apply: shadow age {age_min:.1f} minutes")
 
           api=(os.environ.get("BEDS24_API_KEY") or "").strip()
           prop=(os.environ.get("BEDS24_PROP_KEY") or "").strip()
@@ -58,7 +59,7 @@ jobs:
               req=urllib.request.Request(
                   f"https://api.beds24.com/json/{path}",
                   data=json.dumps(body).encode(),
-                  headers={"Content-Type":"application/json","Accept":"application/json","User-Agent":"AUMARA-revenue-apply/1.0"},
+                  headers={"Content-Type":"application/json","Accept":"application/json","User-Agent":"AUMARA-revenue-apply/2.0"},
                   method="POST")
               try:
                   with urllib.request.urlopen(req,timeout=90) as r:
@@ -74,74 +75,122 @@ jobs:
           totals={str(k):int(v) for k,v in policy["rules"]["totalUnitsByRoomId"].items()}
           evidence={
               "status":"RUNNING",
-              "startedAtUtc":dt.datetime.now(dt.timezone.utc).isoformat(),
+              "startedAtUtc":now_utc.isoformat(),
               "sourceShadowGeneratedAtUtc":shadow.get("generatedAtUtc"),
-              "requested":active.get("changedRoomDates",0),
-              "before":{},"writes":{},"after":{},"skipped":[],"mismatches":[],
+              "shadowAgeMinutes":round(age_min,1),
+              "before":{},"writes":{},"after":{},"stale":[],"guarded":[],"mismatches":[],
               "liveQuotes":{}
           }
-          applied_prices={rid:{} for rid in (active.get("prices") or {})}
-
-          for rid,dates in (active.get("prices") or {}).items():
+          live_by_room={}
+          rows_by_room={}
+          for rid,obj in (shadow.get("rooms") or {}).items():
+              rows=list(obj.get("rows") or [])
+              if not rows: continue
               if rid not in totals: raise RuntimeError(f"Unknown room {rid}")
-              keys=sorted(dates)
-              if not keys: continue
-              current=call("getRoomDates",{"roomId":rid,"from":keys[0],"to":keys[-1]})
+              rows_by_room[rid]=rows
+              keys=[r["date"].replace("-","") for r in rows]
+              live=call("getRoomDates",{"roomId":rid,"from":min(keys),"to":max(keys)})
+              live_by_room[rid]=live
               evidence["before"][rid]={}
-              writes={}
+              for row in rows:
+                  k=row["date"].replace("-","")
+                  item=live.get(k,{}) if isinstance(live,dict) else {}
+                  evidence["before"][rid][k]=item
+                  try: live_p1=float(item.get("p1"))
+                  except: live_p1=None
+                  shadow_current=float(row["current"])
+                  if live_p1 is None or abs(live_p1-shadow_current)>0.001:
+                      evidence["stale"].append({
+                          "roomId":rid,"date":k,
+                          "shadowCurrent":shadow_current,"live":live_p1
+                      })
+
+          evpath=root/"aumara/evidence/aumara-revenue-apply.json"
+          if evidence["stale"]:
+              evidence["status"]="FAILED_STALE_SHADOW"
+              evpath.write_text(json.dumps(evidence,indent=2,ensure_ascii=False)+"\n",encoding="utf-8")
+              print(json.dumps({"status":evidence["status"],"stale":evidence["stale"][:20]},ensure_ascii=False,indent=2))
+              raise SystemExit(f"Refusing apply: {len(evidence['stale'])} live prices changed since shadow")
+
+          writes_by_room={}
+          new_active_prices={}
+          max_writes=100
+          for rid,rows in rows_by_room.items():
               total=totals[rid]
-              for k,item in sorted(dates.items()):
-                  now=current.get(k,{}) if isinstance(current,dict) else {}
-                  evidence["before"][rid][k]=now
-                  try: current_p1=float(now.get("p1"))
-                  except: current_p1=None
-                  try: avail=int(now.get("i"))
+              writes={}
+              active_dates={}
+              live=live_by_room[rid]
+              for row in rows:
+                  k=row["date"].replace("-","")
+                  item=live.get(k,{}) if isinstance(live,dict) else {}
+                  current=float(item["p1"])
+                  try: avail=int(item.get("i"))
                   except: avail=total
-                  occ_pct=round((1-max(0,min(total,avail))/total)*100,1)
-                  previous=float(item["previous"])
-                  target=int(round(float(item["p1"])))
-                  canonical=float(item["canonical"])
+                  avail=max(0,min(total,avail))
+                  live_occ=round((1-avail/total)*100,1)
+                  canonical=int(round(float(row["canonical"])))
+                  desired=int(round(float(row["boundedNext"])))
 
-                  # Shadow must still describe the live price. Never overwrite somebody else's later change.
-                  if current_p1 is None or abs(current_p1-previous)>0.001:
-                      evidence["skipped"].append({"roomId":rid,"date":k,"reason":"price_changed_since_shadow","shadowPrevious":previous,"live":current_p1})
-                      continue
+                  # Never preserve a low-demand discount if live occupancy improved materially after shadow.
+                  if desired < canonical and live_occ >= 50:
+                      desired=canonical
+                      evidence["guarded"].append({
+                          "roomId":rid,"date":k,"reason":"live_occupancy_now_ge_50",
+                          "occupancyPct":live_occ,"restoredToCanonical":canonical
+                      })
 
-                  # A downward move is cancelled if occupancy has improved to >=50%.
-                  if target < current_p1 and occ_pct >= 50:
-                      evidence["skipped"].append({"roomId":rid,"date":k,"reason":"occupancy_improved","occupancyPct":occ_pct})
-                      continue
+                  floor=int(round(float(row["floor"])))
+                  ceiling=int(round(float(row["ceiling"])))
+                  if desired != canonical and not (floor <= desired <= ceiling):
+                      raise RuntimeError(f"Target outside guardrails {rid} {k}: {desired} not {floor}..{ceiling}")
 
-                  floor_pct=float(policy["rules"]["hardFloorPctOfCanonical"] if item.get("rule")=="last-minute empty" else policy["rules"]["standardFloorPctOfCanonical"])
-                  floor=int(canonical*floor_pct/100+0.5)
-                  ceiling=int(canonical*float(policy["rules"]["ceilingPctOfCanonical"])/100+0.5)
-                  if not (floor <= target <= ceiling):
-                      raise RuntimeError(f"Target outside guardrails {rid} {k}: {target} not {floor}..{ceiling}")
+                  if desired != int(round(current)):
+                      writes[k]={"p1":str(desired)}
 
-                  writes[k]={"p1":str(target)}
-                  applied_prices[rid][k]=dict(item)
+                  if desired != canonical:
+                      active_dates[k]={
+                          "p1":str(desired),
+                          "canonical":canonical,
+                          "previous":int(round(current)),
+                          "occupancyPct":live_occ,
+                          "leadDays":row.get("leadDays"),
+                          "rule":row.get("rule"),
+                          "sourceShadowGeneratedAtUtc":shadow.get("generatedAtUtc")
+                      }
 
+              writes_by_room[rid]=writes
+              new_active_prices[rid]=active_dates
+
+          write_count=sum(len(v) for v in writes_by_room.values())
+          if write_count > max_writes:
+              evidence["status"]="FAILED_TOO_MANY_WRITES"
+              evidence["plannedWriteCount"]=write_count
+              evpath.write_text(json.dumps(evidence,indent=2,ensure_ascii=False)+"\n",encoding="utf-8")
+              raise SystemExit(f"Refusing apply: {write_count} writes exceeds safety cap {max_writes}")
+
+          for rid,writes in writes_by_room.items():
               if writes:
                   out=call("setRoomDates",{"roomId":rid,"dates":writes})
                   evidence["writes"][rid]={"count":len(writes),"response":out}
               else:
                   evidence["writes"][rid]={"count":0}
 
-          # Read back every applied p1.
-          for rid,dates in applied_prices.items():
-              keys=sorted(dates)
+          # Read back every evaluated day and verify the intended final p1.
+          for rid,rows in rows_by_room.items():
+              keys=[r["date"].replace("-","") for r in rows]
+              actual=call("getRoomDates",{"roomId":rid,"from":min(keys),"to":max(keys)})
               evidence["after"][rid]={}
-              if not keys: continue
-              actual=call("getRoomDates",{"roomId":rid,"from":keys[0],"to":keys[-1]})
-              for k,item in dates.items():
+              active_dates=new_active_prices[rid]
+              for row in rows:
+                  k=row["date"].replace("-","")
                   got=(actual.get(k) or {}).get("p1") if isinstance(actual,dict) else None
                   evidence["after"][rid][k]=actual.get(k) if isinstance(actual,dict) else None
-                  try: ok=float(got)==float(item["p1"])
+                  expected=int(active_dates[k]["p1"]) if k in active_dates else int(round(float(row["canonical"])))
+                  try: ok=float(got)==float(expected)
                   except: ok=False
                   if not ok:
-                      evidence["mismatches"].append({"roomId":rid,"date":k,"expected":item["p1"],"actual":got})
+                      evidence["mismatches"].append({"roomId":rid,"date":k,"expected":expected,"actual":got})
 
-          # Independent public Beds24 quotes.
           for ci,co in [("20261015","20261017"),("20261016","20261018"),("20261102","20261104")]:
               q=call("getAvailabilities",{
                   "checkIn":ci,"checkOut":co,"propId":"324882",
@@ -149,26 +198,30 @@ jobs:
               },auth_on=False)
               evidence["liveQuotes"][f"{ci}-{co}"]=q
 
-          if evidence["mismatches"]:
-              evidence["status"]="FAILED"
-          else:
-              evidence["status"]="SUCCESS"
+          evidence["status"]="SUCCESS" if not evidence["mismatches"] else "FAILED"
+          active_count=sum(len(v) for v in new_active_prices.values())
+          new_active={
+              "schemaVersion":1,
+              "status":"APPLIED" if evidence["status"]=="SUCCESS" else "FAILED",
+              "sourceShadowGeneratedAtUtc":shadow.get("generatedAtUtc"),
+              "window":shadow.get("window"),
+              "generatedFromPolicy":"aumara/config/revenue-policy.json",
+              "canonicalSource":"aumara/config/rate-canonical.json",
+              "appliedAtUtc":dt.datetime.now(dt.timezone.utc).isoformat(),
+              "lastWriteCount":write_count,
+              "changedRoomDates":active_count,
+              "prices":new_active_prices,
+              "guarded":evidence["guarded"]
+          }
+          if evidence["status"]=="SUCCESS":
+              active_path.write_text(json.dumps(new_active,indent=2,ensure_ascii=False)+"\n",encoding="utf-8")
 
-          actually=sum(len(v) for v in applied_prices.values())
-          new_active=dict(active)
-          new_active["status"]="APPLIED" if evidence["status"]=="SUCCESS" else "FAILED"
-          new_active["appliedAtUtc"]=dt.datetime.now(dt.timezone.utc).isoformat()
-          new_active["changedRoomDates"]=actually
-          new_active["prices"]=applied_prices
-          new_active["skipped"]=evidence["skipped"]
-          active_path.write_text(json.dumps(new_active,indent=2,ensure_ascii=False)+"\n",encoding="utf-8")
-
-          evpath=root/"aumara/evidence/aumara-revenue-apply.json"
           evpath.write_text(json.dumps(evidence,indent=2,ensure_ascii=False)+"\n",encoding="utf-8")
           print(json.dumps({
               "status":evidence["status"],
-              "appliedRoomDates":actually,
-              "skipped":len(evidence["skipped"]),
+              "writes":write_count,
+              "activeOverlayDates":active_count,
+              "guarded":len(evidence["guarded"]),
               "mismatches":evidence["mismatches"],
               "quotes":evidence["liveQuotes"]
           },ensure_ascii=False,indent=2))
@@ -183,6 +236,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add aumara/config/revenue-active.json aumara/evidence/aumara-revenue-apply.json
-          git diff --cached --quiet || git commit -m "Apply validated AUMARA revenue overlay"
+          git diff --cached --quiet || git commit -m "Apply fresh AUMARA revenue overlay"
           git pull --rebase origin main
           git push origin HEAD:main
