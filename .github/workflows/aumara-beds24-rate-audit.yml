@@ -66,15 +66,17 @@ jobs:
               "includeAccountAccess": False,
           })
 
+          prop_obj={}
+          if isinstance(property_data,list):
+              prop_obj=next((x for x in property_data if isinstance(x,dict)),{})
+          elif isinstance(property_data,dict):
+              prop_obj=property_data
+
           rooms=[]
-          if isinstance(property_data, dict):
-              candidate=property_data.get("rooms")
-              if isinstance(candidate, list): rooms=candidate
-              elif isinstance(candidate, dict): rooms=list(candidate.values())
-          elif isinstance(property_data, list):
-              for item in property_data:
-                  if isinstance(item,dict) and isinstance(item.get("rooms"),list):
-                      rooms.extend(item["rooms"])
+          candidate=prop_obj.get("roomTypes")
+          if candidate is None: candidate=prop_obj.get("rooms")
+          if isinstance(candidate,list): rooms=candidate
+          elif isinstance(candidate,dict): rooms=list(candidate.values())
 
           room_summary=[]
           setups={}
@@ -82,8 +84,15 @@ jobs:
               if not isinstance(room,dict): continue
               rid=room.get("roomId")
               summary={k:room.get(k) for k in [
-                  "roomId","name","qty","unitNames","minStay","maxStay","minPrice","rackRate",
-                  "cleaningFee","maxPeople","bookingComEnableInventory","bookingComEnableBooking",
+                  "roomId","name","qty","unitNames","unallocatedUnitName",
+                  "minStay","maxStay","minPrice","rackRate","cleaningFee","maxPeople",
+                  "unitAllocationPerGuest","overbookingProtection","blockAfterCheckout",
+                  "p1Sync","p2Sync","p3Sync","p4Sync",
+                  "dependentRoomId1","dependentRoomId2","dependentRoomId3","dependentRoomId4",
+                  "dependentRoomId5","dependentRoomId6","dependentRoomLogic",
+                  "includeBookingsRoomId1","includeBookingsRoomId2","includeBookingsRoomId3",
+                  "assignBookingsRoomId1","assignBookingsRoomId2","assignBookingsRoomId3",
+                  "bookingComEnableInventory","bookingComEnableBooking",
                   "bookingComRoomCode","bookingComRateCode","airbnbComEnableInventory",
                   "airbnbComEnableBooking","airbnbRoomCode"
               ]}
@@ -95,17 +104,19 @@ jobs:
                   setups[str(rid)] = call("getDailyPriceSetup", {"roomId":str(rid)})
 
           rates = call("getRates", {})
-          try:
-              rate_links = call("getRateLinks", {})
-          except Exception as e:
-              rate_links = {"auditError": str(e)}
+          rate_links={}
+          if isinstance(rates,list):
+              for rate in rates:
+                  if not isinstance(rate,dict) or not rate.get("rateId"): continue
+                  rid=str(rate["rateId"])
+                  try: rate_links[rid]=call("getRateLinks", {"rateId":rid})
+                  except Exception as e: rate_links[rid]={"auditError":str(e)}
 
           safe_property = {}
-          if isinstance(property_data,dict):
-              for k in ["name","propId","currency","city","country","postcode","phone","mobile","email","web",
-                        "airbnbPropertyCode","airbnbCurrency","airbnbMultiplier",
-                        "bookingComPropertyCode","bookingComMultiplier"]:
-                  safe_property[k]=property_data.get(k)
+          for k in ["name","propId","currency","city","country","postcode","web",
+                    "airbnbPropertyCode","airbnbCurrency","airbnbMultiplier",
+                    "bookingComPropertyCode","bookingComMultiplier"]:
+              safe_property[k]=prop_obj.get(k)
 
           evidence={
               "status":"SUCCESS",
