@@ -3,7 +3,7 @@
   "propertyId": 324882,
   "mode": "read-only",
   "horizonDays": 120,
-  "requestedAt": "2026-09-22T07:10:00Z",
-  "revision": 1,
-  "reason": "end-to-end daily cycle validation"
+  "requestedAt": "2026-09-22T07:14:00Z",
+  "revision": 2,
+  "reason": "validate workflow_run shadow-to-apply-to-guard chain"
 }
