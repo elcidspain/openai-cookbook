@@ -1,0 +1,201 @@
+name: AUMARA Revenue Shadow
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "aumara/jobs/aumara-revenue-shadow.json"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: aumara-revenue-shadow-324882
+  cancel-in-progress: true
+
+jobs:
+  shadow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: Production
+    env:
+      BEDS24_API_KEY: ${{ secrets.BEDS24_API_KEY }}
+      BEDS24_PROP_KEY: ${{ secrets.BEDS24_PROP_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compute shadow revenue recommendations
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import datetime as dt
+          import json, math, os, pathlib, time
+          import urllib.error, urllib.request
+
+          root=pathlib.Path(".")
+          canon=json.loads((root/"aumara/config/rate-canonical.json").read_text(encoding="utf-8"))
+          policy=json.loads((root/"aumara/config/revenue-policy.json").read_text(encoding="utf-8"))
+
+          api=(os.environ.get("BEDS24_API_KEY") or "").strip()
+          prop=(os.environ.get("BEDS24_PROP_KEY") or "").strip()
+          if not (api and prop): raise SystemExit("Missing Beds24 Production API/PROP keys")
+          print(f"::add-mask::{api}"); print(f"::add-mask::{prop}")
+          auth={"authentication":{"apiKey":api,"propKey":prop}}
+
+          def call(path,payload):
+              body=dict(payload); body.update(auth)
+              req=urllib.request.Request(
+                  f"https://api.beds24.com/json/{path}",
+                  data=json.dumps(body).encode(),
+                  headers={"Content-Type":"application/json","Accept":"application/json","User-Agent":"AUMARA-revenue-shadow/1.0"},
+                  method="POST")
+              try:
+                  with urllib.request.urlopen(req,timeout=90) as r:
+                      raw=r.read(); st=int(r.status)
+              except urllib.error.HTTPError as e:
+                  raw=e.read(); st=int(e.code)
+              try: data=json.loads(raw.decode("utf-8","replace")) if raw else {}
+              except: data={"raw":raw.decode("utf-8","replace")[:1000]}
+              time.sleep(2.2)
+              if not 200 <= st < 300: raise RuntimeError(f"{path} HTTP {st}: {data}")
+              return data
+
+          room_meta={
+              str(canon["rooms"]["chalet"]["roomId"]): {"key":"chalet","name":"Chalet"},
+              str(canon["rooms"]["superiorChalet"]["roomId"]): {"key":"superior","name":"Superior Chalet"},
+          }
+          totals={str(k):int(v) for k,v in policy["rules"]["totalUnitsByRoomId"].items()}
+          protected=set(int(x) for x in policy.get("protectedMonths",[]))
+          effective=dt.date.fromisoformat(canon["effectiveFrom"])
+          today=dt.datetime.now(dt.timezone.utc).date()
+          start=max(today,effective)
+          end=start+dt.timedelta(days=int(policy["horizonDays"])-1)
+          canon_end=dt.date.fromisoformat(canon["horizonThrough"])
+          end=min(end,canon_end)
+
+          base_by_month={}
+          for row in canon["monthlyBase"]:
+              base_by_month[(int(row["year"]),int(row["month"]))]=row
+
+          def round_eur(x):
+              return int(math.floor(float(x)+0.5))
+
+          def canonical_price(room_key,d):
+              row=base_by_month.get((d.year,d.month))
+              if not row: return None
+              base=int(row["chalet"] if room_key=="chalet" else row["superior"])
+              if d.strftime("%a").upper()[:3] in set(canon["policy"]["weekendDays"]):
+                  base=round_eur(base*(1+float(canon["policy"]["weekendUpliftPct"])/100))
+              return base
+
+          def choose_rule(lead,occ_pct):
+              for rule in policy["rules"]["adjustments"]:
+                  if lead>int(rule.get("maxLeadDays",999999)): continue
+                  if "maxOccupancyPct" in rule and occ_pct>float(rule["maxOccupancyPct"]): continue
+                  if "minOccupancyPct" in rule and occ_pct<float(rule["minOccupancyPct"]): continue
+                  return rule
+              return {"adjustPct":0,"reason":"hold base"}
+
+          def clamp(v,lo,hi): return max(lo,min(hi,v))
+
+          report={
+              "status":"SUCCESS",
+              "mode":"shadow",
+              "generatedAtUtc":dt.datetime.now(dt.timezone.utc).isoformat(),
+              "window":{"from":start.isoformat(),"to":end.isoformat()},
+              "policy":policy,
+              "rooms":{},
+              "summary":{}
+          }
+
+          all_rows=[]
+          for rid,meta in room_meta.items():
+              dates=call("getRoomDates",{
+                  "roomId":rid,
+                  "from":start.strftime("%Y%m%d"),
+                  "to":end.strftime("%Y%m%d")
+              })
+              rows=[]
+              total=totals[rid]
+              d=start
+              while d<=end:
+                  if d.month in protected:
+                      d+=dt.timedelta(days=1); continue
+                  canonical=canonical_price(meta["key"],d)
+                  if canonical is None:
+                      d+=dt.timedelta(days=1); continue
+                  k=d.strftime("%Y%m%d")
+                  item=dates.get(k,{}) if isinstance(dates,dict) else {}
+                  current=item.get("p1")
+                  avail=item.get("i")
+                  try: current_f=float(current)
+                  except: current_f=float(canonical)
+                  try: avail_i=int(avail)
+                  except: avail_i=total
+                  avail_i=max(0,min(total,avail_i))
+                  occ=1-(avail_i/total)
+                  occ_pct=round(occ*100,1)
+                  lead=(d-today).days
+                  rule=choose_rule(lead,occ_pct)
+                  adj=float(rule.get("adjustPct",0))
+                  raw=round_eur(canonical*(1+adj/100))
+                  hard_case=(str(rule.get("reason"))=="last-minute empty")
+                  floor_pct=float(policy["rules"]["hardFloorPctOfCanonical"] if hard_case else policy["rules"]["standardFloorPctOfCanonical"])
+                  floor=round_eur(canonical*floor_pct/100)
+                  ceiling=round_eur(canonical*float(policy["rules"]["ceilingPctOfCanonical"])/100)
+                  target=clamp(raw,floor,ceiling)
+                  step=float(policy["rules"]["maxAbsMovePctPerApplyRun"])
+                  lo=round_eur(current_f*(1-step/100))
+                  hi=round_eur(current_f*(1+step/100))
+                  bounded=clamp(target,lo,hi)
+                  row={
+                      "date":d.isoformat(),"roomId":rid,"room":meta["name"],
+                      "canonical":canonical,"current":round_eur(current_f),
+                      "availableUnits":avail_i,"totalUnits":total,
+                      "occupancyPct":occ_pct,"leadDays":lead,
+                      "rule":rule.get("reason"),"adjustPct":adj,
+                      "floor":floor,"ceiling":ceiling,
+                      "target":target,"boundedNext":bounded,
+                      "deltaVsCurrent":bounded-round_eur(current_f),
+                      "deltaPctVsCurrent":round(((bounded/current_f)-1)*100,1) if current_f else 0
+                  }
+                  rows.append(row); all_rows.append(row)
+                  d+=dt.timedelta(days=1)
+              report["rooms"][rid]={"name":meta["name"],"rows":rows}
+
+          changed=[r for r in all_rows if r["boundedNext"]!=r["current"]]
+          up=[r for r in changed if r["boundedNext"]>r["current"]]
+          down=[r for r in changed if r["boundedNext"]<r["current"]]
+          report["summary"]={
+              "evaluatedDates":len(all_rows),
+              "recommendedChanges":len(changed),
+              "raiseCount":len(up),"lowerCount":len(down),
+              "holdCount":len(all_rows)-len(changed),
+              "maxRaisePct":max([r["deltaPctVsCurrent"] for r in up],default=0),
+              "maxLowerPct":min([r["deltaPctVsCurrent"] for r in down],default=0),
+              "byRule":{}
+          }
+          for r in all_rows:
+              report["summary"]["byRule"][r["rule"]]=report["summary"]["byRule"].get(r["rule"],0)+1
+
+          biggest=sorted(changed,key=lambda r:abs(r["deltaPctVsCurrent"]),reverse=True)[:40]
+          report["largestMoves"]=biggest
+          p=root/"aumara/evidence/aumara-revenue-shadow.json"
+          p.parent.mkdir(parents=True,exist_ok=True)
+          p.write_text(json.dumps(report,indent=2,ensure_ascii=False)+"\n",encoding="utf-8")
+          print(json.dumps({
+              "status":"SUCCESS","window":report["window"],
+              "summary":report["summary"],
+              "largestMoves":biggest[:12]
+          },ensure_ascii=False,indent=2))
+          PY
+
+      - name: Commit shadow evidence
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add aumara/evidence/aumara-revenue-shadow.json
+          git diff --cached --quiet || git commit -m "Record AUMARA revenue shadow recommendations"
+          git pull --rebase origin main
+          git push origin HEAD:main
