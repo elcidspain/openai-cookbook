@@ -14,5 +14,7 @@
   "rounding": "whole EUR",
   "source": "AUMARA control tower seasonal target ADR",
   "requestedBy": "Ilya",
-  "requestedAt": "2026-09-22"
+  "requestedAt": "2026-09-22",
+  "revision": 2,
+  "verify": "full read-back + July/August sentinels + committed evidence"
 }
