@@ -1,7 +1,7 @@
 {
   "status": "SUCCESS",
-  "startedAtUtc": "2026-09-22T07:13:30.560399+00:00",
-  "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00",
+  "startedAtUtc": "2026-09-23T09:23:36.987525+00:00",
+  "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00",
   "shadowAgeMinutes": 0.5,
   "before": {
     "674465": {
@@ -1211,10 +1211,20 @@
   },
   "writes": {
     "674465": {
-      "count": 0
+      "count": 1,
+      "response": [
+        {
+          "success": "items updated: 1"
+        }
+      ]
     },
     "674466": {
-      "count": 0
+      "count": 1,
+      "response": [
+        {
+          "success": "items updated: 1"
+        }
+      ]
     }
   },
   "after": {
@@ -1336,7 +1346,7 @@
       },
       "20261107": {
         "i": 4,
-        "p1": "187.00",
+        "p1": "178.00",
         "m": "2"
       },
       "20261108": {
@@ -1938,7 +1948,7 @@
       },
       "20261107": {
         "i": 2,
-        "p1": "275.00",
+        "p1": "261.00",
         "m": "2"
       },
       "20261108": {

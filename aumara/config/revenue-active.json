@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
   "status": "APPLIED",
-  "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00",
+  "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00",
   "window": {
     "from": "2026-10-15",
     "to": "2027-02-11"
   },
   "generatedFromPolicy": "aumara/config/revenue-policy.json",
   "canonicalSource": "aumara/config/rate-canonical.json",
-  "appliedAtUtc": "2026-09-22T07:13:50.421553+00:00",
-  "lastWriteCount": 0,
-  "changedRoomDates": 46,
+  "appliedAtUtc": "2026-09-23T09:24:02.391549+00:00",
+  "lastWriteCount": 2,
+  "changedRoomDates": 48,
   "prices": {
     "674465": {
       "20261015": {
@@ -18,207 +18,216 @@
         "canonical": 210,
         "previous": 200,
         "occupancyPct": 0.0,
-        "leadDays": 23,
+        "leadDays": 22,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261016": {
         "p1": "219",
         "canonical": 231,
         "previous": 219,
         "occupancyPct": 0.0,
-        "leadDays": 24,
+        "leadDays": 23,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261017": {
         "p1": "219",
         "canonical": 231,
         "previous": 219,
         "occupancyPct": 0.0,
-        "leadDays": 25,
+        "leadDays": 24,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261018": {
         "p1": "200",
         "canonical": 210,
         "previous": 200,
         "occupancyPct": 0.0,
-        "leadDays": 26,
+        "leadDays": 25,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261019": {
         "p1": "200",
         "canonical": 210,
         "previous": 200,
         "occupancyPct": 0.0,
-        "leadDays": 27,
+        "leadDays": 26,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261020": {
         "p1": "200",
         "canonical": 210,
         "previous": 200,
         "occupancyPct": 0.0,
-        "leadDays": 28,
+        "leadDays": 27,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261021": {
         "p1": "200",
         "canonical": 210,
         "previous": 200,
         "occupancyPct": 0.0,
-        "leadDays": 29,
+        "leadDays": 28,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261022": {
         "p1": "200",
         "canonical": 210,
         "previous": 200,
         "occupancyPct": 0.0,
-        "leadDays": 30,
+        "leadDays": 29,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261023": {
         "p1": "219",
         "canonical": 231,
         "previous": 219,
         "occupancyPct": 0.0,
-        "leadDays": 31,
+        "leadDays": 30,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261024": {
         "p1": "219",
         "canonical": 231,
         "previous": 219,
         "occupancyPct": 0.0,
-        "leadDays": 32,
+        "leadDays": 31,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261025": {
         "p1": "200",
         "canonical": 210,
         "previous": 200,
         "occupancyPct": 0.0,
-        "leadDays": 33,
+        "leadDays": 32,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261026": {
         "p1": "200",
         "canonical": 210,
         "previous": 200,
         "occupancyPct": 0.0,
-        "leadDays": 34,
+        "leadDays": 33,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261027": {
         "p1": "200",
         "canonical": 210,
         "previous": 200,
         "occupancyPct": 0.0,
-        "leadDays": 35,
+        "leadDays": 34,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261028": {
         "p1": "200",
         "canonical": 210,
         "previous": 200,
         "occupancyPct": 0.0,
-        "leadDays": 36,
+        "leadDays": 35,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261029": {
         "p1": "200",
         "canonical": 210,
         "previous": 200,
         "occupancyPct": 0.0,
-        "leadDays": 37,
+        "leadDays": 36,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261030": {
         "p1": "219",
         "canonical": 231,
         "previous": 219,
         "occupancyPct": 0.0,
-        "leadDays": 38,
+        "leadDays": 37,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261031": {
         "p1": "219",
         "canonical": 231,
         "previous": 219,
         "occupancyPct": 0.0,
-        "leadDays": 39,
+        "leadDays": 38,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261101": {
         "p1": "162",
         "canonical": 170,
         "previous": 162,
         "occupancyPct": 0.0,
-        "leadDays": 40,
+        "leadDays": 39,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261102": {
         "p1": "162",
         "canonical": 170,
         "previous": 162,
         "occupancyPct": 0.0,
-        "leadDays": 41,
+        "leadDays": 40,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261103": {
         "p1": "162",
         "canonical": 170,
         "previous": 162,
         "occupancyPct": 0.0,
-        "leadDays": 42,
+        "leadDays": 41,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261104": {
         "p1": "162",
         "canonical": 170,
         "previous": 162,
         "occupancyPct": 0.0,
-        "leadDays": 43,
+        "leadDays": 42,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261105": {
         "p1": "162",
         "canonical": 170,
         "previous": 162,
         "occupancyPct": 0.0,
-        "leadDays": 44,
+        "leadDays": 43,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261106": {
         "p1": "178",
         "canonical": 187,
         "previous": 178,
         "occupancyPct": 0.0,
+        "leadDays": 44,
+        "rule": "mid-term empty",
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
+      },
+      "20261107": {
+        "p1": "178",
+        "canonical": 187,
+        "previous": 187,
+        "occupancyPct": 0.0,
         "leadDays": 45,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       }
     },
     "674466": {
@@ -227,207 +236,216 @@
         "canonical": 250,
         "previous": 238,
         "occupancyPct": 0.0,
-        "leadDays": 23,
+        "leadDays": 22,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261016": {
         "p1": "261",
         "canonical": 275,
         "previous": 261,
         "occupancyPct": 0.0,
-        "leadDays": 24,
+        "leadDays": 23,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261017": {
         "p1": "261",
         "canonical": 275,
         "previous": 261,
         "occupancyPct": 0.0,
-        "leadDays": 25,
+        "leadDays": 24,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261018": {
         "p1": "238",
         "canonical": 250,
         "previous": 238,
         "occupancyPct": 0.0,
-        "leadDays": 26,
+        "leadDays": 25,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261019": {
         "p1": "238",
         "canonical": 250,
         "previous": 238,
         "occupancyPct": 0.0,
-        "leadDays": 27,
+        "leadDays": 26,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261020": {
         "p1": "238",
         "canonical": 250,
         "previous": 238,
         "occupancyPct": 0.0,
-        "leadDays": 28,
+        "leadDays": 27,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261021": {
         "p1": "238",
         "canonical": 250,
         "previous": 238,
         "occupancyPct": 0.0,
-        "leadDays": 29,
+        "leadDays": 28,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261022": {
         "p1": "238",
         "canonical": 250,
         "previous": 238,
         "occupancyPct": 0.0,
-        "leadDays": 30,
+        "leadDays": 29,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261023": {
         "p1": "261",
         "canonical": 275,
         "previous": 261,
         "occupancyPct": 0.0,
-        "leadDays": 31,
+        "leadDays": 30,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261024": {
         "p1": "261",
         "canonical": 275,
         "previous": 261,
         "occupancyPct": 0.0,
-        "leadDays": 32,
+        "leadDays": 31,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261025": {
         "p1": "238",
         "canonical": 250,
         "previous": 238,
         "occupancyPct": 0.0,
-        "leadDays": 33,
+        "leadDays": 32,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261026": {
         "p1": "238",
         "canonical": 250,
         "previous": 238,
         "occupancyPct": 0.0,
-        "leadDays": 34,
+        "leadDays": 33,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261027": {
         "p1": "238",
         "canonical": 250,
         "previous": 238,
         "occupancyPct": 0.0,
-        "leadDays": 35,
+        "leadDays": 34,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261028": {
         "p1": "238",
         "canonical": 250,
         "previous": 238,
         "occupancyPct": 0.0,
-        "leadDays": 36,
+        "leadDays": 35,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261029": {
         "p1": "238",
         "canonical": 250,
         "previous": 238,
         "occupancyPct": 0.0,
-        "leadDays": 37,
+        "leadDays": 36,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261030": {
         "p1": "261",
         "canonical": 275,
         "previous": 261,
         "occupancyPct": 0.0,
-        "leadDays": 38,
+        "leadDays": 37,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261031": {
         "p1": "261",
         "canonical": 275,
         "previous": 261,
         "occupancyPct": 0.0,
-        "leadDays": 39,
+        "leadDays": 38,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261101": {
         "p1": "238",
         "canonical": 250,
         "previous": 238,
         "occupancyPct": 0.0,
-        "leadDays": 40,
+        "leadDays": 39,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261102": {
         "p1": "238",
         "canonical": 250,
         "previous": 238,
         "occupancyPct": 0.0,
-        "leadDays": 41,
+        "leadDays": 40,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261103": {
         "p1": "238",
         "canonical": 250,
         "previous": 238,
         "occupancyPct": 0.0,
-        "leadDays": 42,
+        "leadDays": 41,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261104": {
         "p1": "238",
         "canonical": 250,
         "previous": 238,
         "occupancyPct": 0.0,
-        "leadDays": 43,
+        "leadDays": 42,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261105": {
         "p1": "238",
         "canonical": 250,
         "previous": 238,
         "occupancyPct": 0.0,
-        "leadDays": 44,
+        "leadDays": 43,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       },
       "20261106": {
         "p1": "261",
         "canonical": 275,
         "previous": 261,
         "occupancyPct": 0.0,
+        "leadDays": 44,
+        "rule": "mid-term empty",
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
+      },
+      "20261107": {
+        "p1": "261",
+        "canonical": 275,
+        "previous": 275,
+        "occupancyPct": 0.0,
         "leadDays": 45,
         "rule": "mid-term empty",
-        "sourceShadowGeneratedAtUtc": "2026-09-22T07:13:01.454739+00:00"
+        "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00"
       }
     }
   },
