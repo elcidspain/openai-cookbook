@@ -559,7 +559,9 @@ def run_v1(
                     "name": "Weekly",
                     "firstNight": today.isoformat(),
                     "lastNight": RATE_END.isoformat(),
-                    "minNights": "7",
+                    # Was "7" — blocked 1–2 night bookings on beds24.com ("7 Noches").
+                    # Short stays are required; keep Weekly as a named plan with minNights=1.
+                    "minNights": "1",
                     "maxNights": "30",
                     "roomPrice": spec["price"],
                     "roomPriceEnable": "1",

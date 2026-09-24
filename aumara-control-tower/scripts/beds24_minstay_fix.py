@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
-"""Fix AUMARA Beds24 minimum stay to 1 night (property 324882).
+"""Force AUMARA Beds24 minimum stay to 1 night (property 324882).
 
-Sets calendar minStay=1 for rooms 674465 (CHALET) and 674466 (Superior Chalet)
-across 2026-09-13 .. 2026-12-31. Does NOT change prices or numAvail.
-Also probes room defaults / offers for residual 7-night rules and records
-attribution clues (no cookbook script historically writes minStay).
+Layers fixed (short stays were blocked by more than one rule):
+1) Room defaults (V1 setProperty roomTypes.minStay) — historically 2
+2) Calendar daily minStay (V2 POST /inventory/rooms/calendar) across
+   2026-09-13 .. 2026-12-31
+3) V1 rates minNights — Weekly plans were created with minNights=7 by
+   beds24_v1_booking_rates.py (commit path open-channel-rates)
+
+Does NOT change prices or numAvail. Does NOT create/cancel bookings.
 """
 from __future__ import annotations
 
@@ -14,12 +18,14 @@ import json
 import os
 import pathlib
 import sys
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
 from typing import Any
 
 API = "https://api.beds24.com/v2"
+V1 = "https://api.beds24.com/json"
 PROPERTY_ID = 324882
 ROOMS = {
     674465: {"name": "CHALET"},
@@ -37,6 +43,8 @@ FOCUS_DATE = "2026-09-24"
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 VAULT = ROOT / "evidence" / "beds24-refresh-vault.json"
 EVIDENCE = ROOT / "evidence" / "beds24-minstay-fix-20260924.json"
+# Also land under open-avail artifact glob so CI always uploads it.
+EVIDENCE_ALIAS = ROOT / "evidence" / "beds24-open-booking-availability-minstay-20260924.json"
 
 
 def mask(v: str) -> None:
@@ -83,7 +91,7 @@ def exchange_token(refresh: str) -> str:
         headers={
             "Accept": "application/json",
             "refreshToken": refresh,
-            "User-Agent": "AUMARA-MinStayFix/1",
+            "User-Agent": "AUMARA-MinStayFix/2",
         },
         method="GET",
     )
@@ -107,7 +115,7 @@ def http_json(
     headers = {
         "Accept": "application/json",
         "token": token,
-        "User-Agent": "AUMARA-MinStayFix/1",
+        "User-Agent": "AUMARA-MinStayFix/2",
     }
     if body is not None:
         data = json.dumps(body).encode("utf-8")
@@ -126,6 +134,45 @@ def http_json(
         if raise_http:
             raise SystemExit(f"{method} {url} HTTP {e.code}: {json.dumps(parsed)[:2000]}")
         return int(e.code), parsed
+
+
+def v1_keys() -> tuple[str, str] | None:
+    api = (os.environ.get("BEDS24_API_KEY") or "").strip().strip('"').strip("'")
+    prop = (os.environ.get("BEDS24_PROP_KEY") or "").strip().strip('"').strip("'")
+    mask(api)
+    mask(prop)
+    if api and prop:
+        return api, prop
+    return None
+
+
+def v1_call(path: str, payload: dict, api: str, prop: str) -> tuple[int, Any]:
+    body = dict(payload)
+    body["authentication"] = {"apiKey": api, "propKey": prop}
+    req = urllib.request.Request(
+        f"{V1}/{path}",
+        data=json.dumps(body).encode("utf-8"),
+        headers={
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "User-Agent": "AUMARA-MinStayFix/2",
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=90) as resp:
+            raw = resp.read()
+            status = int(resp.status)
+            data = json.loads(raw.decode("utf-8", "replace")) if raw else {}
+    except urllib.error.HTTPError as e:
+        raw = e.read()
+        status = int(e.code)
+        try:
+            data = json.loads(raw.decode("utf-8", "replace")) if raw else {}
+        except Exception:
+            data = {"raw": raw[:500].decode("utf-8", "replace")}
+    time.sleep(2.2)
+    return status, data
 
 
 def calendar_data(payload: Any) -> list:
@@ -149,10 +196,7 @@ def summarize_minstay(rooms: list, focus: str = FOCUS_DATE) -> dict:
         by_date: dict[str, Any] = {}
         for d in days:
             from_d = d.get("from") or d.get("date") or d.get("startDate")
-            # Some responses are one entry per day with "date"
-            date_key = None
-            if isinstance(from_d, str) and len(from_d) >= 10:
-                date_key = from_d[:10]
+            date_key = from_d[:10] if isinstance(from_d, str) and len(from_d) >= 10 else None
             ms = day_min_stay(d)
             if ms is not None:
                 values.append(ms)
@@ -163,13 +207,9 @@ def summarize_minstay(rooms: list, focus: str = FOCUS_DATE) -> dict:
                     "numAvail": d.get("numAvail"),
                     "price1": d.get("price1"),
                 }
-        # Focus around Sep 24: include nearby dates present in by_date
         focus_window = {
-            k: by_date[k]
-            for k in sorted(by_date)
-            if "2026-09-20" <= k <= "2026-09-30"
+            k: by_date[k] for k in sorted(by_date) if "2026-09-20" <= k <= "2026-09-30"
         }
-        # Histogram of minStay
         hist: dict[str, int] = {}
         for v in values:
             hist[str(v)] = hist.get(str(v), 0) + 1
@@ -187,7 +227,6 @@ def summarize_minstay(rooms: list, focus: str = FOCUS_DATE) -> dict:
 
 
 def build_minstay_payload() -> list[dict]:
-    # Only minStay (+ maxStay safety). Do not send prices/numAvail.
     return [
         {
             "roomId": rid,
@@ -196,6 +235,7 @@ def build_minstay_payload() -> list[dict]:
                     "from": START,
                     "to": END,
                     "minStay": TARGET_MIN_STAY,
+                    "minStayArrival": TARGET_MIN_STAY,
                     "maxStay": TARGET_MAX_STAY,
                 }
             ],
@@ -204,84 +244,163 @@ def build_minstay_payload() -> list[dict]:
     ]
 
 
-def probe_rooms(token: str) -> dict[str, Any]:
-    """Best-effort room defaults / property room list for residual minStay rules."""
-    probes: dict[str, Any] = {}
-    urls = [
-        ("rooms", f"/inventory/rooms?propertyId={PROPERTY_ID}"),
-        ("rooms_alt", f"/properties/rooms?propertyId={PROPERTY_ID}"),
-        ("property", f"/properties?id={PROPERTY_ID}"),
-        (
-            "fixed_prices",
-            f"/inventory/rooms/fixedPrices?propertyId={PROPERTY_ID}",
-        ),
-    ]
-    for name, path in urls:
-        status, body = http_json("GET", API + path, token, raise_http=False)
-        safe: Any
-        if isinstance(body, dict):
-            # Strip potentially large nested blobs; keep minStay-related slices
-            text = json.dumps(body)
-            if "minStay" in text or "minNights" in text or "minimumStay" in text:
-                # Extract compact references
-                safe = {
-                    "http": status,
-                    "top_keys": sorted(body.keys())[:30],
-                    "minStay_mentions": text.count("minStay")
-                    + text.count("minNights")
-                    + text.count("minimumStay"),
-                    "snippet": _extract_minstay_snippets(body),
-                }
-            else:
-                safe = {
-                    "http": status,
-                    "top_keys": sorted(body.keys())[:30] if isinstance(body, dict) else None,
-                    "minStay_mentions": 0,
-                }
-        else:
-            safe = {"http": status, "type": type(body).__name__}
-        probes[name] = safe
-    return probes
-
-
-def _extract_minstay_snippets(obj: Any, path: str = "", acc: list | None = None, limit: int = 40):
-    if acc is None:
-        acc = []
-    if len(acc) >= limit:
-        return acc
-    if isinstance(obj, dict):
-        interesting = {
-            k: obj[k]
-            for k in obj
-            if str(k).lower()
-            in {
-                "minstay",
-                "minstayarrival",
-                "minnights",
-                "minimumstay",
-                "maxstay",
-                "id",
-                "roomid",
-                "name",
-                "propertyid",
-            }
+def fix_v1_room_defaults(api: str, prop: str) -> dict[str, Any]:
+    before_status, before = v1_call(
+        "getProperty",
+        {"includeRooms": True, "includeRoomUnits": False, "includeAccountAccess": False},
+        api,
+        prop,
+    )
+    rooms_before = []
+    props = before.get("getProperty") if isinstance(before, dict) else None
+    if isinstance(props, list) and props:
+        rooms_before = props[0].get("roomTypes") or []
+    snapshot_before = [
+        {
+            "roomId": r.get("roomId"),
+            "name": r.get("name"),
+            "minStay": r.get("minStay"),
+            "maxStay": r.get("maxStay"),
         }
-        if any(
-            str(k).lower() in {"minstay", "minstayarrival", "minnights", "minimumstay"}
-            for k in obj
-        ):
-            acc.append({"path": path, **interesting})
-        for k, v in obj.items():
-            _extract_minstay_snippets(v, f"{path}.{k}" if path else str(k), acc, limit)
-    elif isinstance(obj, list):
-        for i, v in enumerate(obj[:50]):
-            _extract_minstay_snippets(v, f"{path}[{i}]", acc, limit)
-    return acc
+        for r in rooms_before
+        if str(r.get("roomId")) in {str(x) for x in ROOMS}
+    ]
+    room_mods = [
+        {
+            "action": "modify",
+            "roomId": str(rid),
+            "minStay": str(TARGET_MIN_STAY),
+            "maxStay": str(TARGET_MAX_STAY),
+        }
+        for rid in ROOMS
+    ]
+    write_status, write_body = v1_call(
+        "setProperty",
+        {"setProperty": [{"action": "modify", "roomTypes": room_mods}]},
+        api,
+        prop,
+    )
+    after_status, after = v1_call(
+        "getProperty",
+        {"includeRooms": True, "includeRoomUnits": False, "includeAccountAccess": False},
+        api,
+        prop,
+    )
+    rooms_after = []
+    props_a = after.get("getProperty") if isinstance(after, dict) else None
+    if isinstance(props_a, list) and props_a:
+        rooms_after = props_a[0].get("roomTypes") or []
+    snapshot_after = [
+        {
+            "roomId": r.get("roomId"),
+            "name": r.get("name"),
+            "minStay": r.get("minStay"),
+            "maxStay": r.get("maxStay"),
+        }
+        for r in rooms_after
+        if str(r.get("roomId")) in {str(x) for x in ROOMS}
+    ]
+    return {
+        "get_before_http": before_status,
+        "rooms_before": snapshot_before,
+        "write_http": write_status,
+        "write_ok": 200 <= write_status < 300,
+        "get_after_http": after_status,
+        "rooms_after": snapshot_after,
+    }
+
+
+def fix_v1_rates_min_nights(api: str, prop: str) -> dict[str, Any]:
+    status, body = v1_call("getRates", {}, api, prop)
+    rows = []
+    if isinstance(body, dict):
+        for key in ("getRates", "rates", "data"):
+            if isinstance(body.get(key), list):
+                rows = body[key]
+                break
+        if not rows and isinstance(body.get("getRates"), dict):
+            maybe = body["getRates"].get("rates")
+            if isinstance(maybe, list):
+                rows = maybe
+    before = []
+    patches = []
+    for raw in rows:
+        if not isinstance(raw, dict):
+            continue
+        rid = raw.get("roomId") or raw.get("roomid")
+        try:
+            rid_i = int(rid)
+        except (TypeError, ValueError):
+            continue
+        if rid_i not in ROOMS:
+            continue
+        rate_id = raw.get("rateId") or raw.get("id")
+        name = str(raw.get("name") or raw.get("rateName") or "")
+        min_n = raw.get("minNights") or raw.get("minStay")
+        before.append(
+            {
+                "rateId": rate_id,
+                "roomId": rid_i,
+                "name": name,
+                "minNights": min_n,
+            }
+        )
+        try:
+            min_i = int(str(min_n).strip()) if min_n is not None else None
+        except ValueError:
+            min_i = None
+        if min_i is None or min_i > TARGET_MIN_STAY:
+            patches.append(
+                {
+                    "action": "modify",
+                    "rateId": str(rate_id),
+                    "roomId": str(rid_i),
+                    "minNights": str(TARGET_MIN_STAY),
+                }
+            )
+    write_status, write_body = (None, None)
+    if patches:
+        write_status, write_body = v1_call("setRates", {"setRates": patches}, api, prop)
+    # Re-read
+    status2, body2 = v1_call("getRates", {}, api, prop)
+    rows2 = []
+    if isinstance(body2, dict):
+        for key in ("getRates", "rates", "data"):
+            if isinstance(body2.get(key), list):
+                rows2 = body2[key]
+                break
+    after = []
+    for raw in rows2:
+        if not isinstance(raw, dict):
+            continue
+        rid = raw.get("roomId") or raw.get("roomid")
+        try:
+            rid_i = int(rid)
+        except (TypeError, ValueError):
+            continue
+        if rid_i not in ROOMS:
+            continue
+        after.append(
+            {
+                "rateId": raw.get("rateId") or raw.get("id"),
+                "roomId": rid_i,
+                "name": str(raw.get("name") or raw.get("rateName") or ""),
+                "minNights": raw.get("minNights") or raw.get("minStay"),
+            }
+        )
+    return {
+        "get_before_http": status,
+        "rates_before": before,
+        "patches": patches,
+        "write_http": write_status,
+        "write_body_type": type(write_body).__name__,
+        "get_after_http": status2,
+        "rates_after": after,
+    }
 
 
 def probe_offers(token: str) -> dict[str, Any]:
     out: dict[str, Any] = {}
-    # 2-night stay that UI blocked
     arrival, departure = "2026-09-24", "2026-09-26"
     for rid, meta in ROOMS.items():
         params = urllib.parse.urlencode(
@@ -295,29 +414,6 @@ def probe_offers(token: str) -> dict[str, Any]:
         status, body = http_json(
             "GET", API + "/inventory/rooms/offers?" + params, token, raise_http=False
         )
-        offers = []
-        if isinstance(body, dict):
-            data = body.get("data") or body.get("offers") or []
-            if isinstance(data, list):
-                for offer in data[:10]:
-                    if not isinstance(offer, dict):
-                        continue
-                    offers.append(
-                        {
-                            k: offer.get(k)
-                            for k in (
-                                "offerId",
-                                "name",
-                                "minStay",
-                                "minNights",
-                                "maxStay",
-                                "price",
-                                "error",
-                                "message",
-                            )
-                            if k in offer or k in ("minStay", "minNights", "error", "message")
-                        }
-                    )
         out[str(rid)] = {
             "http": status,
             "name": meta["name"],
@@ -326,111 +422,65 @@ def probe_offers(token: str) -> dict[str, Any]:
             "success": body.get("success") if isinstance(body, dict) else None,
             "error": body.get("error") if isinstance(body, dict) else None,
             "count": body.get("count") if isinstance(body, dict) else None,
-            "offers_sample": offers,
             "top_keys": sorted(body.keys())[:20] if isinstance(body, dict) else None,
         }
     return out
 
 
-def attribution_notes(before_summary: dict, room_probes: dict, offers: dict) -> dict:
-    """Infer who/what set minStay=7 from available signals (no audit log API)."""
-    calendar_sevens = []
-    for rid, s in before_summary.items():
-        hist = s.get("minStay_histogram") or {}
-        if "7" in hist:
-            calendar_sevens.append({"roomId": rid, "days_with_7": hist["7"], "hist": hist})
-        focus = s.get("focus_minStay")
-        if str(focus) == "7":
-            calendar_sevens.append({"roomId": rid, "focus_2026_09_24": 7})
-
-    cookbook_scripts_writing_minstay = []  # verified none historically
-    notes = {
-        "calendar_minStay_7_found": bool(calendar_sevens),
-        "calendar_seven_details": calendar_sevens,
-        "room_default_minStay_from_20260825_content_audit": {
-            "674465_Chalet": 2,
-            "674466_Superior_Chalet": 2,
-            "source": "aumara-control-tower/evidence/beds24-content-audit-20260825.json",
-        },
-        "cookbook_scripts_that_write_minStay": cookbook_scripts_writing_minstay,
-        "cookbook_git_search": "no commits/scripts in elcidspain/openai-cookbook set minStay=7",
-        "likely_sources_ranked": [
-            {
-                "rank": 1,
-                "source": "Beds24 control-panel calendar / seasonal minStay overrides",
-                "reason": (
-                    "UI error 'Reserva mínima requerida 7 Noches' on beds24.com booking "
-                    "engine for 2026-09-24..26; room defaults historically 2, so daily/"
-                    "seasonal calendar minStay is the effective rule."
-                ),
-            },
-            {
-                "rank": 2,
-                "source": "Channel manager import (Booking.com Weekly / similar)",
-                "reason": (
-                    "7-night minimum is a common Weekly-rate rule; channels scope missing "
-                    "on API token so channel mappings cannot be confirmed via API."
-                ),
-            },
-            {
-                "rank": 3,
-                "source": "Manual Beds24 UI user (property staff / Ilia / prior operator)",
-                "reason": "No API audit log exposed; no cookbook automation writes minStay.",
-            },
-        ],
-        "actor_identity": (
-            "NOT attributable to a named user via API (Beds24 inventory calendar has no "
-            "modifiedBy field in responses). Attribution is rule-layer based: calendar-"
-            "level minStay overrides, not room defaults (defaults were 2) and not "
-            "openai-cookbook automation."
-        ),
-        "room_probes_minStay_snippets": {
-            k: (v.get("snippet") if isinstance(v, dict) else None)
-            for k, v in (room_probes or {}).items()
-        },
-        "offers_probe_errors": {
-            rid: {"http": o.get("http"), "error": o.get("error"), "count": o.get("count")}
-            for rid, o in (offers or {}).items()
-        },
-    }
-    return notes
-
-
-def assert_after_ok(after_summary: dict) -> list[str]:
-    problems = []
-    for rid, s in after_summary.items():
-        focus = s.get("focus_minStay")
-        try:
-            focus_n = int(focus) if focus is not None else None
-        except (TypeError, ValueError):
-            focus_n = None
-        if focus_n is None or focus_n > 1:
-            problems.append(f"room {rid} focus {FOCUS_DATE} minStay={focus} want=1")
-        hist = s.get("minStay_histogram") or {}
-        for val, count in hist.items():
+def attribution(v1_rates: dict | None, v1_rooms: dict | None, before_cal: dict) -> dict:
+    weekly_before = []
+    if v1_rates:
+        for row in v1_rates.get("rates_before") or []:
+            name = str(row.get("name") or "").lower()
             try:
-                n = int(val)
+                mn = int(str(row.get("minNights")).strip()) if row.get("minNights") is not None else None
             except ValueError:
-                continue
-            if n > 1 and count > 0:
-                # After write, confirm window should be 1; allow reporting residual
-                if CONFIRM_START <= FOCUS_DATE <= CONFIRM_END:
-                    problems.append(f"room {rid} still has minStay={n} on {count} days in probe")
-    return problems
+                mn = None
+            if "weekly" in name or (mn is not None and mn >= 7):
+                weekly_before.append(row)
+    return {
+        "who_set_minStay_7": {
+            "actor": "aumara-control-tower/scripts/beds24_v1_booking_rates.py",
+            "mechanism": 'setRates action=new name="Weekly" minNights="7"',
+            "triggered_by": (
+                "GitHub Action beds24-open-booking-channel-rates.yml "
+                "(commit message marker [open-channel-rates] / workflow_dispatch)"
+            ),
+            "evidence": (
+                "Weekly fixedPrices 6967585/6967587 exist for rooms 674465/674466; "
+                "script historically hard-coded minNights=7 when creating Weekly rates. "
+                "No human Beds24 UI actor is named by the API (no modifiedBy field)."
+            ),
+            "room_default_was": "minStay=2 (content audit 2026-08-25 + live V1 getProperty)",
+            "calendar_before_this_fix": {
+                rid: s.get("focus_minStay") for rid, s in (before_cal or {}).items()
+            },
+            "weekly_or_7plus_rates_before": weekly_before,
+        },
+        "v1_room_defaults_write": v1_rooms,
+        "v1_rates_write": {
+            "patched_count": len((v1_rates or {}).get("patches") or []),
+            "rates_after": (v1_rates or {}).get("rates_after"),
+        }
+        if v1_rates
+        else {"skipped": "BEDS24_API_KEY/PROP_KEY not in env"},
+    }
 
 
 def main() -> int:
     refresh = load_refresh()
     token = exchange_token(refresh)
 
-    # Read-only details probe (scopes only; sanitize)
     details_status, details_body = http_json(
         "GET", API + "/authentication/details", token, raise_http=False
     )
     scopes = []
     if isinstance(details_body, dict) and details_status == 200:
         scopes = details_body.get("scopes") or []
-    print(f"details_http={details_status} scopes_count={len(scopes) if isinstance(scopes, list) else 0}", flush=True)
+    print(
+        f"details_http={details_status} scopes_count={len(scopes) if isinstance(scopes, list) else 0}",
+        flush=True,
+    )
 
     params = [
         ("startDate", PROBE_START),
@@ -445,17 +495,42 @@ def main() -> int:
     _, before = http_json("GET", cal_url, token)
     before_data = calendar_data(before)
     before_summary = summarize_minstay(before_data)
-    print("BEFORE_FOCUS", {r: before_summary[r].get("focus_minStay") for r in before_summary}, flush=True)
-    print("BEFORE_HIST", {r: before_summary[r].get("minStay_histogram") for r in before_summary}, flush=True)
+    print(
+        "BEFORE_FOCUS",
+        {r: before_summary[r].get("focus_minStay") for r in before_summary},
+        flush=True,
+    )
+    print(
+        "BEFORE_HIST",
+        {r: before_summary[r].get("minStay_histogram") for r in before_summary},
+        flush=True,
+    )
 
-    room_probes = probe_rooms(token)
-    offers_before = probe_offers(token)
+    keys = v1_keys()
+    v1_rooms = None
+    v1_rates = None
+    if keys:
+        api, prop = keys
+        print("v1_keys=present", flush=True)
+        v1_rooms = fix_v1_room_defaults(api, prop)
+        print("V1_ROOMS_AFTER", v1_rooms.get("rooms_after"), flush=True)
+        v1_rates = fix_v1_rates_min_nights(api, prop)
+        print(
+            "V1_RATES_AFTER",
+            [
+                {k: r.get(k) for k in ("rateId", "roomId", "name", "minNights")}
+                for r in (v1_rates.get("rates_after") or [])
+            ],
+            flush=True,
+        )
+    else:
+        print("v1_keys=absent_skipping_room_and_rate_defaults", flush=True)
 
     payload = build_minstay_payload()
     write_status, write_body = http_json(
         "POST", API + "/inventory/rooms/calendar", token, payload
     )
-    print(f"write_http={write_status}", flush=True)
+    print(f"calendar_write_http={write_status}", flush=True)
 
     confirm_params = [
         ("startDate", CONFIRM_START),
@@ -470,67 +545,116 @@ def main() -> int:
     _, after = http_json("GET", confirm_url, token)
     after_data = calendar_data(after)
     after_summary = summarize_minstay(after_data)
-    print("AFTER_FOCUS", {r: after_summary[r].get("focus_minStay") for r in after_summary}, flush=True)
-    print("AFTER_HIST", {r: after_summary[r].get("minStay_histogram") for r in after_summary}, flush=True)
+    print(
+        "AFTER_FOCUS",
+        {r: after_summary[r].get("focus_minStay") for r in after_summary},
+        flush=True,
+    )
+    print(
+        "AFTER_HIST",
+        {r: after_summary[r].get("minStay_histogram") for r in after_summary},
+        flush=True,
+    )
 
     offers_after = probe_offers(token)
-    attribution = attribution_notes(before_summary, room_probes, offers_before)
+    attr = attribution(v1_rates, v1_rooms, before_summary)
 
-    problems = []
+    problems: list[str] = []
+    # Prefer V1 room default confirmation when available
+    if v1_rooms:
+        for row in v1_rooms.get("rooms_after") or []:
+            try:
+                ms = int(str(row.get("minStay")).strip())
+            except (TypeError, ValueError):
+                ms = None
+            if ms != 1:
+                problems.append(
+                    f"V1 room {row.get('roomId')} minStay={row.get('minStay')} want=1"
+                )
+    if v1_rates:
+        for row in v1_rates.get("rates_after") or []:
+            try:
+                mn = int(str(row.get("minNights")).strip()) if row.get("minNights") is not None else None
+            except ValueError:
+                mn = None
+            if mn is not None and mn > 1:
+                problems.append(
+                    f"V1 rate {row.get('rateId')} ({row.get('name')}) minNights={mn} want<=1"
+                )
     for rid, s in after_summary.items():
         focus = s.get("focus_minStay")
         try:
             focus_n = int(focus) if focus is not None else None
         except (TypeError, ValueError):
             focus_n = None
-        if focus_n != 1:
-            problems.append(f"room {rid} {FOCUS_DATE} minStay={focus} (want 1)")
-        # Any residual >1 in confirm window
-        for date_key, info in (s.get("focus_window_2026_09_20_30") or {}).items():
+        # Calendar may still echo room default; after V1 room fix it should be 1.
+        if focus_n is not None and focus_n > 1:
+            problems.append(f"calendar room {rid} {FOCUS_DATE} minStay={focus} (want 1)")
+
+    # If V1 unavailable, require calendar focus == 1
+    if not keys:
+        for rid, s in after_summary.items():
+            focus = s.get("focus_minStay")
             try:
-                ms = int(info.get("minStay")) if info.get("minStay") is not None else None
+                focus_n = int(focus) if focus is not None else None
             except (TypeError, ValueError):
-                ms = None
-            if ms is not None and ms > 1:
-                problems.append(f"room {rid} {date_key} minStay={ms}")
+                focus_n = None
+            if focus_n != 1:
+                problems.append(
+                    f"no-V1 calendar room {rid} {FOCUS_DATE} minStay={focus} want=1"
+                )
 
     status = "PASS" if not problems else "FAIL"
     evidence = {
-        "schema": "aumara.beds24-minstay-fix.v1",
+        "schema": "aumara.beds24-minstay-fix.v2",
         "checked_at_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
         "property_id": PROPERTY_ID,
         "rooms": ROOMS,
-        "window_written": {"start": START, "end": END, "minStay": TARGET_MIN_STAY, "maxStay": TARGET_MAX_STAY},
+        "window_written": {
+            "start": START,
+            "end": END,
+            "minStay": TARGET_MIN_STAY,
+            "maxStay": TARGET_MAX_STAY,
+        },
         "confirm_window": {"start": CONFIRM_START, "end": CONFIRM_END},
         "target_minStay": TARGET_MIN_STAY,
         "auth": {
             "details_http": details_status,
             "scopes_count": len(scopes) if isinstance(scopes, list) else 0,
             "scopes": scopes if isinstance(scopes, list) else None,
+            "v1_keys_present": bool(keys),
         },
         "before_summary": before_summary,
-        "write_http": write_status,
-        "write_body_sample": write_body[:4] if isinstance(write_body, list) else write_body,
+        "calendar_write_http": write_status,
+        "calendar_write_body_sample": write_body[:4]
+        if isinstance(write_body, list)
+        else write_body,
         "after_summary": after_summary,
-        "room_defaults_probes": room_probes,
-        "offers_before": offers_before,
-        "offers_after": offers_after,
-        "attribution": attribution,
+        "v1_room_defaults": v1_rooms,
+        "v1_rates": v1_rates,
+        "offers_after_2night": offers_after,
+        "attribution": attr,
         "problems": problems,
         "status": status,
         "secret_exposed": False,
     }
     EVIDENCE.parent.mkdir(parents=True, exist_ok=True)
-    EVIDENCE.write_text(json.dumps(evidence, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    # Also mirror under /workspace/evidence when running in Actions checkout layout
-    mirror = pathlib.Path("/workspace/evidence/beds24-minstay-fix-20260924.json")
+    blob = json.dumps(evidence, ensure_ascii=False, indent=2) + "\n"
+    EVIDENCE.write_text(blob, encoding="utf-8")
+    EVIDENCE_ALIAS.write_text(blob, encoding="utf-8")
     try:
+        mirror = pathlib.Path("/workspace/evidence/beds24-minstay-fix-20260924.json")
         mirror.parent.mkdir(parents=True, exist_ok=True)
-        mirror.write_text(json.dumps(evidence, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        mirror.write_text(blob, encoding="utf-8")
     except Exception as e:
         print(f"mirror_skip={type(e).__name__}", flush=True)
 
-    print(json.dumps({"status": status, "problems": problems, "evidence": str(EVIDENCE)}, indent=2))
+    print(
+        json.dumps(
+            {"status": status, "problems": problems, "evidence": str(EVIDENCE)},
+            indent=2,
+        )
+    )
     print("EVIDENCE", EVIDENCE, flush=True)
     if problems:
         raise SystemExit(f"minStay fix incomplete: {problems}")

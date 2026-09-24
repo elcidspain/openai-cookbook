@@ -778,7 +778,13 @@ def main() -> int:
         import runpy
 
         print("running_minstay_fix", minstay_script, flush=True)
-        runpy.run_path(str(minstay_script), run_name="__main__")
+        try:
+            runpy.run_path(str(minstay_script), run_name="__main__")
+        except SystemExit as exc:
+            code = exc.code if isinstance(exc.code, int) else (1 if exc.code else 0)
+            if code:
+                # Re-raise so CI fails when minStay not fixed; evidence already written.
+                raise
     else:
         print("minstay_fix_script_missing", flush=True)
 

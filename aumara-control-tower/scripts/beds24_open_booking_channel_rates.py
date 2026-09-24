@@ -764,5 +764,26 @@ def main() -> int:
     )
 
 
+
+def run_minstay_fix() -> None:
+    """Enforce minStay/minNights=1 after rate opens (Weekly previously used 7)."""
+    script = SCRIPTS_DIR / "beds24_minstay_fix.py"
+    if not script.exists():
+        print("minstay_fix_script_missing", flush=True)
+        return
+    import runpy
+
+    print("running_minstay_fix", script, flush=True)
+    try:
+        runpy.run_path(str(script), run_name="__main__")
+    except SystemExit as exc:
+        code = exc.code if isinstance(exc.code, int) else (1 if exc.code else 0)
+        if code:
+            raise
+
+
 if __name__ == "__main__":
-    raise SystemExit(main())
+    code = main()
+    if code == 0:
+        run_minstay_fix()
+    raise SystemExit(code)
