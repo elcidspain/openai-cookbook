@@ -259,6 +259,8 @@ def build_calendar_payload(start: str, end: str) -> list[dict]:
                     "to": end,
                     "numAvail": meta["target_num_avail"],
                     "price1": meta["price1"],
+                    "minStay": 1,
+                    "maxStay": 365,
                     "override": "none",
                 }
             ],
@@ -628,6 +630,7 @@ def main() -> int:
         ("endDate", near_end),
         ("includePrices", "true"),
         ("includeNumAvail", "true"),
+        ("includeMinStay", "true"),
     ]
     for rid in ROOMS:
         params.append(("roomId", str(rid)))
@@ -658,6 +661,7 @@ def main() -> int:
             ("endDate", far_end),
             ("includePrices", "true"),
             ("includeNumAvail", "true"),
+            ("includeMinStay", "true"),
         ]
         for rid in ROOMS:
             far_params.append(("roomId", str(rid)))
@@ -767,6 +771,17 @@ def main() -> int:
                 f"(missing prices historically caused this)",
                 flush=True,
             )
+
+    # Dedicated minStay=1 enforcement (fixed near-term window in beds24_minstay_fix.py).
+    minstay_script = ROOT / "scripts" / "beds24_minstay_fix.py"
+    if minstay_script.exists():
+        import runpy
+
+        print("running_minstay_fix", minstay_script, flush=True)
+        runpy.run_path(str(minstay_script), run_name="__main__")
+    else:
+        print("minstay_fix_script_missing", flush=True)
+
     return 0
 
 
