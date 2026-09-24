@@ -1,0 +1,122 @@
+{
+  "schema": "aumara.beds24-minstay-fix.v2",
+  "status": "PASS",
+  "checked_at_utc": "2026-09-24T05:15:40+00:00",
+  "checked_at_madrid": "2026-09-24T07:15:40 CEST",
+  "property_id": 324882,
+  "rooms_fixed": {
+    "674465": "CHALET",
+    "674466": "Superior Chalet"
+  },
+  "target_minStay": 1,
+  "window_written": {
+    "start": "2026-09-13",
+    "end": "2026-12-31",
+    "minStay": 1,
+    "maxStay": 365
+  },
+  "before": {
+    "calendar_focus_2026_09_24": {
+      "674465": 2,
+      "674466": 2
+    },
+    "note": "First successful V1 room write (run 35958853444) saw calendar focus minStay=2; content audit 2026-08-25 also had room default minStay=2. UI error was 7 Noches from Weekly rates.",
+    "v1_room_defaults_before_fix": {
+      "674465": 2,
+      "674466": 2
+    },
+    "v1_weekly_rates_before_final_patch": {
+      "6967585": {
+        "roomId": 674465,
+        "name": "Weekly",
+        "minNights": 7
+      },
+      "6967587": {
+        "roomId": 674466,
+        "name": "Weekly",
+        "minNights": 7
+      }
+    }
+  },
+  "after": {
+    "calendar_focus_2026_09_24": {
+      "674465": 1,
+      "674466": 1
+    },
+    "v1_room_defaults": [
+      {
+        "roomId": "674465",
+        "name": "Chalet",
+        "minStay": "1",
+        "maxStay": "365"
+      },
+      {
+        "roomId": "674466",
+        "name": "Superior Chalet",
+        "minStay": "1",
+        "maxStay": "365"
+      }
+    ],
+    "v1_rates_all_minNights_1": [
+      {
+        "rateId": "6952922",
+        "roomId": 674465,
+        "name": "AUMARA AI Agent Control - Chalet DORMANT",
+        "minNights": "1"
+      },
+      {
+        "rateId": "6967585",
+        "roomId": 674465,
+        "name": "Weekly",
+        "minNights": "1"
+      },
+      {
+        "rateId": "6967586",
+        "roomId": 674465,
+        "name": "Fully flexible",
+        "minNights": "1"
+      },
+      {
+        "rateId": "6952923",
+        "roomId": 674466,
+        "name": "AUMARA AI Agent Control - Superior Chalet DORMANT",
+        "minNights": "1"
+      },
+      {
+        "rateId": "6967587",
+        "roomId": 674466,
+        "name": "Weekly",
+        "minNights": "1"
+      },
+      {
+        "rateId": "6967588",
+        "roomId": 674466,
+        "name": "Fully flexible",
+        "minNights": "1"
+      }
+    ]
+  },
+  "attribution_who_set_minStay_7": {
+    "actor": "aumara-control-tower/scripts/beds24_v1_booking_rates.py",
+    "mechanism": "setRates action=new name=\"Weekly\" minNights=\"7\"",
+    "triggered_by": "GitHub Action beds24-open-booking-channel-rates.yml ([open-channel-rates] / workflow_dispatch)",
+    "human_actor": "NOT attributable via API (no modifiedBy). Automation authored Weekly rates with hard-coded minNights=7.",
+    "room_default_was": "minStay=2 (not 7) per content audit 2026-08-25 + live V1 getProperty before fix",
+    "ui_error_source": "beds24.com booking engine enforced Weekly rate minNights=7 → 'Reserva mínima requerida 7 Noches' for 2026-09-24..26"
+  },
+  "residual_7_night_rules": "NONE remaining after final patch (Weekly 6967585/6967587 now minNights=1). Future Weekly creates also changed to minNights=1 in beds24_v1_booking_rates.py.",
+  "github_runs": {
+    "final_pass": "https://github.com/elcidspain/openai-cookbook/actions/runs/35959066847",
+    "head_sha": "9dc68d0ccf42f2f0e9981c040e40be1ba04abf22",
+    "prior_room_default_fix": "https://github.com/elcidspain/openai-cookbook/actions/runs/35958853444",
+    "prior_channel_rates_with_rooms_only": "https://github.com/elcidspain/openai-cookbook/actions/runs/35958848775"
+  },
+  "constraints_honored": [
+    "no bookings created/cancelled",
+    "prices/numAvail not wiped (calendar POST sent only minStay/minStayArrival/maxStay)",
+    "www.aumara.me code untouched",
+    "no credentials printed"
+  ],
+  "secret_exposed": false,
+  "problems": []
+}
