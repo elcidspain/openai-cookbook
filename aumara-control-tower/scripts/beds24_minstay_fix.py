@@ -310,18 +310,38 @@ def fix_v1_room_defaults(api: str, prop: str) -> dict[str, Any]:
     }
 
 
+def _as_list(payload: Any, *keys: str) -> list:
+    if isinstance(payload, list):
+        return [x for x in payload if isinstance(x, dict)]
+    if not isinstance(payload, dict):
+        return []
+    for key in keys:
+        val = payload.get(key)
+        if isinstance(val, list):
+            return [x for x in val if isinstance(x, dict)]
+        if isinstance(val, dict):
+            for nested in ("rates", "rate", "data", "items"):
+                maybe = val.get(nested)
+                if isinstance(maybe, list):
+                    return [x for x in maybe if isinstance(x, dict)]
+            # dict keyed by id
+            out = []
+            for k, v in val.items():
+                if isinstance(v, dict):
+                    row = dict(v)
+                    row.setdefault("rateId", row.get("rateId") or row.get("id") or k)
+                    out.append(row)
+            if out:
+                return out
+    return []
+
+
 def fix_v1_rates_min_nights(api: str, prop: str) -> dict[str, Any]:
     status, body = v1_call("getRates", {}, api, prop)
-    rows = []
-    if isinstance(body, dict):
-        for key in ("getRates", "rates", "data"):
-            if isinstance(body.get(key), list):
-                rows = body[key]
-                break
-        if not rows and isinstance(body.get("getRates"), dict):
-            maybe = body["getRates"].get("rates")
-            if isinstance(maybe, list):
-                rows = maybe
+    rows = _as_list(body, "getRates", "setRates", "rates", "data")
+    if not rows and isinstance(body, list):
+        rows = [x for x in body if isinstance(x, dict)]
+    print(f"v1_getRates_http={status} rows={len(rows)}", flush=True)
     before = []
     patches = []
     for raw in rows:
@@ -358,17 +378,26 @@ def fix_v1_rates_min_nights(api: str, prop: str) -> dict[str, Any]:
                     "minNights": str(TARGET_MIN_STAY),
                 }
             )
+    # Deduplicate by rateId
+    seen = set()
+    uniq = []
+    for patch in patches:
+        rid = patch["rateId"]
+        if rid in seen:
+            continue
+        seen.add(rid)
+        uniq.append(patch)
+    patches = uniq
+    print(f"v1_rate_patches={len(patches)} sample={patches[:6]}", flush=True)
     write_status, write_body = (None, None)
     if patches:
         write_status, write_body = v1_call("setRates", {"setRates": patches}, api, prop)
     # Re-read
     status2, body2 = v1_call("getRates", {}, api, prop)
-    rows2 = []
-    if isinstance(body2, dict):
-        for key in ("getRates", "rates", "data"):
-            if isinstance(body2.get(key), list):
-                rows2 = body2[key]
-                break
+    rows2 = _as_list(body2, "getRates", "setRates", "rates", "data")
+    if not rows2 and isinstance(body2, list):
+        rows2 = [x for x in body2 if isinstance(x, dict)]
+    print(f"v1_getRates_after_http={status2} rows={len(rows2)}", flush=True)
     after = []
     for raw in rows2:
         if not isinstance(raw, dict):
