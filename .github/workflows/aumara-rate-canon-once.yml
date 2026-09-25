@@ -4,7 +4,8 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - "aumara/jobs/aumara-rate-canon-20260922.json"\n      - "aumara/config/rate-canonical.json"
+      - "aumara/jobs/aumara-rate-canon-20260922.json"
+      - "aumara/config/rate-canonical.json"
 
 permissions:
   contents: write
