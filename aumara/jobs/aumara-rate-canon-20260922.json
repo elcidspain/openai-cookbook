@@ -5,7 +5,8 @@
   "horizonThrough": "2027-12-31",
   "source": "aumara/config/rate-canonical.json",
   "requestedBy": "Ilya",
-  "requestedAt": "2026-09-25",
-  "revision": 3,
-  "verify": "full p1 read-back + legacy flat rates disabled"
+  "requestedAt": "2026-09-26",
+  "revision": 4,
+  "verify": "full p1 read-back + legacy flat rates disabled",
+  "reason": "Reapply canonical rates after 2026 holiday overlay and workflow trigger fix"
 }
