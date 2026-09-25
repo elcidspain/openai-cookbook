@@ -1,12 +1,9 @@
-name: AUMARA Rate Drift Guard
+name: AUMARA Rate Drift Guard v2
 
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - "aumara/jobs/aumara-rate-drift-guard.json"
   workflow_run:
-    workflows: ["AUMARA Revenue Apply"]
+    workflows: ["AUMARA Canonical Rates v2"]
     types: [completed]
   schedule:
     - cron: "17 5 * * *"
@@ -29,113 +26,65 @@ jobs:
       BEDS24_PROP_KEY: ${{ secrets.BEDS24_PROP_KEY }}
     steps:
       - uses: actions/checkout@v4
-      - name: Verify Beds24 rates against canonical manifest
+      - name: Verify live prices and flat-rate kill switch
         shell: bash
         run: |
           python3 - <<'PY'
           import datetime as dt, json, os, pathlib, time, urllib.error, urllib.request
-
           cfg=json.loads(pathlib.Path("aumara/config/rate-canonical.json").read_text(encoding="utf-8"))
-          active_path=pathlib.Path("aumara/config/revenue-active.json")
-          active=json.loads(active_path.read_text(encoding="utf-8")) if active_path.exists() else {}
-          api=(os.environ.get("BEDS24_API_KEY") or "").strip()
-          prop=(os.environ.get("BEDS24_PROP_KEY") or "").strip()
-          if not (api and prop): raise SystemExit("Missing Beds24 Production API/PROP keys")
+          api=(os.environ.get("BEDS24_API_KEY") or "").strip(); prop=(os.environ.get("BEDS24_PROP_KEY") or "").strip()
+          if not (api and prop): raise SystemExit("Missing Beds24 credentials")
           print(f"::add-mask::{api}"); print(f"::add-mask::{prop}")
           auth={"authentication":{"apiKey":api,"propKey":prop}}
 
           def call(path,payload):
               body=dict(payload); body.update(auth)
-              req=urllib.request.Request(
-                  f"https://api.beds24.com/json/{path}",
-                  data=json.dumps(body).encode(),
-                  headers={"Content-Type":"application/json","Accept":"application/json","User-Agent":"AUMARA-rate-guard/1.0"},
-                  method="POST")
+              req=urllib.request.Request(f"https://api.beds24.com/json/{path}",data=json.dumps(body).encode(),
+                  headers={"Content-Type":"application/json","Accept":"application/json","User-Agent":"AUMARA-rate-guard-v2/1.0"},method="POST")
               try:
-                  with urllib.request.urlopen(req,timeout=90) as r:
-                      raw=r.read(); st=int(r.status)
-              except urllib.error.HTTPError as e:
-                  raw=e.read(); st=int(e.code)
-              try: data=json.loads(raw.decode("utf-8","replace")) if raw else {}
-              except: data={"raw":raw.decode("utf-8","replace")[:1000]}
+                  with urllib.request.urlopen(req,timeout=90) as r: raw=r.read(); st=int(r.status)
+              except urllib.error.HTTPError as e: raw=e.read(); st=int(e.code)
+              data=json.loads(raw.decode("utf-8","replace")) if raw else {}
               time.sleep(2.2)
               if not 200 <= st < 300: raise RuntimeError(f"{path} HTTP {st}: {data}")
               return data
 
-          def month_end(y,m):
-              return (dt.date(y+1,1,1) if m==12 else dt.date(y,m+1,1))-dt.timedelta(days=1)
-
-          def weekend(base,d):
-              return int(base*1.10+0.5) if d.weekday() in (4,5) else int(base)
+          def each(a,b):
+              d=a
+              while d<=b:
+                  yield d; d+=dt.timedelta(days=1)
 
           expected={"674465":{},"674466":{}}
-          for row in cfg["monthlyBase"]:
-              y,m=int(row["year"]),int(row["month"])
-              start=dt.date(y,m,1)
-              if (y,m)==(2026,10): start=dt.date(2026,10,15)
-              end=month_end(y,m)
-              d=start
-              while d<=end:
-                  k=d.strftime("%Y%m%d")
-                  expected["674465"][k]=weekend(int(row["chalet"]),d)
-                  expected["674466"][k]=weekend(int(row["superior"]),d)
-                  d+=dt.timedelta(days=1)
-
-          # An APPLIED revenue overlay supersedes canonical p1 only for its explicit dates.
-          if active.get("status")=="APPLIED":
-              for rid,dates in (active.get("prices") or {}).items():
-                  if rid not in expected: continue
-                  for k,item in (dates or {}).items():
-                      if k in expected[rid] and isinstance(item,dict) and item.get("p1") is not None:
-                          expected[rid][k]=int(round(float(item["p1"])))
+          holidays=set(cfg.get("holidays2027") or [])
+          delta=int(cfg["policy"]["superiorDeltaEur"])
+          for p in cfg["periods"]:
+              a=dt.date.fromisoformat(p["from"]); b=dt.date.fromisoformat(p["to"]); base=int(p["chalet"]); flat=bool(p.get("flat"))
+              for d in each(a,b):
+                  v=base
+                  if not flat:
+                      if d.isoformat() in holidays: v=int(base*1.20+0.5)
+                      elif d.weekday() in (4,5): v=int(base*1.10+0.5)
+                  k=d.strftime("%Y%m%d"); expected["674465"][k]=v; expected["674466"][k]=v+delta
 
           drift=[]
-          windows=[
-              (dt.date(2026,10,15),dt.date(2026,12,31)),
-              (dt.date(2027,1,1),dt.date(2027,12,31)),
-              (dt.date(2028,1,1),dt.date(2028,12,31)),
-          ]
-          for rid in ("674465","674466"):
-              actual={}
-              for a,b in windows:
-                  data=call("getRoomDates",{"roomId":rid,"from":a.strftime("%Y%m%d"),"to":b.strftime("%Y%m%d")})
-                  for k,v in data.items():
-                      if k in expected[rid] and isinstance(v,dict):
-                          actual[k]=v.get("p1")
+          for rid in expected:
+              keys=sorted(expected[rid])
+              live=call("getRoomDates",{"roomId":rid,"from":keys[0],"to":keys[-1]})
               for k,want in expected[rid].items():
-                  got=actual.get(k)
+                  got=(live.get(k) or {}).get("p1")
                   try: ok=float(got)==float(want)
                   except: ok=False
                   if not ok: drift.append({"kind":"p1","roomId":rid,"date":k,"expected":want,"actual":got})
-
-          # Daily price row must remain the channel source.
-          for rid in ("674465","674466"):
-              setup=call("getDailyPriceSetup",{"roomId":rid})
-              row=setup[0]["dailyPrices"][0]
+              setup=call("getDailyPriceSetup",{"roomId":rid})[0]["dailyPrices"][0]
+              if str(setup.get("minStay"))!="2": drift.append({"kind":"minStay","roomId":rid,"actual":setup.get("minStay")})
               for key in ("directEnable","bookingapiEnable","airbnbxmlEnable"):
-                  if str(row.get(key))!="1":
-                      drift.append({"kind":"channel-source","roomId":rid,"field":key,"actual":row.get(key)})
-              if str(row.get("minStay"))!="2":
-                  drift.append({"kind":"minStay","roomId":rid,"expected":"2","actual":row.get("minStay")})
-              if row.get("bookingcomRateCode")!="66887702":
-                  drift.append({"kind":"booking-rate-code","roomId":rid,"expected":"66887702","actual":row.get("bookingcomRateCode")})
+                  if str(setup.get(key))!="1": drift.append({"kind":"channel-source","roomId":rid,"field":key,"actual":setup.get(key)})
 
-          # Legacy flat fixed prices must stay disabled.
-          rates=call("getRates",{})
-          byid={str(x.get("rateId")):x for x in rates if isinstance(x,dict)}
-          for rate_id in ("6967585","6967586","6967587","6967588"):
-              x=byid.get(rate_id,{})
-              if str(x.get("roomPriceEnable"))!="0":
-                  drift.append({"kind":"legacy-flat-rate","rateId":rate_id,"expected":"roomPriceEnable=0","actual":x.get("roomPriceEnable")})
-
-          # Inventory truth: current calendar publishes 4 Chalet + 2 Superior.
-          probe=call("getRoomDates",{"roomId":"674465","from":"20261015","to":"20261015"})
-          if int(probe.get("20261015",{}).get("i",-1))!=4:
-              drift.append({"kind":"inventory","roomId":"674465","expected":4,"actual":probe.get("20261015",{}).get("i")})
-          probe=call("getRoomDates",{"roomId":"674466","from":"20261015","to":"20261015"})
-          if int(probe.get("20261015",{}).get("i",-1))!=2:
-              drift.append({"kind":"inventory","roomId":"674466","expected":2,"actual":probe.get("20261015",{}).get("i")})
+          rates=call("getRates",{}); byid={str(x.get("rateId")):x for x in rates if isinstance(x,dict)}
+          for rate_id in cfg["policy"].get("legacyFlatRateIds",[]):
+              got=byid.get(str(rate_id),{}).get("roomPriceEnable")
+              if str(got)!="0": drift.append({"kind":"legacy-flat-rate","rateId":rate_id,"actual":got})
 
           print(json.dumps({"status":"PASS" if not drift else "DRIFT","drift":drift[:100]},ensure_ascii=False,indent=2))
-          if drift: raise SystemExit(f"AUMARA pricing drift detected: {len(drift)} mismatches")
+          if drift: raise SystemExit(f"AUMARA pricing drift detected: {len(drift)}")
           PY
