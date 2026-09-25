@@ -1,20 +1,11 @@
 {
-  "task": "AUMARA canonical rates 2026-2028",
+  "task": "AUMARA pricing v2 live apply",
   "propertyId": 324882,
-  "roomIds": {
-    "chalet": 674465,
-    "superiorChalet": 674466
-  },
-  "effectiveFrom": "2026-10-15",
-  "preserveMonths": [
-    7,
-    8
-  ],
-  "weekendUpliftPct": 10,
-  "rounding": "whole EUR",
-  "source": "AUMARA control tower seasonal target ADR",
+  "effectiveFrom": "2026-09-25",
+  "horizonThrough": "2027-12-31",
+  "source": "aumara/config/rate-canonical.json",
   "requestedBy": "Ilya",
-  "requestedAt": "2026-09-22",
-  "revision": 2,
-  "verify": "full read-back + July/August sentinels + committed evidence"
+  "requestedAt": "2026-09-25",
+  "revision": 3,
+  "verify": "full p1 read-back + legacy flat rates disabled"
 }
