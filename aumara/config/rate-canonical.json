@@ -8,8 +8,16 @@
   "effectiveFrom": "2026-09-25",
   "horizonThrough": "2027-12-31",
   "rooms": {
-    "chalet": {"roomId": 674465, "name": "Chalet", "units": 4},
-    "superiorChalet": {"roomId": 674466, "name": "Superior Chalet", "units": 2}
+    "chalet": {
+      "roomId": 674465,
+      "name": "Chalet",
+      "units": 4
+    },
+    "superiorChalet": {
+      "roomId": 674466,
+      "name": "Superior Chalet",
+      "units": 2
+    }
   },
   "policy": {
     "channelSource": "Beds24 Daily Prices",
@@ -19,27 +27,79 @@
     "oneNightMinStay": 1,
     "oneNightMaxStay": 1,
     "oneNightPremiumEur": 20,
-    "oneNightQuotaUnits": {"674465": 2, "674466": 1},
-    "oneNightChannels": ["Direct"],
+    "oneNightQuotaUnits": {
+      "674465": 2,
+      "674466": 1
+    },
+    "oneNightChannels": [
+      "Direct"
+    ],
     "superiorDeltaEur": 80,
-    "weekendDays": ["FRI", "SAT"],
+    "weekendDays": [
+      "FRI",
+      "SAT"
+    ],
     "weekendUpliftPct": 10,
     "holidayUpliftPct": 20,
     "rounding": "nearest whole EUR",
-    "precedence": ["specialFlat", "holiday", "weekend", "base"],
+    "precedence": [
+      "specialFlat",
+      "holiday",
+      "weekend",
+      "base"
+    ],
     "fixedFlatRatesForbidden": true,
-    "legacyFlatRateIds": ["6967585", "6967586", "6967587", "6967588"],
+    "legacyFlatRateIds": [
+      "6967585",
+      "6967586",
+      "6967587",
+      "6967588"
+    ],
     "automaticRevenueApply": false
   },
   "periods": [
-    {"from": "2026-09-25", "to": "2026-12-24", "chalet": 169},
-    {"from": "2026-12-25", "to": "2027-01-08", "chalet": 249, "flat": true, "name": "New Year"},
-    {"from": "2027-01-09", "to": "2027-03-31", "chalet": 169},
-    {"from": "2027-04-01", "to": "2027-05-31", "chalet": 179},
-    {"from": "2027-06-01", "to": "2027-09-15", "chalet": 199},
-    {"from": "2027-09-16", "to": "2027-10-31", "chalet": 218},
-    {"from": "2027-11-01", "to": "2027-11-30", "chalet": 177},
-    {"from": "2027-12-01", "to": "2027-12-31", "chalet": 229}
+    {
+      "from": "2026-09-25",
+      "to": "2026-12-24",
+      "chalet": 169
+    },
+    {
+      "from": "2026-12-25",
+      "to": "2027-01-08",
+      "chalet": 249,
+      "flat": true,
+      "name": "New Year"
+    },
+    {
+      "from": "2027-01-09",
+      "to": "2027-03-31",
+      "chalet": 169
+    },
+    {
+      "from": "2027-04-01",
+      "to": "2027-05-31",
+      "chalet": 179
+    },
+    {
+      "from": "2027-06-01",
+      "to": "2027-09-15",
+      "chalet": 199
+    },
+    {
+      "from": "2027-09-16",
+      "to": "2027-10-31",
+      "chalet": 218
+    },
+    {
+      "from": "2027-11-01",
+      "to": "2027-11-30",
+      "chalet": 177
+    },
+    {
+      "from": "2027-12-01",
+      "to": "2027-12-31",
+      "chalet": 229
+    }
   ],
   "holidays2027": [
     "2027-01-01",
@@ -60,6 +120,14 @@
     "Superior Chalet nightly price is Chalet nightly price plus EUR 80.",
     "Friday and Saturday use approximately +10%, rounded to whole EUR.",
     "Official Comunitat Valenciana holidays use +20%, except the New Year specialFlat period which remains flat.",
-    "Exact one-night unit quotas require inventory segmentation; Daily Price rows share room-type inventory."
-  ]
+    "Exact one-night unit quotas require inventory segmentation; Daily Price rows share room-type inventory.",
+    "2026 regional holiday overlay applies 9 Oct, 12 Oct, 8 Dec and 25 Dec; New Year flat still has precedence from 25 Dec."
+  ],
+  "holidays2026": [
+    "2026-10-09",
+    "2026-10-12",
+    "2026-12-08",
+    "2026-12-25"
+  ],
+  "holidaySource2026": "Comunitat Valenciana official 2026 labour-holiday calendar"
 }
