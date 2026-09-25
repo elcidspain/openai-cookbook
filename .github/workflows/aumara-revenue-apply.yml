@@ -5,9 +5,6 @@ on:
   push:
     paths:
       - "aumara/jobs/aumara-revenue-apply.json"
-  workflow_run:
-    workflows: ["AUMARA Revenue Shadow"]
-    types: [completed]
 
 permissions:
   contents: write
@@ -18,7 +15,6 @@ concurrency:
 
 jobs:
   apply:
-    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     environment: Production
@@ -36,6 +32,9 @@ jobs:
           import urllib.error, urllib.request
 
           root=pathlib.Path(".")
+          canon=json.loads((root/"aumara/config/rate-canonical.json").read_text(encoding="utf-8"))
+          if not bool(canon.get("policy",{}).get("automaticRevenueApply",False)):
+              raise SystemExit("Revenue apply disabled by AUMARA pricing policy")
           shadow_path=root/"aumara/evidence/aumara-revenue-shadow.json"
           policy_path=root/"aumara/config/revenue-policy.json"
           active_path=root/"aumara/config/revenue-active.json"
