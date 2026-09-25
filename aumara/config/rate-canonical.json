@@ -5,7 +5,7 @@
     "beds24PropertyId": 324882,
     "currency": "EUR"
   },
-  "effectiveFrom": "2026-09-26",
+  "effectiveFrom": "2026-09-25",
   "horizonThrough": "2027-12-31",
   "rooms": {
     "chalet": {"roomId": 674465, "name": "Chalet", "units": 4},
@@ -32,7 +32,7 @@
     "automaticRevenueApply": false
   },
   "periods": [
-    {"from": "2026-09-26", "to": "2026-12-24", "chalet": 169},
+    {"from": "2026-09-25", "to": "2026-12-24", "chalet": 169},
     {"from": "2026-12-25", "to": "2027-01-08", "chalet": 249, "flat": true, "name": "New Year"},
     {"from": "2027-01-09", "to": "2027-03-31", "chalet": 169},
     {"from": "2027-04-01", "to": "2027-05-31", "chalet": 179},
