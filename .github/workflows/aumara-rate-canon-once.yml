@@ -37,7 +37,7 @@ jobs:
           auth={"authentication":{"apiKey":api,"propKey":prop}}
           rooms={"674465":"Chalet","674466":"Superior Chalet"}
           delta=int(cfg["policy"]["superiorDeltaEur"])
-          holidays=set(cfg.get("holidays2027") or [])
+          holidays=set((cfg.get("holidays2026") or []) + (cfg.get("holidays2027") or []))
           legacy=[str(x) for x in cfg["policy"].get("legacyFlatRateIds",[])]
           evidence={"status":"RUNNING","generatedAtUtc":dt.datetime.now(dt.timezone.utc).isoformat(),
                     "configSchema":cfg.get("schemaVersion"),"before":{},"writes":{},"after":{},
