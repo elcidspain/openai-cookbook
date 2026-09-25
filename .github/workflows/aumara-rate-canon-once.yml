@@ -1,4 +1,4 @@
-name: AUMARA Canonical Rates 2026-2028
+name: AUMARA Canonical Rates v2
 
 on:
   workflow_dispatch:
@@ -10,7 +10,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: aumara-rate-canon-324882
+  group: aumara-rate-write-324882
   cancel-in-progress: false
 
 jobs:
@@ -19,268 +19,146 @@ jobs:
     timeout-minutes: 20
     environment: Production
     env:
-      BEDS24_REFRESH_CREDENTIAL: ${{ secrets.BEDS24_REFRESH_CREDENTIAL }}
       BEDS24_API_KEY: ${{ secrets.BEDS24_API_KEY }}
       BEDS24_PROP_KEY: ${{ secrets.BEDS24_PROP_KEY }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Apply and verify canonical AUMARA rates
+      - uses: actions/checkout@v4
+      - name: Apply AUMARA pricing v2 and verify
         shell: bash
         run: |
           python3 - <<'PY'
-          import datetime as dt
-          import json
-          import os
-          import pathlib
-          import sys
-          import time
-          import urllib.error
-          import urllib.request
+          import datetime as dt, json, os, pathlib, time, urllib.error, urllib.request
 
-          PROPERTY_ID = 324882
-          ROOMS = {"Chalet": 674465, "Superior Chalet": 674466}
-          WORK = pathlib.Path(os.environ.get("RUNNER_TEMP", "/tmp")) / "aumara-rate-canon"
-          WORK.mkdir(parents=True, exist_ok=True)
-          EVIDENCE = WORK / "evidence.json"
+          cfg=json.loads(pathlib.Path("aumara/config/rate-canonical.json").read_text(encoding="utf-8"))
+          api=(os.environ.get("BEDS24_API_KEY") or "").strip()
+          prop=(os.environ.get("BEDS24_PROP_KEY") or "").strip()
+          if not (api and prop): raise SystemExit("Missing Beds24 Production API/PROP keys")
+          print(f"::add-mask::{api}"); print(f"::add-mask::{prop}")
+          auth={"authentication":{"apiKey":api,"propKey":prop}}
+          rooms={"674465":"Chalet","674466":"Superior Chalet"}
+          delta=int(cfg["policy"]["superiorDeltaEur"])
+          holidays=set(cfg.get("holidays2027") or [])
+          legacy=[str(x) for x in cfg["policy"].get("legacyFlatRateIds",[])]
+          evidence={"status":"RUNNING","generatedAtUtc":dt.datetime.now(dt.timezone.utc).isoformat(),
+                    "configSchema":cfg.get("schemaVersion"),"before":{},"writes":{},"after":{},
+                    "dailyPriceSetup":{},"legacyFlatRates":{},"mismatches":[],"samples":{}}
 
-          RATES = {
-              (2026,10):(210,250), (2026,11):(170,250), (2026,12):(220,310),
-              (2027,1):(220,320), (2027,2):(220,320), (2027,3):(230,330),
-              (2027,4):(240,340), (2027,5):(250,350), (2027,6):(166,260),
-              (2027,9):(218,302), (2027,10):(218,260), (2027,11):(177,260),
-              (2027,12):(229,322),
-              (2028,1):(229,333), (2028,2):(229,333), (2028,3):(239,343),
-              (2028,4):(250,354), (2028,5):(260,364), (2028,6):(173,270),
-              (2028,9):(227,314), (2028,10):(227,270), (2028,11):(184,270),
-              (2028,12):(238,335),
-          }
-
-          def mask(v):
-              if v:
-                  print(f"::add-mask::{v}", flush=True)
-
-          api_key = (os.environ.get("BEDS24_API_KEY") or "").strip().strip('"').strip("'")
-          prop_key = (os.environ.get("BEDS24_PROP_KEY") or "").strip().strip('"').strip("'")
-          refresh = (os.environ.get("BEDS24_REFRESH_CREDENTIAL") or "").strip().strip('"').strip("'")
-          mask(api_key); mask(prop_key); mask(refresh)
-          access_token = ""
-
-          evidence = {
-              "property": PROPERTY_ID,
-              "rooms": ROOMS,
-              "generated_at_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
-              "policy": "Canonical monthly target ADR; Fri/Sat +10%; whole EUR; Jul/Aug untouched; starts 2026-10-15",
-              "before": {},
-              "after": {},
-              "write_status": {},
-              "mismatches": [],
-              "sentinels_before": {},
-              "sentinels_after": {},
-          }
-
-          def save():
-              EVIDENCE.write_text(json.dumps(evidence, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-
-          def request_json(url, payload=None, headers=None, method=None):
-              data = None if payload is None else json.dumps(payload).encode()
-              req = urllib.request.Request(
-                  url,
-                  data=data,
-                  headers={
-                      "Accept": "application/json",
-                      "User-Agent": "AUMARA-rate-canon/1.0",
-                      **({"Content-Type": "application/json"} if data is not None else {}),
-                      **(headers or {}),
-                  },
-                  method=method or ("POST" if data is not None else "GET"),
-              )
+          def call(path,payload,auth_on=True):
+              body=dict(payload)
+              if auth_on: body.update(auth)
+              req=urllib.request.Request(
+                  f"https://api.beds24.com/json/{path}",
+                  data=json.dumps(body).encode(),
+                  headers={"Content-Type":"application/json","Accept":"application/json","User-Agent":"AUMARA-rate-canon-v2/1.0"},
+                  method="POST")
               try:
-                  with urllib.request.urlopen(req, timeout=90) as r:
-                      raw = r.read(); status = int(r.status)
+                  with urllib.request.urlopen(req,timeout=90) as r:
+                      raw=r.read(); st=int(r.status)
               except urllib.error.HTTPError as e:
-                  raw = e.read(); status = int(e.code)
-              try:
-                  body = json.loads(raw.decode("utf-8", "replace")) if raw else {}
-              except Exception:
-                  body = {"raw": raw.decode("utf-8", "replace")[:1000]}
-              return status, body
-
-          if not (api_key and prop_key):
-              if not refresh:
-                  raise SystemExit("No Beds24 credentials in Production environment")
-              st, body = request_json(
-                  "https://beds24.com/api/v2/authentication/token",
-                  headers={"refreshToken": refresh},
-                  method="GET",
-              )
-              access_token = (body.get("token") or "").strip() if isinstance(body, dict) else ""
-              mask(access_token)
-              if not (200 <= st < 300 and access_token):
-                  raise SystemExit(f"Beds24 token exchange failed HTTP {st}")
-
-          def auth_attempts():
-              if api_key and prop_key:
-                  return [({"authentication":{"apiKey":api_key,"propKey":prop_key}}, {})]
-              return [
-                  ({"authentication":{"token":access_token}}, {}),
-                  ({}, {"token":access_token}),
-              ]
-
-          def v1(path, payload):
-              last = (0, {})
-              for auth_payload, auth_headers in auth_attempts():
-                  body = dict(payload)
-                  body.update(auth_payload)
-                  st, out = request_json(
-                      f"https://api.beds24.com/json/{path}",
-                      body,
-                      headers=auth_headers,
-                      method="POST",
-                  )
-                  last = (st, out)
-                  if 200 <= st < 300:
-                      time.sleep(2.2)
-                      return st, out
+                  raw=e.read(); st=int(e.code)
+              try: data=json.loads(raw.decode("utf-8","replace")) if raw else {}
+              except: data={"raw":raw.decode("utf-8","replace")[:1000]}
               time.sleep(2.2)
-              return last
+              if not 200 <= st < 300: raise RuntimeError(f"{path} HTTP {st}: {data}")
+              return data
 
-          def iter_dates(start, end):
-              d = start
-              while d <= end:
+          def dates(a,b):
+              d=a
+              while d<=b:
                   yield d
-                  d += dt.timedelta(days=1)
+                  d+=dt.timedelta(days=1)
 
-          def whole_weekend(base, d):
-              return int(base * 1.10 + 0.5) if d.weekday() in (4,5) else int(base)
+          expected={"674465":{},"674466":{}}
+          for p in cfg["periods"]:
+              a=dt.date.fromisoformat(p["from"]); b=dt.date.fromisoformat(p["to"])
+              base=int(p["chalet"]); flat=bool(p.get("flat"))
+              for d in dates(a,b):
+                  chalet=base
+                  if not flat:
+                      if d.isoformat() in holidays:
+                          chalet=int(base*1.20+0.5)
+                      elif d.weekday() in (4,5):
+                          chalet=int(base*1.10+0.5)
+                  k=d.strftime("%Y%m%d")
+                  expected["674465"][k]=chalet
+                  expected["674466"][k]=chalet+delta
 
-          expected = {name:{} for name in ROOMS}
-          for (year, month), pair in sorted(RATES.items()):
-              start = dt.date(year, month, 1)
-              if (year, month) == (2026,10):
-                  start = dt.date(2026,10,15)
-              end = (dt.date(year+1,1,1) if month == 12 else dt.date(year,month+1,1)) - dt.timedelta(days=1)
-              for d in iter_dates(start, end):
-                  expected["Chalet"][d.strftime("%Y%m%d")] = whole_weekend(pair[0], d)
-                  expected["Superior Chalet"][d.strftime("%Y%m%d")] = whole_weekend(pair[1], d)
-
-          def get_chunk(room_id, start, end):
-              st, body = v1("getRoomDates", {
-                  "roomId": room_id,
-                  "from": start.strftime("%Y%m%d"),
-                  "to": end.strftime("%Y%m%d"),
-              })
-              if not 200 <= st < 300:
-                  raise RuntimeError(f"getRoomDates {room_id} HTTP {st}: {body}")
-              return body if isinstance(body, dict) else {}
-
-          # Backup existing p1 for all affected dates in three API windows per room.
-          sentinels = [dt.date(2027,7,1), dt.date(2027,8,1), dt.date(2028,7,1), dt.date(2028,8,1)]
-          windows = [
-              (dt.date(2026,10,15), dt.date(2026,12,31)),
-              (dt.date(2027,1,1), dt.date(2027,12,31)),
-              (dt.date(2028,1,1), dt.date(2028,12,31)),
-          ]
-          for name, room_id in ROOMS.items():
-              current = {}
-              for a,b in windows:
-                  chunk = get_chunk(room_id, a, b)
-                  for k,v in chunk.items():
-                      if k in expected[name] and isinstance(v, dict):
-                          current[k] = v.get("p1")
-              evidence["before"][name] = current
-              evidence["sentinels_before"][name] = {}
-              for sd in sentinels:
-                  one = get_chunk(room_id, sd, sd)
-                  item = one.get(sd.strftime("%Y%m%d"), {}) if isinstance(one, dict) else {}
-                  evidence["sentinels_before"][name][sd.isoformat()] = item.get("p1") if isinstance(item, dict) else None
-              save()
-
-          # One write per room; only p1 is changed. Availability/min-stay/overrides are untouched.
-          for name, room_id in ROOMS.items():
-              dates = {k: {"p1": str(v)} for k,v in expected[name].items()}
-              st, body = v1("setRoomDates", {"roomId": room_id, "dates": dates})
-              evidence["write_status"][name] = {"http": st, "response": body}
-              save()
-              if not 200 <= st < 300:
-                  raise RuntimeError(f"setRoomDates {name} HTTP {st}: {body}")
-
-          # Full read-back verification of every changed date.
-          for name, room_id in ROOMS.items():
-              actual = {}
-              for a,b in windows:
-                  chunk = get_chunk(room_id, a, b)
-                  for k,v in chunk.items():
-                      if k in expected[name] and isinstance(v, dict):
-                          actual[k] = v.get("p1")
-              evidence["after"][name] = actual
-              evidence["sentinels_after"][name] = {}
-              for sd in sentinels:
-                  one = get_chunk(room_id, sd, sd)
-                  item = one.get(sd.strftime("%Y%m%d"), {}) if isinstance(one, dict) else {}
-                  evidence["sentinels_after"][name][sd.isoformat()] = item.get("p1") if isinstance(item, dict) else None
-                  if evidence["sentinels_after"][name][sd.isoformat()] != evidence["sentinels_before"][name][sd.isoformat()]:
-                      evidence["mismatches"].append({
-                          "room":name, "date":sd.isoformat(), "kind":"preserve_jul_aug",
-                          "before":evidence["sentinels_before"][name][sd.isoformat()],
-                          "after":evidence["sentinels_after"][name][sd.isoformat()]
-                      })
-              for k,want in expected[name].items():
-                  got = actual.get(k)
-                  try:
-                      ok = float(got) == float(want)
-                  except Exception:
-                      ok = False
-                  if not ok:
-                      evidence["mismatches"].append({"room":name,"date":k,"expected":want,"actual":got})
-              save()
-
+          # Safety: keep existing two-night Daily Price row as the channel source.
+          for rid,name in rooms.items():
+              setup=call("getDailyPriceSetup",{"roomId":rid})
+              evidence["dailyPriceSetup"][rid]=setup
+              row=setup[0]["dailyPrices"][0]
+              if str(row.get("minStay"))!="2":
+                  evidence["mismatches"].append({"roomId":rid,"kind":"minStay","expected":"2","actual":row.get("minStay")})
+              for key in ("directEnable","bookingapiEnable","airbnbxmlEnable"):
+                  if str(row.get(key))!="1":
+                      evidence["mismatches"].append({"roomId":rid,"kind":"channel-source","field":key,"actual":row.get(key)})
+              if row.get("bookingcomRateCode")!="66887702":
+                  evidence["mismatches"].append({"roomId":rid,"kind":"booking-rate-code","actual":row.get("bookingcomRateCode")})
           if evidence["mismatches"]:
-              print(json.dumps(evidence["mismatches"][:20], ensure_ascii=False))
-              raise SystemExit(f"Verification failed: {len(evidence['mismatches'])} mismatches")
+              raise SystemExit("Safety gate failed: "+json.dumps(evidence["mismatches"],ensure_ascii=False))
 
-          evidence["status"] = "SUCCESS"
-          save()
-          print(json.dumps({
-              "status":"SUCCESS",
-              "property":PROPERTY_ID,
-              "changed_dates":{k:len(v) for k,v in expected.items()},
-              "mismatches":0,
-              "samples":{
-                  "2026-10-15":{n: evidence["after"][n].get("20261015") for n in ROOMS},
-                  "2026-10-16":{n: evidence["after"][n].get("20261016") for n in ROOMS},
-                  "2026-10-17":{n: evidence["after"][n].get("20261017") for n in ROOMS},
-                  "2027-07-01":"untouched",
-                  "2028-08-01":"untouched",
-              }
-          }, ensure_ascii=False))
+          # Capture current live p1.
+          for rid in rooms:
+              keys=sorted(expected[rid]); a=keys[0]; b=keys[-1]
+              live=call("getRoomDates",{"roomId":rid,"from":a,"to":b})
+              evidence["before"][rid]={k:(live.get(k) or {}).get("p1") for k in keys}
+
+          # Write only the Daily Price p1 grid.
+          for rid in rooms:
+              payload={k:{"p1":str(v)} for k,v in expected[rid].items()}
+              out=call("setRoomDates",{"roomId":rid,"dates":payload})
+              evidence["writes"][rid]={"count":len(payload),"response":out}
+
+          # Disable the known flat fixed rates that caused 259/329 override.
+          rates=call("getRates",{})
+          byid={str(x.get("rateId")):x for x in rates if isinstance(x,dict)}
+          for rate_id in legacy:
+              x=byid.get(rate_id,{})
+              evidence["legacyFlatRates"][rate_id]={"before":x.get("roomPriceEnable"),"roomPrice":x.get("roomPrice")}
+              if str(x.get("roomPriceEnable"))!="0":
+                  out=call("setRate",{"action":"modify","rateId":rate_id,"roomId":str(x.get("roomId")),"roomPriceEnable":"0"})
+                  evidence["legacyFlatRates"][rate_id]["write"]=out
+
+          # Full read-back verification.
+          for rid in rooms:
+              keys=sorted(expected[rid]); a=keys[0]; b=keys[-1]
+              live=call("getRoomDates",{"roomId":rid,"from":a,"to":b})
+              evidence["after"][rid]={k:(live.get(k) or {}).get("p1") for k in keys}
+              for k,want in expected[rid].items():
+                  got=(live.get(k) or {}).get("p1")
+                  try: ok=float(got)==float(want)
+                  except: ok=False
+                  if not ok: evidence["mismatches"].append({"roomId":rid,"date":k,"expected":want,"actual":got})
+
+          rates=call("getRates",{})
+          byid={str(x.get("rateId")):x for x in rates if isinstance(x,dict)}
+          for rate_id in legacy:
+              got=byid.get(rate_id,{}).get("roomPriceEnable")
+              evidence["legacyFlatRates"].setdefault(rate_id,{})["after"]=got
+              if str(got)!="0":
+                  evidence["mismatches"].append({"rateId":rate_id,"expected":"roomPriceEnable=0","actual":got})
+
+          sample_dates=["20260926","20261002","20261224","20261225","20270101","20270109","20270319","20270402","20270604","20270917","20271105","20271203"]
+          for k in sample_dates:
+              evidence["samples"][k]={rid:evidence["after"][rid].get(k) for rid in rooms}
+
+          evidence["status"]="SUCCESS" if not evidence["mismatches"] else "FAILED"
+          out=pathlib.Path("aumara/evidence/aumara-rate-canon-v2.json")
+          out.parent.mkdir(parents=True,exist_ok=True)
+          out.write_text(json.dumps(evidence,indent=2,ensure_ascii=False)+"\n",encoding="utf-8")
+          print(json.dumps({"status":evidence["status"],"writes":{rid:x["count"] for rid,x in evidence["writes"].items()},
+                            "samples":evidence["samples"],"mismatches":evidence["mismatches"][:20]},ensure_ascii=False,indent=2))
+          if evidence["mismatches"]: raise SystemExit(f"Verification failed: {len(evidence['mismatches'])} mismatches")
           PY
 
-      - name: Publish sanitized rate evidence
+      - name: Commit pricing evidence
         if: always()
         shell: bash
         run: |
-          mkdir -p aumara/evidence
-          src="${RUNNER_TEMP}/aumara-rate-canon/evidence.json"
-          dst="aumara/evidence/aumara-rate-canon-20260922.json"
-          if [ -f "$src" ]; then
-            cp "$src" "$dst"
-          else
-            printf '%s\n' '{"status":"NO_EVIDENCE","task":"AUMARA canonical rates 2026-2028"}' > "$dst"
-          fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add "$dst"
-          git diff --cached --quiet || git commit -m "Record AUMARA rate sync evidence"
+          git add aumara/evidence/aumara-rate-canon-v2.json
+          git diff --cached --quiet || git commit -m "Record AUMARA pricing v2 evidence"
           git pull --rebase origin main
           git push origin HEAD:main
-
-      - name: Upload rate evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: aumara-rate-canon-20260922
-          path: ${{ runner.temp }}/aumara-rate-canon/evidence.json
-          if-no-files-found: warn
-          retention-days: 14
