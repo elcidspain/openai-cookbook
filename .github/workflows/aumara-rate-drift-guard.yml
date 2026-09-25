@@ -55,7 +55,7 @@ jobs:
                   yield d; d+=dt.timedelta(days=1)
 
           expected={"674465":{},"674466":{}}
-          holidays=set(cfg.get("holidays2027") or [])
+          holidays=set((cfg.get("holidays2026") or []) + (cfg.get("holidays2027") or []))
           delta=int(cfg["policy"]["superiorDeltaEur"])
           for p in cfg["periods"]:
               a=dt.date.fromisoformat(p["from"]); b=dt.date.fromisoformat(p["to"]); base=int(p["chalet"]); flat=bool(p.get("flat"))
