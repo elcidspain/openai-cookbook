@@ -76,7 +76,7 @@ jobs:
                   except: ok=False
                   if not ok: drift.append({"kind":"p1","roomId":rid,"date":k,"expected":want,"actual":got})
               setup=call("getDailyPriceSetup",{"roomId":rid})[0]["dailyPrices"][0]
-              if str(setup.get("minStay"))!="2": drift.append({"kind":"minStay","roomId":rid,"actual":setup.get("minStay")})
+              if str(setup.get("minStay"))!="1": drift.append({"kind":"minStay","roomId":rid,"actual":setup.get("minStay")})
               for key in ("directEnable","bookingapiEnable","airbnbxmlEnable"):
                   if str(setup.get(key))!="1": drift.append({"kind":"channel-source","roomId":rid,"field":key,"actual":setup.get(key)})
 

@@ -84,13 +84,13 @@ jobs:
                   expected["674465"][k]=chalet
                   expected["674466"][k]=chalet+delta
 
-          # Safety: keep existing two-night Daily Price row as the channel source.
+          # Safety: keep existing one-night Daily Price row as the channel source.
           for rid,name in rooms.items():
               setup=call("getDailyPriceSetup",{"roomId":rid})
               evidence["dailyPriceSetup"][rid]=setup
               row=setup[0]["dailyPrices"][0]
-              if str(row.get("minStay"))!="2":
-                  evidence["mismatches"].append({"roomId":rid,"kind":"minStay","expected":"2","actual":row.get("minStay")})
+              if str(row.get("minStay"))!="1":
+                  evidence["mismatches"].append({"roomId":rid,"kind":"minStay","expected":"1","actual":row.get("minStay")})
               for key in ("directEnable","bookingapiEnable","airbnbxmlEnable"):
                   if str(row.get(key))!="1":
                       evidence["mismatches"].append({"roomId":rid,"kind":"channel-source","field":key,"actual":row.get(key)})
