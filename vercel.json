@@ -90,6 +90,13 @@
       "dest": "/elcid-site/.well-known/$1"
     },
     {
+      "src": "^/aumara(/.*)?$",
+      "status": 308,
+      "headers": {
+        "Location": "https://www.aumara.me/"
+      }
+    },
+    {
       "src": "^/staff/?$",
       "dest": "/staff/index.html"
     },
