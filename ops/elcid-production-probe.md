@@ -1,13 +1,13 @@
 # EL CID / AUMARA production probe
 
-- Checked UTC: 2026-09-20T23:18:19Z
-- Commit: 6e9d15f6410d34619ba5986273f4f791924f9dd9
+- Checked UTC: 2026-09-29T18:37:04Z
+- Commit: b6a21a52497a5b4b7d2db498a5630ce6d34e0742
 - Trigger: workflow_run
 - Fully operational: **no**
 
 ## Root
 - URL: https://elcidspain.com/
-- curl_exit|http|final_url|content_type|bytes: `0|200|https://www.elcidspain.com/|text/html; charset=utf-8|13673`
+- curl_exit|http|final_url|content_type|bytes: `0|200|https://www.elcidspain.com/|text/html; charset=utf-8|13687`
 - expanded release marker: **no**
 - secondary section marker: **no**
 - AUMARA walkthrough link: **no**
@@ -26,6 +26,6 @@
 
 ## Beds24
 - URL: https://beds24.com/booking2.php?propid=324882
-- curl_exit|http|final_url|content_type|bytes: `0|200|https://beds24.com/booking2.php?propid=324882|text/html; charset=utf-8|118386`
+- curl_exit|http|final_url|content_type|bytes: `0|200|https://beds24.com/booking2.php?propid=324882|text/html; charset=utf-8|119970`
 
 ## Errors
