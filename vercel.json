@@ -1,7 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "node scripts/generate-elcid-oauth-key.mjs",
-  "trailingSlash": false,
   "redirects": [
     {
       "source": "/aumara",
@@ -15,6 +14,40 @@
     }
   ],
   "routes": [
+    {
+      "src": "^/(?:about-us|terms-conditions|en-gb/rooms|nuestra-historia|restaurant-menu|es-es/booking|experiences|wine-club|terroirs|demo-design-system|shop|ru-ru|product-category|product)(?:/.*)?$",
+      "status": 410,
+      "headers": {
+        "Content-Type": "text/plain; charset=utf-8",
+        "X-Robots-Tag": "noindex"
+      },
+      "dest": "/elcid-site/gone.txt"
+    },
+    {
+      "src": "^/(?:[0-9]{4}/[0-9]{2}/[0-9]{2}/)?hello-world(?:/.*)?$",
+      "status": 410,
+      "headers": {
+        "Content-Type": "text/plain; charset=utf-8",
+        "X-Robots-Tag": "noindex"
+      },
+      "dest": "/elcid-site/gone.txt"
+    },
+    {
+      "src": "^/[0-9]{4}/[0-9]{2}/[0-9]{2}/post[0-9]+(?:/.*)?$",
+      "status": 410,
+      "headers": {
+        "Content-Type": "text/plain; charset=utf-8",
+        "X-Robots-Tag": "noindex"
+      },
+      "dest": "/elcid-site/gone.txt"
+    },
+    {
+      "src": "^/(.*)/$",
+      "headers": {
+        "Location": "/$1"
+      },
+      "status": 308
+    },
     {
       "src": "^/$",
       "has": [

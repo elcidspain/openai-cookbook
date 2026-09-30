@@ -149,6 +149,135 @@ if not any(item.get("source") in ("/aumara", "/aumara/") and item.get("destinati
     fail("AUMARA canonical redirect missing")
 if not any(item.get("src") == "^/.*$" and item.get("status") == 404 for item in routes):
     fail("production routing does not fail closed for unrelated repository files")
+if "trailingSlash" in vercel:
+    fail("trailingSlash must stay unset so stale WordPress paths can return 410 before slash redirects")
+
+gone_routes = [item for item in routes if item.get("status") == 410 and item.get("dest") == "/elcid-site/gone.txt"]
+if len(gone_routes) != 3:
+    fail("expected three stale WordPress 410 routes")
+slash_route = next((item for item in routes if item.get("src") == "^/(.*)/$" and item.get("status") == 308), None)
+if not slash_route or slash_route.get("headers", {}).get("Location") != "/$1":
+    fail("non-stale trailing-slash 308 missing")
+gone_indexes = [routes.index(item) for item in gone_routes]
+slash_index = routes.index(slash_route)
+catch_all_index = next(i for i, item in enumerate(routes) if item.get("src") == "^/.*$" and item.get("status") == 404)
+if max(gone_indexes) >= slash_index or slash_index >= catch_all_index:
+    fail("410 routes must run before the trailing-slash 308 and the 404 catch-all")
+if not (ROOT / "gone.txt").is_file():
+    fail("410 response body missing")
+
+def first_route(path):
+    for item in routes:
+        if re.search(item.get("src", ""), path):
+            return item
+    return None
+
+gone_paths = [
+    "/about-us",
+    "/about-us/",
+    "/terms-conditions",
+    "/terms-conditions/",
+    "/shop",
+    "/shop/",
+    "/shop/cart",
+    "/shop/cart/",
+    "/en-gb/rooms",
+    "/en-gb/rooms/",
+    "/ru-ru",
+    "/ru-ru/",
+    "/ru-ru/rooms",
+    "/ru-ru/privacy-policy",
+    "/experiences",
+    "/experiences/",
+    "/experiences/wine-tasting",
+    "/wine-club",
+    "/wine-club/",
+    "/terroirs",
+    "/terroirs/",
+    "/demo-design-system",
+    "/demo-design-system/",
+    "/demo-design-system/typography",
+    "/nuestra-historia",
+    "/nuestra-historia/",
+    "/restaurant-menu",
+    "/restaurant-menu/",
+    "/es-es/booking",
+    "/es-es/booking/",
+    "/product/seven-case-2",
+    "/product/seven-case-2/",
+    "/product-category/uncategorized",
+    "/product-category/uncategorized/",
+    "/hello-world",
+    "/hello-world/",
+    "/2025/07/31/hello-world",
+    "/2025/07/31/hello-world/",
+    "/2021/05/02/post001",
+    "/2021/05/02/post002",
+    "/2021/05/02/post003/",
+    "/2021/05/03/post008",
+]
+for path in gone_paths:
+    match = first_route(path)
+    if not match or match.get("status") != 410:
+        fail(f"stale path is not 410 in one hop: {path}")
+
+kept_paths = {
+    "/": 200,
+    "/legal.html": 200,
+    "/privacy.html": 200,
+    "/cookies.html": 200,
+    "/styles.css": 200,
+    "/robots.txt": 200,
+    "/sitemap.xml": 200,
+    "/llms.txt": 200,
+    "/auth.md": 200,
+    "/mcp": 200,
+    "/a2a": 200,
+    "/legal/": 308,
+    "/privacy.html/": 308,
+    "/aumara/": 308,
+    "/en": 404,
+    "/en/": 308,
+    "/privacy": 404,
+    "/privacy-policy": 404,
+    "/contact": 404,
+    "/contact/": 308,
+    "/heart-and-blood-vessels/alcohol-and-blood-pressure-medicine-m04cbq": 404,
+    "/products": 404,
+    "/shopping": 404,
+    "/ru-rules": 404,
+    "/en-gb": 404,
+    "/es-es": 404,
+}
+for path, expected in kept_paths.items():
+    match = first_route(path)
+    if expected == 410:
+        status = 410 if match and match.get("status") == 410 else None
+    elif expected == 308:
+        status = match.get("status") if match else None
+        location = None
+        if match:
+            found = re.search(match.get("src", ""), path)
+            location_template = match.get("headers", {}).get("Location", "")
+            location = location_template
+            if found:
+                for group_index, group in enumerate(found.groups(), start=1):
+                    location = location.replace(f"${group_index}", group or "")
+        if location != "/" + path.strip("/"):
+            fail(f"trailing slash redirect changed: {path} -> {location}")
+    elif expected == 404:
+        status = match.get("status") if match else None
+    else:
+        status = 200 if match and match.get("status") != 410 and match.get("src") != "^/(.*)/$" and match.get("src") != "^/.*$" else (match.get("status") if match else None)
+    if status != expected:
+        fail(f"unrelated path changed: {path} expected {expected} got {status} via {match.get('src') if match else None}")
+
+aumara = first_route("/aumara")
+if not aumara or aumara.get("status") != 308 or aumara.get("headers", {}).get("Location") != "https://www.aumara.me/":
+    fail("AUMARA path redirect changed")
+aumara_nested = first_route("/aumara/explore")
+if not aumara_nested or aumara_nested.get("headers", {}).get("Location") != "https://www.aumara.me/":
+    fail("AUMARA nested redirect changed")
 header_route = next((item for item in routes if item.get("src") == "^/$" and item.get("headers") and item.get("continue")), None)
 if not header_route or "Content-Signal" not in header_route.get("headers", {}) or "Link" not in header_route.get("headers", {}):
     fail("production discovery headers missing")
@@ -160,5 +289,5 @@ print("conversion=booking drawer + Booking.com + verified WhatsApp")
 print("studio=verified kitchen + living area + bedroom + bathroom")
 print("discovery=robots + sitemap + llms + Markdown negotiation + Agent Skills + WebMCP + Link headers")
 print("policies=legal + privacy + cookies")
-print("routes=/->EL CID HTML/Markdown, /aumara/->www.aumara.me")
+print("routes=/->EL CID HTML/Markdown, /aumara/->www.aumara.me, stale WordPress paths->410")
 print("EL CID production static site checks: PASS")
