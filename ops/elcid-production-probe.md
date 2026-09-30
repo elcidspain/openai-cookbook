@@ -1,7 +1,7 @@
 # EL CID / AUMARA production probe
 
-- Checked UTC: 2026-09-29T18:37:04Z
-- Commit: b6a21a52497a5b4b7d2db498a5630ce6d34e0742
+- Checked UTC: 2026-09-30T18:06:21Z
+- Commit: 6c1d06b3ded85fb4e48d1fc30efbd69b5173ca3d
 - Trigger: workflow_run
 - Fully operational: **no**
 
@@ -14,18 +14,18 @@
 
 ## AUMARA
 - URL: https://elcidspain.com/aumara/
-- curl_exit|http|final_url|content_type|bytes: `0|404|https://www.elcidspain.com/aumara|text/plain; charset=utf-8|79`
+- curl_exit|http|final_url|content_type|bytes: `0|200|https://www.aumara.me/|text/html; charset=utf-8|49018`
 - exact page marker: **no**
 - node-01 reference: **no**
 - node-08 reference: **no**
-- Beds24 reference: **no**
+- Beds24 reference: **yes**
 
 ## Walkthrough clips
-- node-01 curl_exit|http|final_url|content_type|bytes: `0|404|https://www.elcidspain.com/aumara/media/nodes/node-01.mp4|text/plain; charset=utf-8|79`
-- node-08 curl_exit|http|final_url|content_type|bytes: `0|404|https://www.elcidspain.com/aumara/media/nodes/node-08.mp4|text/plain; charset=utf-8|79`
+- node-01 curl_exit|http|final_url|content_type|bytes: `0|200|https://www.aumara.me/|text/html; charset=utf-8|49018`
+- node-08 curl_exit|http|final_url|content_type|bytes: `0|200|https://www.aumara.me/|text/html; charset=utf-8|49018`
 
 ## Beds24
 - URL: https://beds24.com/booking2.php?propid=324882
-- curl_exit|http|final_url|content_type|bytes: `0|200|https://beds24.com/booking2.php?propid=324882|text/html; charset=utf-8|119970`
+- curl_exit|http|final_url|content_type|bytes: `0|200|https://beds24.com/booking2.php?propid=324882|text/html; charset=utf-8|119955`
 
 ## Errors
