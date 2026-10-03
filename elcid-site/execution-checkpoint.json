@@ -1,6 +1,6 @@
 {
   "objective": "Replace the public EL CID telephone with WhatsApp-only contact +34 622 914 323 on elcid-site live pages.",
-  "status": "in progress",
+  "status": "complete",
   "scope": {
     "allowed": [
       "elcid-site/index.html",
@@ -32,7 +32,7 @@
     "reused": "clean main at 0eaeea8d; no prior branch, PR, or checkpoint for this contact change"
   },
   "changes": "Telephone spots now show https://wa.me/34622914323 with the language note. JSON-LD telephone is +34 622 914 323 plus a ContactPoint.",
-  "tests": "python3 elcid-site/check_site.py PASS. Local scan found no 966 579 970 and no tel: href in elcid-site HTML. Production curl pending merge.",
-  "stop_condition": "Production https://www.elcidspain.com/, /legal.html, and markdown/llms contact files show 34622914323 and the note; old number and tel: links are gone; /about-us returns 410.",
-  "recovery_point": "branch cursor/elcid-whatsapp-only-contact-4d38"
+  "tests": "python3 elcid-site/check_site.py PASS. Production curl after merge commit b5496d9a on deployment dpl_9MrdEYbkAqef65b3SbvDivHfpW7F: / 200 contains 34622914323, both notes, no tel: and no old number; /legal.html 200 contains the WhatsApp link and Spanish note; /llms.txt and Accept:text/markdown / 200 contain the English note; /privacy.html and /cookies.html 200 have no telephone; /about-us 410.",
+  "stop_condition": "Reached. Production contact pages show the WhatsApp-only number and note. Old number and tel: links are gone. /about-us returns 410.",
+  "recovery_point": "main merge commit b5496d9a via PR https://github.com/elcidspain/openai-cookbook/pull/169. api/elcid-mcp.js and api/elcid-a2a.js were excluded and still contain telephone +34966579970."
 }
