@@ -29,8 +29,8 @@ EL CID can be contacted about considered private gatherings combining accommodat
 
 - Website: https://www.elcidspain.com/
 - Booking: https://www.booking.com/hotel/es/el-cid-country-club.html
-- WhatsApp: +34 622 914 323
-- Telephone: +34 966 579 970
+- WhatsApp: +34 622 914 323 (https://wa.me/34622914323)
+- Contact: WhatsApp and text only, no calls
 - Email: elcidspain@gmail.com
 - Address: Carrer Rincón del Silencio, 3, 03759 Benidoleig, Alicante, Spain
 

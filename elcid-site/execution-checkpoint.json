@@ -1,0 +1,38 @@
+{
+  "objective": "Replace the public EL CID telephone with WhatsApp-only contact +34 622 914 323 on elcid-site live pages.",
+  "status": "in progress",
+  "scope": {
+    "allowed": [
+      "elcid-site/index.html",
+      "elcid-site/site.js",
+      "elcid-site/styles.css",
+      "elcid-site/legal.html",
+      "elcid-site/llms.txt",
+      "elcid-site/index.md",
+      "elcid-site/execution-checkpoint.json"
+    ],
+    "exclusions": [
+      "vercel.json 410 rules and catch-all",
+      "folders outside elcid-site, including api/elcid-mcp.js and api/elcid-a2a.js",
+      "privacy.html and cookies.html have no telephone number",
+      "no tel: links"
+    ]
+  },
+  "evidence": {
+    "old_number": "+34 966 579 970",
+    "inspected": [
+      "elcid-site/index.html",
+      "elcid-site/legal.html",
+      "elcid-site/privacy.html",
+      "elcid-site/cookies.html",
+      "elcid-site/llms.txt",
+      "elcid-site/index.md",
+      "elcid-site/site.js"
+    ],
+    "reused": "clean main at 0eaeea8d; no prior branch, PR, or checkpoint for this contact change"
+  },
+  "changes": "Telephone spots now show https://wa.me/34622914323 with the language note. JSON-LD telephone is +34 622 914 323 plus a ContactPoint.",
+  "tests": "python3 elcid-site/check_site.py PASS. Local scan found no 966 579 970 and no tel: href in elcid-site HTML. Production curl pending merge.",
+  "stop_condition": "Production https://www.elcidspain.com/, /legal.html, and markdown/llms contact files show 34622914323 and the note; old number and tel: links are gone; /about-us returns 410.",
+  "recovery_point": "branch cursor/elcid-whatsapp-only-contact-4d38"
+}
