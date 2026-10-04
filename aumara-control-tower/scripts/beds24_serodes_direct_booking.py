@@ -38,6 +38,8 @@ SUPERIOR_ROOM_ID = 674466
 ARRIVAL = "2026-10-10"
 DEPARTURE = "2026-10-11"
 NIGHT = ARRIVAL
+# unitBookings rejects endDate == startDate ("cannot be earlier than startDate").
+INVENTORY_END = DEPARTURE
 API_REFERENCE = "AUMARA-SERODES-20261010-186"
 LAST_NAME = "Serodes"
 ADULTS = 2
@@ -567,7 +569,7 @@ def execute(transport: Any) -> dict[str, Any]:
             [
                 ("propertyId", str(PROPERTY_ID)),
                 ("startDate", NIGHT),
-                ("endDate", NIGHT),
+                ("endDate", INVENTORY_END),
             ],
         )
     )
@@ -577,7 +579,7 @@ def execute(transport: Any) -> dict[str, Any]:
         [
             ("propertyId", str(PROPERTY_ID)),
             ("startDate", NIGHT),
-            ("endDate", NIGHT),
+            ("endDate", INVENTORY_END),
         ],
     )
     calendar_rows = paged(
@@ -586,7 +588,7 @@ def execute(transport: Any) -> dict[str, Any]:
         [
             ("propertyId", str(PROPERTY_ID)),
             ("startDate", NIGHT),
-            ("endDate", NIGHT),
+            ("endDate", INVENTORY_END),
             ("includeNumAvail", "true"),
         ],
     )
