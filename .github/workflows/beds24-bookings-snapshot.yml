@@ -5,6 +5,9 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "7 6 * * *"
+  push:
+    branches:
+      - cursor/aumara-bookings-snapshot-9e09
 
 permissions:
   contents: read
