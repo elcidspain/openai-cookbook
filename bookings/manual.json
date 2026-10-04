@@ -1,0 +1,22 @@
+{
+  "schema": "aumara-manual-bookings-v1",
+  "description": "Прямые брони, которых нет в Beds24. Ежедневный снимок читает этот файл и добавляет будущие проживания в заезды, выезды и загрузку. Не храните телефоны, почту и полные фамилии.",
+  "bookings": [
+    {
+      "guest": "Serodes",
+      "property": "AUMARA",
+      "propertyId": 324882,
+      "roomId": null,
+      "room": null,
+      "arrival": "2026-10-10",
+      "departure": "2026-10-11",
+      "adults": 2,
+      "children": 0,
+      "dogs": 2,
+      "price": 186,
+      "currency": "EUR",
+      "paid": true,
+      "channel": "direct"
+    }
+  ]
+}

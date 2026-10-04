@@ -1,0 +1,40 @@
+name: AUMARA bookings snapshot
+
+# GitHub cron is UTC. 06:07 UTC is 08:07 Europe/Madrid while CEST is in effect.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "7 6 * * *"
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: aumara-bookings-snapshot
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run snapshot unit tests
+        run: python -m unittest aumara-control-tower/scripts/tests/test_beds24_bookings_snapshot.py aumara-control-tower/scripts/tests/test_publish_bookings_snapshot_issue.py -v
+
+      - name: Build read-only Beds24 snapshot
+        env:
+          BEDS24_REFRESH_CREDENTIAL: ${{ secrets.BEDS24_REFRESH_CREDENTIAL }}
+          BEDS24_REFRESH_TOKEN: ${{ secrets.BEDS24_REFRESH_CREDENTIAL }}
+        run: python aumara-control-tower/scripts/beds24_bookings_snapshot.py --output "$RUNNER_TEMP/bookings-snapshot.md"
+
+      - name: Write the job summary
+        run: cat "$RUNNER_TEMP/bookings-snapshot.md" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Update the pinned issue comment
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: python aumara-control-tower/scripts/publish_bookings_snapshot_issue.py "$RUNNER_TEMP/bookings-snapshot.md"
