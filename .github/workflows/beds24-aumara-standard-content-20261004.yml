@@ -1,0 +1,193 @@
+name: Beds24 AUMARA standard content 2026-10-04 (324882)
+
+# Manual only. Default mode is a READ-ONLY dry run (getPropertyContent + diff, no write).
+# Writing requires mode=apply AND confirm="APPLY 324882".
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'dry-run (read only) or apply (writes to Beds24)'
+        required: true
+        default: 'dry-run'
+        type: choice
+        options: ['dry-run', 'apply']
+      clean_feature_codes:
+        description: 'Also remove pool/tennis/sea-view feature codes and add DESK/PRIVATE_ENTRANCE'
+        required: true
+        default: true
+        type: boolean
+      confirm:
+        description: 'Type exactly: APPLY 324882 (only needed for apply)'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: beds24-standard-content-324882
+  cancel-in-progress: false
+
+jobs:
+  content:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    environment: Production
+    env:
+      BEDS24_API_KEY: ${{ secrets.BEDS24_API_KEY }}
+      BEDS24_PROP_KEY: ${{ secrets.BEDS24_PROP_KEY }}
+      PROPERTY_ID: '324882'
+      MODE: ${{ inputs.mode }}
+      CLEAN_FEATURES: ${{ inputs.clean_feature_codes }}
+      CONFIRM: ${{ inputs.confirm }}
+      PAYLOAD_PATH: aumara-control-tower/content/beds24-standard-content-20261004.json
+      OUT_DIR: ${{ runner.temp }}/beds24-standard-content
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read current content, diff, optionally write and verify
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$OUT_DIR"
+          python3 - <<'PY'
+          import datetime as dt, json, os, pathlib, re, time, urllib.error, urllib.request
+
+          api=(os.environ.get('BEDS24_API_KEY') or '').strip()
+          prop=(os.environ.get('BEDS24_PROP_KEY') or '').strip()
+          if not api or not prop:
+              raise SystemExit('Beds24 V1 credentials (BEDS24_API_KEY / BEDS24_PROP_KEY) missing in Production')
+          print(f'::add-mask::{api}'); print(f'::add-mask::{prop}')
+          auth={'apiKey':api,'propKey':prop}
+          mode=os.environ['MODE']; clean=os.environ.get('CLEAN_FEATURES','true').lower()=='true'
+          out=pathlib.Path(os.environ['OUT_DIR'])
+          doc=json.loads(pathlib.Path(os.environ['PAYLOAD_PATH']).read_text(encoding='utf-8'))
+          change=doc['setPropertyContent'][0]
+
+          # --- guard: payload must be clean before anything is sent ---
+          BANNED=[r'\bpool\b',r'piscina',r'бассейн',r'\btrees?\b',r'\bpines?\b',r'\beco\b',r'bungalow',r'24h',r'24 ?hour',r'24 horas',
+                  r'private beach',r'playa privada',r'tennis',r'tenis',r'теннис',r'no pets',r'small hotel',r'unique',r'único',r'уникальн',r'\[REG/TIPO']
+          ALLOWED_NEG=['No es un camping','Not a campsite','Это не кемпинг']
+          def scan(text):
+              t=text
+              for a in ALLOWED_NEG: t=t.replace(a,'')
+              hits=[p for p in BANNED if re.search(p,t,re.I)]
+              if re.search(r'camping|campsite|кемпинг',t,re.I): hits.append('camping')
+              return hits
+          bad=[]
+          def walk(node,path):
+              if isinstance(node,dict):
+                  for k,v in node.items(): walk(v,f'{path}.{k}')
+              elif isinstance(node,str):
+                  h=scan(node)
+                  if h: bad.append((path,h))
+          walk(change,'payload')
+          if bad: raise SystemExit(f'Payload failed banned-word guard: {bad[:10]}')
+
+          def post(path,payload):
+              raw=json.dumps(payload,ensure_ascii=False).encode('utf-8')
+              req=urllib.request.Request('https://api.beds24.com/json/'+path,data=raw,
+                  headers={'Content-Type':'application/json','Accept':'application/json','User-Agent':'AUMARA-Control-Tower/1.0'},method='POST')
+              try:
+                  with urllib.request.urlopen(req,timeout=90) as r: body=r.read(); status=int(r.status)
+              except urllib.error.HTTPError as e: body=e.read(); status=int(e.code)
+              try: data=json.loads(body.decode('utf-8','replace')) if body else {}
+              except Exception: data={'non_json_bytes':len(body)}
+              if not 200<=status<300: raise SystemExit(f'{path} HTTP {status}: {str(data)[:800]}')
+              if isinstance(data,dict) and data.get('error'): raise SystemExit(f'{path} error: {str(data)[:800]}')
+              return data
+
+          def read_content():
+              data=post('getPropertyContent',{'authentication':auth,'bookingData':False,'images':False,'roomIds':True,'texts':True,'includeAirbnb':True,'includeVrbo':False})
+              rows=data.get('getPropertyContent') if isinstance(data,dict) else None
+              if not isinstance(rows,list) or not rows or not isinstance(rows[0],dict):
+                  raise SystemExit(f'Unexpected getPropertyContent response: {str(data)[:500]}')
+              return rows[0]
+
+          def relevant(obj):
+              r={'texts':{},'roomIds':{}}
+              for k in change['texts']: r['texts'][k]=(obj.get('texts') or {}).get(k)
+              for rid,rc in change['roomIds'].items():
+                  room=(obj.get('roomIds') or {}).get(rid) or {}
+                  r['roomIds'][rid]={'texts':{k:(room.get('texts') or {}).get(k) for k in rc['texts']},
+                                     'airbnb':{k:(room.get('airbnb') or {}).get(k) for k in rc['airbnb']},
+                                     'featureCodes':room.get('featureCodes')}
+              return r
+
+          FLAG=re.compile(r'pool|piscina|piscine|zwembad|бассейн|camping|campsite|кемпинг|bungalow|cinco casas|5 casas|five houses|5 houses|5 дом|пять дом|tennis|tenis|Costa Blanca',re.I)
+          def flagged(rel):
+              hits=[]
+              def w(n,p):
+                  if isinstance(n,dict):
+                      for k,v in n.items(): w(v,f'{p}.{k}')
+                  elif isinstance(n,list):
+                      for i,v in enumerate(n): w(v,f'{p}[{i}]')
+                  elif isinstance(n,str):
+                      t=n
+                      for a in ALLOWED_NEG: t=t.replace(a,'')
+                      if FLAG.search(t):
+                          hits.append({'path':p,'match':sorted(set(m.group(0).lower() for m in FLAG.finditer(t))),'text':n[:300]})
+              w(rel,'current'); return hits
+
+          before=read_content()
+          rel_before=relevant(before)
+
+          # feature codes (optional)
+          if clean:
+              fc=doc['feature_codes']; remove=set(fc['remove'])
+              for rid in change['roomIds']:
+                  codes=((before.get('roomIds') or {}).get(rid) or {}).get('featureCodes') or []
+                  cleaned=[]
+                  for g in codes:
+                      if not isinstance(g,list): cleaned.append(g); continue
+                      keep=[c for c in g if c not in remove]
+                      if keep: cleaned.append(keep)
+                  flat={c for g in cleaned if isinstance(g,list) for c in g}
+                  for c in fc['add'].get(rid,[]):
+                      if c not in flat: cleaned.append([c])
+                  change['roomIds'][rid]['featureCodes']=cleaned
+
+          evidence={'schema':'aumara.beds24-standard-content-run.v1','property_id':int(os.environ['PROPERTY_ID']),
+                    'mode':mode,'clean_feature_codes':clean,'checked_at_utc':dt.datetime.now(dt.timezone.utc).isoformat(),
+                    'before':rel_before,'flagged_before':flagged(rel_before),'requested':change,'secret_exposed':False}
+
+          if mode=='apply':
+              if os.environ.get('CONFIRM','').strip()!='APPLY 324882':
+                  raise SystemExit('Refusing to write: confirm input must be exactly "APPLY 324882"')
+              evidence['write_response']=post('setPropertyContent',{'authentication':auth,'setPropertyContent':[change]})
+              time.sleep(4)
+              after=read_content(); rel_after=relevant(after)
+              mism=[]
+              for k,want in change['texts'].items():
+                  got=(after.get('texts') or {}).get(k) or {}
+                  mism+= [f'texts.{k}.{l}' for l,v in want.items() if got.get(l)!=v]
+              for rid,rc in change['roomIds'].items():
+                  room=(after.get('roomIds') or {}).get(rid) or {}
+                  for sect in ('texts','airbnb'):
+                      for k,want in rc[sect].items():
+                          got=(room.get(sect) or {}).get(k) or {}
+                          mism+= [f'roomIds.{rid}.{sect}.{k}.{l}' for l,v in want.items() if got.get(l)!=v]
+                  if 'featureCodes' in rc:
+                      flat={c for g in (room.get('featureCodes') or []) if isinstance(g,list) for c in g}
+                      left=sorted(flat & set(doc['feature_codes']['remove']))
+                      if left: mism.append(f'roomIds.{rid}.featureCodes still has {left}')
+              evidence.update({'after':rel_after,'flagged_after':flagged(rel_after),'mismatches':mism,
+                               'status':'SUCCESS' if not mism else 'FAILED_READBACK'})
+          else:
+              evidence['status']='DRY_RUN_NO_WRITE'
+
+          text=json.dumps(evidence,ensure_ascii=False,indent=2,sort_keys=True)
+          for s in (api,prop): text=text.replace(s,'[REDACTED]')
+          (out/'evidence.json').write_text(text+'\n',encoding='utf-8')
+          print(json.dumps({'status':evidence['status'],'flagged_before':len(evidence['flagged_before']),
+                            'mismatches':evidence.get('mismatches',[])[:20]},ensure_ascii=False))
+          for h in evidence['flagged_before'][:40]: print('FLAG', h['path'], h['match'])
+          if evidence.get('mismatches'): raise SystemExit(1)
+          PY
+      - name: Upload sanitized evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: beds24-standard-content-324882-${{ inputs.mode }}
+          path: ${{ runner.temp }}/beds24-standard-content/evidence.json
+          if-no-files-found: warn
+          retention-days: 14
