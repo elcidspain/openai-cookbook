@@ -1,0 +1,71 @@
+name: AUMARA Serodes direct booking
+
+# One-off. workflow_dispatch is not available to this token, so the live
+# Beds24 write runs once when this file is pushed to main. Pull requests only
+# run the unit tests. The job never sends guest messages.
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/aumara-serodes-direct-booking.yml"
+      - ".github/aumara-serodes-direct-booking.trigger"
+      - "aumara-control-tower/scripts/beds24_serodes_direct_booking.py"
+      - "aumara-control-tower/scripts/tests/test_beds24_serodes_direct_booking.py"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/aumara-serodes-direct-booking.yml"
+      - ".github/aumara-serodes-direct-booking.trigger"
+      - "aumara-control-tower/scripts/beds24_serodes_direct_booking.py"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aumara-serodes-direct-booking
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run Serodes booking unit tests
+        run: python -m unittest aumara-control-tower/scripts/tests/test_beds24_serodes_direct_booking.py -v
+
+  enter:
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Read units and enter the direct booking when a Superior unit is free
+        env:
+          AUMARA_SERODES_DIRECT_BOOKING: "1"
+          BEDS24_REFRESH_CREDENTIAL: ${{ secrets.BEDS24_REFRESH_CREDENTIAL }}
+        run: python aumara-control-tower/scripts/beds24_serodes_direct_booking.py --output serodes-direct-booking-result.json
+
+      - name: Write the job summary
+        if: always()
+        run: |
+          if [ -f serodes-direct-booking-result.json ]; then
+            echo '```json' >> "$GITHUB_STEP_SUMMARY"
+            cat serodes-direct-booking-result.json >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload the sanitized result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: serodes-direct-booking-result
+          path: serodes-direct-booking-result.json
+          retention-days: 14
+          if-no-files-found: warn
