@@ -1,0 +1,35 @@
+{
+  "objective": "Correct AUMARA public copy to six independent houses and remove pool and pine/tree wording.",
+  "status": "complete",
+  "scope": {
+    "allowed": [
+      "aumara-site/index.html",
+      "aumara-site/explore.html",
+      "aumara-site/prototype-v01.html",
+      "aumara-site/route-v01.json",
+      "aumara-site/direct-v3-preview.html",
+      "aumara-site/direct-v4-review.html",
+      "aumara-site/direct-v5-review.html",
+      "aumara-site/feedback.html"
+    ],
+    "exclusions": [
+      "tourist registration numbers left exactly as found",
+      "AUMARA is not described as a hotel",
+      "prices, booking URLs, and the WhatsApp link",
+      ".github/workflows",
+      "EL CID pool copy",
+      "snapshots and internal markdown"
+    ]
+  },
+  "evidence": {
+    "inspected": [
+      "vercel.json routes elcid-site; /aumara redirects to https://www.aumara.me/",
+      "elcid-site served pages do not state a 5-house inventory",
+      "aumara-site public HTML stated 5 bookable houses as 3 Chalet + 2 Superior"
+    ]
+  },
+  "changes": "Public AUMARA pages now say 6 independent houses: 4 Chalet up to 3 guests and 2 Superior Chalet up to 6 guests, 24 guests total. Pool chips and pine/tree wording were removed.",
+  "tests": "node --check on explore inline script. Local HTTP 200 checks in aumara-copy-check.log. Booking and WhatsApp URLs unchanged.",
+  "stop_condition": "Reached. Corrected public AUMARA page copy is in the pull request. Registration numbers were not edited.",
+  "recovery_point": "branch cursor/aumara-six-houses-87c0"
+}
