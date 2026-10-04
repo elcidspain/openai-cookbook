@@ -41,11 +41,12 @@ jobs:
       CLEAN_FEATURES: ${{ inputs.clean_feature_codes }}
       CONFIRM: ${{ inputs.confirm }}
       PAYLOAD_PATH: aumara-control-tower/content/beds24-standard-content-20261004.json
-      OUT_DIR: ${{ runner.temp }}/beds24-standard-content
     steps:
       - uses: actions/checkout@v4
       - name: Read current content, diff, optionally write and verify
         shell: bash
+        env:
+          OUT_DIR: ${{ runner.temp }}/beds24-standard-content
         run: |
           set -euo pipefail
           mkdir -p "$OUT_DIR"
