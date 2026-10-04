@@ -1,0 +1,165 @@
+{
+  "schema": "aumara.beds24-listing-descriptions-verify.v1",
+  "property_id": 324882,
+  "room_ids": [
+    674465,
+    674466
+  ],
+  "verified_at_utc": "2026-10-04T19:06:08.614315+00:00",
+  "source_commit": "7637d743f4d20001870be07b1811ea7868046bf1",
+  "source_sha256": "7af95f0e4acfb9679c2a19bb8c0db4f20cf46469da5a5970d013d0e1c4868b25",
+  "backup_path": "beds24/backup-content-20261004.json",
+  "api_base": "https://api.beds24.com/v2",
+  "fields_written": {
+    "property": {
+      "es": [
+        "headline",
+        "houseRules",
+        "locationDescription",
+        "propertyDescription",
+        "propertyDescription1",
+        "propertyDescriptionBookingPage1"
+      ],
+      "en": [
+        "headline",
+        "houseRules",
+        "locationDescription",
+        "propertyDescription",
+        "propertyDescription1",
+        "propertyDescriptionBookingPage1"
+      ],
+      "ru": [
+        "headline",
+        "houseRules",
+        "locationDescription",
+        "propertyDescription",
+        "propertyDescription1",
+        "propertyDescriptionBookingPage1"
+      ],
+      "de": [
+        "headline",
+        "houseRules",
+        "locationDescription",
+        "propertyDescription",
+        "propertyDescription1",
+        "propertyDescriptionBookingPage1"
+      ],
+      "fr": [
+        "headline",
+        "houseRules",
+        "locationDescription",
+        "propertyDescription",
+        "propertyDescription1",
+        "propertyDescriptionBookingPage1"
+      ],
+      "it": [
+        "headline",
+        "houseRules",
+        "locationDescription",
+        "propertyDescription",
+        "propertyDescription1",
+        "propertyDescriptionBookingPage1"
+      ],
+      "pt": [
+        "headline",
+        "houseRules",
+        "locationDescription",
+        "propertyDescription",
+        "propertyDescription1",
+        "propertyDescriptionBookingPage1"
+      ],
+      "nl": [
+        "headline",
+        "houseRules",
+        "locationDescription",
+        "propertyDescription",
+        "propertyDescription1",
+        "propertyDescriptionBookingPage1"
+      ]
+    },
+    "rooms": {
+      "674465": {
+        "es": [
+          "contentDescription",
+          "roomDescription"
+        ],
+        "en": [
+          "contentDescription",
+          "roomDescription"
+        ],
+        "ru": [
+          "contentDescription",
+          "roomDescription"
+        ],
+        "de": [
+          "contentDescription",
+          "roomDescription"
+        ],
+        "fr": [
+          "contentDescription",
+          "roomDescription"
+        ],
+        "it": [
+          "contentDescription",
+          "roomDescription"
+        ],
+        "pt": [
+          "contentDescription",
+          "roomDescription"
+        ],
+        "nl": [
+          "contentDescription",
+          "roomDescription"
+        ]
+      },
+      "674466": {
+        "es": [
+          "contentDescription",
+          "roomDescription"
+        ],
+        "en": [
+          "contentDescription",
+          "roomDescription"
+        ],
+        "ru": [
+          "contentDescription",
+          "roomDescription"
+        ],
+        "de": [
+          "contentDescription",
+          "roomDescription"
+        ],
+        "fr": [
+          "contentDescription",
+          "roomDescription"
+        ],
+        "it": [
+          "contentDescription",
+          "roomDescription"
+        ],
+        "pt": [
+          "contentDescription",
+          "roomDescription"
+        ],
+        "nl": [
+          "contentDescription",
+          "roomDescription"
+        ]
+      }
+    }
+  },
+  "not_written": [
+    "feature_codes",
+    "airbnb",
+    "prices",
+    "pictures",
+    "availability",
+    "rates"
+  ],
+  "mismatches": [],
+  "post_success_flags": [
+    true
+  ],
+  "status": "SUCCESS",
+  "secret_exposed": false
+}
