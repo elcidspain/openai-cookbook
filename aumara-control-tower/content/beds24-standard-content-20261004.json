@@ -1,0 +1,199 @@
+{
+  "schema": "aumara.beds24-standard-content.v1",
+  "property_id": 324882,
+  "rooms": {
+    "674465": "Chalet (qty 4, max 3)",
+    "674466": "Superior Chalet (qty 2, max 6)"
+  },
+  "_pending_not_written": "[REG/TIPO pendiente Gestor] - registration number and property type are NOT touched by this change",
+  "feature_codes": {
+    "remove": [
+      "POOL_CHILDREN",
+      "POOL_PRIVATE",
+      "TENNIS",
+      "OCEAN_VIEW",
+      "BEACH_VIEW",
+      "BEACH"
+    ],
+    "add": {
+      "674465": [
+        "PRIVATE_ENTRANCE"
+      ],
+      "674466": [
+        "DESK",
+        "LAPTOP_FRIENDLY"
+      ]
+    },
+    "review_manually_not_changed": [
+      "MINIBAR",
+      "BUSINESS_CENTER",
+      "ROOM_SERVICE",
+      "BREAKFAST_IN_ROOM",
+      "BREAKFAST_POSSIBLE",
+      "LUNCH_POSSIBLE",
+      "DINNER_POSSIBLE",
+      "MEALS_POSSIBLE",
+      "RESTAURANT",
+      "CAFE",
+      "BAR",
+      "CONCIERGE",
+      "STAFF",
+      "BASKETBALL_COURT",
+      "RESORT",
+      "MARBLE_BATHROOM",
+      "LUXORY_LINEN",
+      "ROOM_SOUNDPROOFED"
+    ]
+  },
+  "setPropertyContent": [
+    {
+      "action": "modify",
+      "texts": {
+        "headlineText": {
+          "ES": "AUMARA: 6 casas independientes en Benidoleig, cerca de Dénia",
+          "EN": "AUMARA: 6 independent houses in Benidoleig, near Dénia",
+          "RU": "AUMARA: 6 отдельных домов в Бенидолейге, рядом с Денией",
+          "DE": "AUMARA: 6 independent houses in Benidoleig, near Dénia",
+          "FR": "AUMARA: 6 independent houses in Benidoleig, near Dénia",
+          "IT": "AUMARA: 6 independent houses in Benidoleig, near Dénia",
+          "PT": "AUMARA: 6 independent houses in Benidoleig, near Dénia",
+          "NL": "AUMARA: 6 independent houses in Benidoleig, near Dénia"
+        },
+        "propertyDescription1": {
+          "ES": "AUMARA: 6 casas independientes en Benidoleig (Marina Alta), cerca de Dénia. Casa completa, entrada propia, abierta al valle, reserva directa en aumara.me. 4 Chalets para hasta 3 personas (1 cama doble + 1 cama individual, cuna bajo petición) y 2 Superior Chalets para hasta 6 personas (2 dormitorios, 2 baños). Hasta 24 huéspedes en total. Escritorio y Wi-Fi en todas las casas. Perros bajo petición. No es un camping.",
+          "EN": "AUMARA: 6 independent houses in Benidoleig (Marina Alta), near Dénia. Whole house, private entrance, open to the valley, direct booking at aumara.me. 4 Chalets for up to 3 guests (1 double + 1 single bed, cot on request) and 2 Superior Chalets for up to 6 guests (2 bedrooms, 2 bathrooms). Up to 24 guests in total. Desk and Wi-Fi in every house. Dogs on request. Not a campsite.",
+          "RU": "AUMARA: 6 отдельных домов в Бенидолейге (Марина Альта), рядом с Денией. Дом целиком, свой вход, открыт к долине, прямое бронирование на aumara.me. 4 Chalet до 3 гостей (1 двуспальная + 1 односпальная кровать, детская кроватка по запросу) и 2 Superior Chalet до 6 гостей (2 спальни, 2 ванные комнаты). Всего до 24 гостей. Рабочий стол и Wi-Fi в каждом доме. Собаки — по запросу. Это не кемпинг.",
+          "DE": "AUMARA: 6 independent houses in Benidoleig (Marina Alta), near Dénia. Whole house, private entrance, open to the valley, direct booking at aumara.me. 4 Chalets for up to 3 guests (1 double + 1 single bed, cot on request) and 2 Superior Chalets for up to 6 guests (2 bedrooms, 2 bathrooms). Up to 24 guests in total. Desk and Wi-Fi in every house. Dogs on request. Not a campsite.",
+          "FR": "AUMARA: 6 independent houses in Benidoleig (Marina Alta), near Dénia. Whole house, private entrance, open to the valley, direct booking at aumara.me. 4 Chalets for up to 3 guests (1 double + 1 single bed, cot on request) and 2 Superior Chalets for up to 6 guests (2 bedrooms, 2 bathrooms). Up to 24 guests in total. Desk and Wi-Fi in every house. Dogs on request. Not a campsite.",
+          "IT": "AUMARA: 6 independent houses in Benidoleig (Marina Alta), near Dénia. Whole house, private entrance, open to the valley, direct booking at aumara.me. 4 Chalets for up to 3 guests (1 double + 1 single bed, cot on request) and 2 Superior Chalets for up to 6 guests (2 bedrooms, 2 bathrooms). Up to 24 guests in total. Desk and Wi-Fi in every house. Dogs on request. Not a campsite.",
+          "PT": "AUMARA: 6 independent houses in Benidoleig (Marina Alta), near Dénia. Whole house, private entrance, open to the valley, direct booking at aumara.me. 4 Chalets for up to 3 guests (1 double + 1 single bed, cot on request) and 2 Superior Chalets for up to 6 guests (2 bedrooms, 2 bathrooms). Up to 24 guests in total. Desk and Wi-Fi in every house. Dogs on request. Not a campsite.",
+          "NL": "AUMARA: 6 independent houses in Benidoleig (Marina Alta), near Dénia. Whole house, private entrance, open to the valley, direct booking at aumara.me. 4 Chalets for up to 3 guests (1 double + 1 single bed, cot on request) and 2 Superior Chalets for up to 6 guests (2 bedrooms, 2 bathrooms). Up to 24 guests in total. Desk and Wi-Fi in every house. Dogs on request. Not a campsite."
+        },
+        "propertyDescriptionText": {
+          "ES": "AUMARA: 6 casas independientes en Benidoleig (Marina Alta), cerca de Dénia. Casa completa, entrada propia, abierta al valle, reserva directa en aumara.me. 4 Chalets para hasta 3 personas (1 cama doble + 1 cama individual, cuna bajo petición) y 2 Superior Chalets para hasta 6 personas (2 dormitorios, 2 baños). Hasta 24 huéspedes en total. Escritorio y Wi-Fi en todas las casas. Perros bajo petición. No es un camping.",
+          "EN": "AUMARA: 6 independent houses in Benidoleig (Marina Alta), near Dénia. Whole house, private entrance, open to the valley, direct booking at aumara.me. 4 Chalets for up to 3 guests (1 double + 1 single bed, cot on request) and 2 Superior Chalets for up to 6 guests (2 bedrooms, 2 bathrooms). Up to 24 guests in total. Desk and Wi-Fi in every house. Dogs on request. Not a campsite.",
+          "RU": "AUMARA: 6 отдельных домов в Бенидолейге (Марина Альта), рядом с Денией. Дом целиком, свой вход, открыт к долине, прямое бронирование на aumara.me. 4 Chalet до 3 гостей (1 двуспальная + 1 односпальная кровать, детская кроватка по запросу) и 2 Superior Chalet до 6 гостей (2 спальни, 2 ванные комнаты). Всего до 24 гостей. Рабочий стол и Wi-Fi в каждом доме. Собаки — по запросу. Это не кемпинг.",
+          "DE": "AUMARA: 6 independent houses in Benidoleig (Marina Alta), near Dénia. Whole house, private entrance, open to the valley, direct booking at aumara.me. 4 Chalets for up to 3 guests (1 double + 1 single bed, cot on request) and 2 Superior Chalets for up to 6 guests (2 bedrooms, 2 bathrooms). Up to 24 guests in total. Desk and Wi-Fi in every house. Dogs on request. Not a campsite.",
+          "FR": "AUMARA: 6 independent houses in Benidoleig (Marina Alta), near Dénia. Whole house, private entrance, open to the valley, direct booking at aumara.me. 4 Chalets for up to 3 guests (1 double + 1 single bed, cot on request) and 2 Superior Chalets for up to 6 guests (2 bedrooms, 2 bathrooms). Up to 24 guests in total. Desk and Wi-Fi in every house. Dogs on request. Not a campsite.",
+          "IT": "AUMARA: 6 independent houses in Benidoleig (Marina Alta), near Dénia. Whole house, private entrance, open to the valley, direct booking at aumara.me. 4 Chalets for up to 3 guests (1 double + 1 single bed, cot on request) and 2 Superior Chalets for up to 6 guests (2 bedrooms, 2 bathrooms). Up to 24 guests in total. Desk and Wi-Fi in every house. Dogs on request. Not a campsite.",
+          "PT": "AUMARA: 6 independent houses in Benidoleig (Marina Alta), near Dénia. Whole house, private entrance, open to the valley, direct booking at aumara.me. 4 Chalets for up to 3 guests (1 double + 1 single bed, cot on request) and 2 Superior Chalets for up to 6 guests (2 bedrooms, 2 bathrooms). Up to 24 guests in total. Desk and Wi-Fi in every house. Dogs on request. Not a campsite.",
+          "NL": "AUMARA: 6 independent houses in Benidoleig (Marina Alta), near Dénia. Whole house, private entrance, open to the valley, direct booking at aumara.me. 4 Chalets for up to 3 guests (1 double + 1 single bed, cot on request) and 2 Superior Chalets for up to 6 guests (2 bedrooms, 2 bathrooms). Up to 24 guests in total. Desk and Wi-Fi in every house. Dogs on request. Not a campsite."
+        },
+        "propertyDescriptionBookingPage1": {
+          "ES": "AUMARA: 6 casas independientes en Benidoleig (Marina Alta), cerca de Dénia. Casa completa, entrada propia, abierta al valle, reserva directa en aumara.me. 4 Chalets para hasta 3 personas (1 cama doble + 1 cama individual, cuna bajo petición) y 2 Superior Chalets para hasta 6 personas (2 dormitorios, 2 baños). Hasta 24 huéspedes en total. Escritorio y Wi-Fi en todas las casas. Perros bajo petición. No es un camping.",
+          "EN": "AUMARA: 6 independent houses in Benidoleig (Marina Alta), near Dénia. Whole house, private entrance, open to the valley, direct booking at aumara.me. 4 Chalets for up to 3 guests (1 double + 1 single bed, cot on request) and 2 Superior Chalets for up to 6 guests (2 bedrooms, 2 bathrooms). Up to 24 guests in total. Desk and Wi-Fi in every house. Dogs on request. Not a campsite.",
+          "RU": "AUMARA: 6 отдельных домов в Бенидолейге (Марина Альта), рядом с Денией. Дом целиком, свой вход, открыт к долине, прямое бронирование на aumara.me. 4 Chalet до 3 гостей (1 двуспальная + 1 односпальная кровать, детская кроватка по запросу) и 2 Superior Chalet до 6 гостей (2 спальни, 2 ванные комнаты). Всего до 24 гостей. Рабочий стол и Wi-Fi в каждом доме. Собаки — по запросу. Это не кемпинг.",
+          "DE": "AUMARA: 6 independent houses in Benidoleig (Marina Alta), near Dénia. Whole house, private entrance, open to the valley, direct booking at aumara.me. 4 Chalets for up to 3 guests (1 double + 1 single bed, cot on request) and 2 Superior Chalets for up to 6 guests (2 bedrooms, 2 bathrooms). Up to 24 guests in total. Desk and Wi-Fi in every house. Dogs on request. Not a campsite.",
+          "FR": "AUMARA: 6 independent houses in Benidoleig (Marina Alta), near Dénia. Whole house, private entrance, open to the valley, direct booking at aumara.me. 4 Chalets for up to 3 guests (1 double + 1 single bed, cot on request) and 2 Superior Chalets for up to 6 guests (2 bedrooms, 2 bathrooms). Up to 24 guests in total. Desk and Wi-Fi in every house. Dogs on request. Not a campsite.",
+          "IT": "AUMARA: 6 independent houses in Benidoleig (Marina Alta), near Dénia. Whole house, private entrance, open to the valley, direct booking at aumara.me. 4 Chalets for up to 3 guests (1 double + 1 single bed, cot on request) and 2 Superior Chalets for up to 6 guests (2 bedrooms, 2 bathrooms). Up to 24 guests in total. Desk and Wi-Fi in every house. Dogs on request. Not a campsite.",
+          "PT": "AUMARA: 6 independent houses in Benidoleig (Marina Alta), near Dénia. Whole house, private entrance, open to the valley, direct booking at aumara.me. 4 Chalets for up to 3 guests (1 double + 1 single bed, cot on request) and 2 Superior Chalets for up to 6 guests (2 bedrooms, 2 bathrooms). Up to 24 guests in total. Desk and Wi-Fi in every house. Dogs on request. Not a campsite.",
+          "NL": "AUMARA: 6 independent houses in Benidoleig (Marina Alta), near Dénia. Whole house, private entrance, open to the valley, direct booking at aumara.me. 4 Chalets for up to 3 guests (1 double + 1 single bed, cot on request) and 2 Superior Chalets for up to 6 guests (2 bedrooms, 2 bathrooms). Up to 24 guests in total. Desk and Wi-Fi in every house. Dogs on request. Not a campsite."
+        },
+        "locationDescription": {
+          "ES": "Benidoleig (Marina Alta), cerca de Dénia. Casas abiertas al valle.",
+          "EN": "Benidoleig (Marina Alta), near Dénia. Houses open to the valley.",
+          "RU": "Бенидолейг (Марина Альта), рядом с Денией. Дома открыты к долине.",
+          "DE": "Benidoleig (Marina Alta), near Dénia. Houses open to the valley.",
+          "FR": "Benidoleig (Marina Alta), near Dénia. Houses open to the valley.",
+          "IT": "Benidoleig (Marina Alta), near Dénia. Houses open to the valley.",
+          "PT": "Benidoleig (Marina Alta), near Dénia. Houses open to the valley.",
+          "NL": "Benidoleig (Marina Alta), near Dénia. Houses open to the valley."
+        },
+        "houseRules": {
+          "ES": "Alojamiento para no fumadores. Perros bajo petición. Cuna bajo petición.",
+          "EN": "Non-smoking accommodation. Dogs on request. Cot on request.",
+          "RU": "Размещение для некурящих. Собаки — по запросу. Детская кроватка — по запросу.",
+          "DE": "Non-smoking accommodation. Dogs on request. Cot on request.",
+          "FR": "Non-smoking accommodation. Dogs on request. Cot on request.",
+          "IT": "Non-smoking accommodation. Dogs on request. Cot on request.",
+          "PT": "Non-smoking accommodation. Dogs on request. Cot on request.",
+          "NL": "Non-smoking accommodation. Dogs on request. Cot on request."
+        }
+      },
+      "roomIds": {
+        "674465": {
+          "texts": {
+            "roomDescription1": {
+              "ES": "Chalet: casa completa con entrada propia, abierta al valle. Hasta 3 personas: 1 cama doble + 1 cama individual, cuna bajo petición. Escritorio y Wi-Fi. Perros bajo petición. AUMARA son 6 casas independientes en Benidoleig (Marina Alta), cerca de Dénia: 4 Chalets y 2 Superior Chalets. Reserva directa en aumara.me.",
+              "EN": "Chalet: whole house with a private entrance, open to the valley. Up to 3 guests: 1 double + 1 single bed, cot on request. Desk and Wi-Fi. Dogs on request. AUMARA is 6 independent houses in Benidoleig (Marina Alta), near Dénia: 4 Chalets and 2 Superior Chalets. Direct booking at aumara.me.",
+              "RU": "Chalet: дом целиком, свой вход, открыт к долине. До 3 гостей: 1 двуспальная + 1 односпальная кровать, детская кроватка по запросу. Рабочий стол и Wi-Fi. Собаки — по запросу. AUMARA — 6 отдельных домов в Бенидолейге (Марина Альта), рядом с Денией: 4 Chalet и 2 Superior Chalet. Прямое бронирование на aumara.me.",
+              "DE": "Chalet: whole house with a private entrance, open to the valley. Up to 3 guests: 1 double + 1 single bed, cot on request. Desk and Wi-Fi. Dogs on request. AUMARA is 6 independent houses in Benidoleig (Marina Alta), near Dénia: 4 Chalets and 2 Superior Chalets. Direct booking at aumara.me.",
+              "FR": "Chalet: whole house with a private entrance, open to the valley. Up to 3 guests: 1 double + 1 single bed, cot on request. Desk and Wi-Fi. Dogs on request. AUMARA is 6 independent houses in Benidoleig (Marina Alta), near Dénia: 4 Chalets and 2 Superior Chalets. Direct booking at aumara.me.",
+              "IT": "Chalet: whole house with a private entrance, open to the valley. Up to 3 guests: 1 double + 1 single bed, cot on request. Desk and Wi-Fi. Dogs on request. AUMARA is 6 independent houses in Benidoleig (Marina Alta), near Dénia: 4 Chalets and 2 Superior Chalets. Direct booking at aumara.me.",
+              "PT": "Chalet: whole house with a private entrance, open to the valley. Up to 3 guests: 1 double + 1 single bed, cot on request. Desk and Wi-Fi. Dogs on request. AUMARA is 6 independent houses in Benidoleig (Marina Alta), near Dénia: 4 Chalets and 2 Superior Chalets. Direct booking at aumara.me.",
+              "NL": "Chalet: whole house with a private entrance, open to the valley. Up to 3 guests: 1 double + 1 single bed, cot on request. Desk and Wi-Fi. Dogs on request. AUMARA is 6 independent houses in Benidoleig (Marina Alta), near Dénia: 4 Chalets and 2 Superior Chalets. Direct booking at aumara.me."
+            },
+            "contentDescriptionText": {
+              "ES": "Chalet: casa completa con entrada propia, abierta al valle. Hasta 3 personas: 1 cama doble + 1 cama individual, cuna bajo petición. Escritorio y Wi-Fi. Perros bajo petición. AUMARA son 6 casas independientes en Benidoleig (Marina Alta), cerca de Dénia: 4 Chalets y 2 Superior Chalets. Reserva directa en aumara.me.",
+              "EN": "Chalet: whole house with a private entrance, open to the valley. Up to 3 guests: 1 double + 1 single bed, cot on request. Desk and Wi-Fi. Dogs on request. AUMARA is 6 independent houses in Benidoleig (Marina Alta), near Dénia: 4 Chalets and 2 Superior Chalets. Direct booking at aumara.me.",
+              "RU": "Chalet: дом целиком, свой вход, открыт к долине. До 3 гостей: 1 двуспальная + 1 односпальная кровать, детская кроватка по запросу. Рабочий стол и Wi-Fi. Собаки — по запросу. AUMARA — 6 отдельных домов в Бенидолейге (Марина Альта), рядом с Денией: 4 Chalet и 2 Superior Chalet. Прямое бронирование на aumara.me.",
+              "DE": "Chalet: whole house with a private entrance, open to the valley. Up to 3 guests: 1 double + 1 single bed, cot on request. Desk and Wi-Fi. Dogs on request. AUMARA is 6 independent houses in Benidoleig (Marina Alta), near Dénia: 4 Chalets and 2 Superior Chalets. Direct booking at aumara.me.",
+              "FR": "Chalet: whole house with a private entrance, open to the valley. Up to 3 guests: 1 double + 1 single bed, cot on request. Desk and Wi-Fi. Dogs on request. AUMARA is 6 independent houses in Benidoleig (Marina Alta), near Dénia: 4 Chalets and 2 Superior Chalets. Direct booking at aumara.me.",
+              "IT": "Chalet: whole house with a private entrance, open to the valley. Up to 3 guests: 1 double + 1 single bed, cot on request. Desk and Wi-Fi. Dogs on request. AUMARA is 6 independent houses in Benidoleig (Marina Alta), near Dénia: 4 Chalets and 2 Superior Chalets. Direct booking at aumara.me.",
+              "PT": "Chalet: whole house with a private entrance, open to the valley. Up to 3 guests: 1 double + 1 single bed, cot on request. Desk and Wi-Fi. Dogs on request. AUMARA is 6 independent houses in Benidoleig (Marina Alta), near Dénia: 4 Chalets and 2 Superior Chalets. Direct booking at aumara.me.",
+              "NL": "Chalet: whole house with a private entrance, open to the valley. Up to 3 guests: 1 double + 1 single bed, cot on request. Desk and Wi-Fi. Dogs on request. AUMARA is 6 independent houses in Benidoleig (Marina Alta), near Dénia: 4 Chalets and 2 Superior Chalets. Direct booking at aumara.me."
+            }
+          },
+          "airbnb": {
+            "summaryText": {
+              "ES": "Chalet: casa completa con entrada propia, abierta al valle. Hasta 3 personas: 1 cama doble + 1 cama individual, cuna bajo petición. Escritorio y Wi-Fi. Perros bajo petición. AUMARA son 6 casas independientes en Benidoleig (Marina Alta), cerca de Dénia: 4 Chalets y 2 Superior Chalets. Reserva directa en aumara.me."
+            },
+            "spaceText": {
+              "ES": "Casa completa con entrada propia. Hasta 3 personas: 1 cama doble + 1 cama individual, cuna bajo petición. Escritorio y Wi-Fi."
+            },
+            "accessText": {
+              "ES": "Los huéspedes tienen la casa completa para ellos, con entrada propia."
+            },
+            "notesText": {
+              "ES": "Perros bajo petición. Cuna bajo petición. No es un camping."
+            },
+            "houseRulesText": {
+              "ES": "Alojamiento para no fumadores. Perros bajo petición. Cuna bajo petición."
+            }
+          }
+        },
+        "674466": {
+          "texts": {
+            "roomDescription1": {
+              "ES": "Superior Chalet: casa completa con entrada propia, abierta al valle. Hasta 6 personas: 2 dormitorios, 2 baños. Escritorio y Wi-Fi. Perros bajo petición. AUMARA son 6 casas independientes en Benidoleig (Marina Alta), cerca de Dénia: 4 Chalets y 2 Superior Chalets. Reserva directa en aumara.me.",
+              "EN": "Superior Chalet: whole house with a private entrance, open to the valley. Up to 6 guests: 2 bedrooms, 2 bathrooms. Desk and Wi-Fi. Dogs on request. AUMARA is 6 independent houses in Benidoleig (Marina Alta), near Dénia: 4 Chalets and 2 Superior Chalets. Direct booking at aumara.me.",
+              "RU": "Superior Chalet: дом целиком, свой вход, открыт к долине. До 6 гостей: 2 спальни, 2 ванные комнаты. Рабочий стол и Wi-Fi. Собаки — по запросу. AUMARA — 6 отдельных домов в Бенидолейге (Марина Альта), рядом с Денией: 4 Chalet и 2 Superior Chalet. Прямое бронирование на aumara.me.",
+              "DE": "Superior Chalet: whole house with a private entrance, open to the valley. Up to 6 guests: 2 bedrooms, 2 bathrooms. Desk and Wi-Fi. Dogs on request. AUMARA is 6 independent houses in Benidoleig (Marina Alta), near Dénia: 4 Chalets and 2 Superior Chalets. Direct booking at aumara.me.",
+              "FR": "Superior Chalet: whole house with a private entrance, open to the valley. Up to 6 guests: 2 bedrooms, 2 bathrooms. Desk and Wi-Fi. Dogs on request. AUMARA is 6 independent houses in Benidoleig (Marina Alta), near Dénia: 4 Chalets and 2 Superior Chalets. Direct booking at aumara.me.",
+              "IT": "Superior Chalet: whole house with a private entrance, open to the valley. Up to 6 guests: 2 bedrooms, 2 bathrooms. Desk and Wi-Fi. Dogs on request. AUMARA is 6 independent houses in Benidoleig (Marina Alta), near Dénia: 4 Chalets and 2 Superior Chalets. Direct booking at aumara.me.",
+              "PT": "Superior Chalet: whole house with a private entrance, open to the valley. Up to 6 guests: 2 bedrooms, 2 bathrooms. Desk and Wi-Fi. Dogs on request. AUMARA is 6 independent houses in Benidoleig (Marina Alta), near Dénia: 4 Chalets and 2 Superior Chalets. Direct booking at aumara.me.",
+              "NL": "Superior Chalet: whole house with a private entrance, open to the valley. Up to 6 guests: 2 bedrooms, 2 bathrooms. Desk and Wi-Fi. Dogs on request. AUMARA is 6 independent houses in Benidoleig (Marina Alta), near Dénia: 4 Chalets and 2 Superior Chalets. Direct booking at aumara.me."
+            },
+            "contentDescriptionText": {
+              "ES": "Superior Chalet: casa completa con entrada propia, abierta al valle. Hasta 6 personas: 2 dormitorios, 2 baños. Escritorio y Wi-Fi. Perros bajo petición. AUMARA son 6 casas independientes en Benidoleig (Marina Alta), cerca de Dénia: 4 Chalets y 2 Superior Chalets. Reserva directa en aumara.me.",
+              "EN": "Superior Chalet: whole house with a private entrance, open to the valley. Up to 6 guests: 2 bedrooms, 2 bathrooms. Desk and Wi-Fi. Dogs on request. AUMARA is 6 independent houses in Benidoleig (Marina Alta), near Dénia: 4 Chalets and 2 Superior Chalets. Direct booking at aumara.me.",
+              "RU": "Superior Chalet: дом целиком, свой вход, открыт к долине. До 6 гостей: 2 спальни, 2 ванные комнаты. Рабочий стол и Wi-Fi. Собаки — по запросу. AUMARA — 6 отдельных домов в Бенидолейге (Марина Альта), рядом с Денией: 4 Chalet и 2 Superior Chalet. Прямое бронирование на aumara.me.",
+              "DE": "Superior Chalet: whole house with a private entrance, open to the valley. Up to 6 guests: 2 bedrooms, 2 bathrooms. Desk and Wi-Fi. Dogs on request. AUMARA is 6 independent houses in Benidoleig (Marina Alta), near Dénia: 4 Chalets and 2 Superior Chalets. Direct booking at aumara.me.",
+              "FR": "Superior Chalet: whole house with a private entrance, open to the valley. Up to 6 guests: 2 bedrooms, 2 bathrooms. Desk and Wi-Fi. Dogs on request. AUMARA is 6 independent houses in Benidoleig (Marina Alta), near Dénia: 4 Chalets and 2 Superior Chalets. Direct booking at aumara.me.",
+              "IT": "Superior Chalet: whole house with a private entrance, open to the valley. Up to 6 guests: 2 bedrooms, 2 bathrooms. Desk and Wi-Fi. Dogs on request. AUMARA is 6 independent houses in Benidoleig (Marina Alta), near Dénia: 4 Chalets and 2 Superior Chalets. Direct booking at aumara.me.",
+              "PT": "Superior Chalet: whole house with a private entrance, open to the valley. Up to 6 guests: 2 bedrooms, 2 bathrooms. Desk and Wi-Fi. Dogs on request. AUMARA is 6 independent houses in Benidoleig (Marina Alta), near Dénia: 4 Chalets and 2 Superior Chalets. Direct booking at aumara.me.",
+              "NL": "Superior Chalet: whole house with a private entrance, open to the valley. Up to 6 guests: 2 bedrooms, 2 bathrooms. Desk and Wi-Fi. Dogs on request. AUMARA is 6 independent houses in Benidoleig (Marina Alta), near Dénia: 4 Chalets and 2 Superior Chalets. Direct booking at aumara.me."
+            }
+          },
+          "airbnb": {
+            "summaryText": {
+              "ES": "Superior Chalet: casa completa con entrada propia, abierta al valle. Hasta 6 personas: 2 dormitorios, 2 baños. Escritorio y Wi-Fi. Perros bajo petición. AUMARA son 6 casas independientes en Benidoleig (Marina Alta), cerca de Dénia: 4 Chalets y 2 Superior Chalets. Reserva directa en aumara.me."
+            },
+            "spaceText": {
+              "ES": "Casa completa con entrada propia. Hasta 6 personas: 2 dormitorios, 2 baños. Escritorio y Wi-Fi."
+            },
+            "accessText": {
+              "ES": "Los huéspedes tienen la casa completa para ellos, con entrada propia."
+            },
+            "notesText": {
+              "ES": "Perros bajo petición. Cuna bajo petición. No es un camping."
+            },
+            "houseRulesText": {
+              "ES": "Alojamiento para no fumadores. Perros bajo petición. Cuna bajo petición."
+            }
+          }
+        }
+      }
+    }
+  ]
+}
