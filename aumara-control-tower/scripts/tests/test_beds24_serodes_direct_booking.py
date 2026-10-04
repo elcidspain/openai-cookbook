@@ -202,6 +202,10 @@ class SerodesBookingTests(unittest.TestCase):
         self.assertNotIn("comments", payload)
         self.assertEqual(payload["invoiceItems"][0]["amount"], 186)
         self.assertEqual(payload["invoiceItems"][1]["type"], "payment")
+        unit_path = next(path for path in transport.gets if path.startswith("/inventory/rooms/unitBookings"))
+        self.assertIn("startDate=2026-10-10", unit_path)
+        self.assertIn("endDate=2026-10-11", unit_path)
+        self.assertNotIn("endDate=2026-10-10", unit_path)
         guests = [
             item["occupyingGuests"]
             for item in result["units"]
