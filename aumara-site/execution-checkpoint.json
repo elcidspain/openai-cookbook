@@ -1,27 +1,29 @@
 {
-  "objective": "Keep Casa A visible and send its booking action to the existing Chalet Beds24 room.",
+  "objective": "Send AUMARA booking actions in this pull request to WhatsApp while Beds24 public booking is paused.",
   "status": "complete",
   "scope": {
     "allowed": [
-      "aumara-site/explore.html booking href for casa-a"
+      "aumara-site pages already changed on cursor/aumara-six-houses-87c0"
     ],
     "exclusions": [
-      "no new Beds24 room or booking URL",
+      "no new Beds24 room and no Beds24 booking URL",
+      "no tel links",
       "tourist registration numbers",
       "hotel wording",
-      "prices, WhatsApp, and other houses' booking URLs",
-      ".github/workflows"
+      "prices",
+      ".github/workflows",
+      "historical snapshots"
     ]
   },
   "evidence": {
     "inspected": [
-      "explore selectHouse previously set label=aumara-map-casa-a",
-      "existing Chalet book links use https://beds24.com/booking2.php?propid=324882&roomid=674465",
-      "Superior book links use roomid=674466"
+      "Casa A book action and every other Beds24 booking URL in the pull request files",
+      "existing WhatsApp number 34622914323",
+      "EL CID note style: WhatsApp and text only, no calls"
     ]
   },
-  "changes": "Casa A stays selectable. Book direct uses the existing Chalet room URL. Booking.com fallback stays the existing property URL with no casa-a label.",
-  "tests": "node --check on the explore script. Node click harness and Chrome dump of ?house=casa-a both show roomid=674465 and no aumara-map-casa-a.",
-  "stop_condition": "Reached. Casa A booking action uses the existing Chalet Beds24 URL.",
+  "changes": "Booking links now open https://wa.me/34622914323 with the page-language prefilled reservation text. Casa A stays selectable. Telephone anchors in these pages are no longer tel links.",
+  "tests": "node --check on page scripts. Explore script reports the WhatsApp href for Casa A in EN and ES. Diff scan for a Beds24 booking URL.",
+  "stop_condition": "Reached when no Beds24 booking link remains in the pull request and Casa A Book direct opens WhatsApp.",
   "recovery_point": "branch cursor/aumara-six-houses-87c0"
 }
