@@ -7,7 +7,7 @@
       "property": "AUMARA",
       "propertyId": 324882,
       "roomId": null,
-      "room": null,
+      "room": "Chalet 4 (не заведён в Beds24)",
       "arrival": "2026-10-10",
       "departure": "2026-10-11",
       "adults": 2,
@@ -16,7 +16,8 @@
       "price": 186,
       "currency": "EUR",
       "paid": true,
-      "channel": "direct"
+      "channel": "direct",
+      "note": "Илья подтвердил 04.10: четвёртый Chalet свободен. В Beds24 не заводим. Завтрак включён."
     }
   ]
 }
