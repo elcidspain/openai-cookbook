@@ -49,6 +49,33 @@ jobs:
               if not 200 <= st < 300: raise RuntimeError(f"{path} HTTP {st}: {data}")
               return data
 
+          def response_shape(value):
+              if isinstance(value, dict):
+                  return {"type": "object", "fields": {
+                      str(key): type(item).__name__ for key, item in list(value.items())[:20]
+                  }}
+              if isinstance(value, list):
+                  return {"type": "list", "length": len(value),
+                          "first": response_shape(value[0]) if value else None}
+              return {"type": type(value).__name__}
+
+          def daily_price_setup(payload, rid):
+              # Legacy replies wrap one room in a list; current replies are objects.
+              room = payload[0] if isinstance(payload, list) and len(payload) == 1 else payload
+              if isinstance(room, dict) and str(room.get("roomId", rid)) == rid:
+                  rows = room.get("dailyPrices")
+                  if isinstance(rows, list) and rows and isinstance(rows[0], dict):
+                      required = ("minStay", "directEnable", "bookingapiEnable", "airbnbxmlEnable")
+                      if all(key in rows[0] for key in required):
+                          return rows[0]
+              shape = {"response": response_shape(payload)}
+              if isinstance(room, dict) and "dailyPrices" in room:
+                  shape["dailyPrices"] = response_shape(room["dailyPrices"])
+              raise SystemExit(
+                  f"UNVERIFIABLE: getDailyPriceSetup room {rid}; shape="
+                  + json.dumps(shape, ensure_ascii=True)
+              )
+
           def each(a,b):
               d=a
               while d<=b:
@@ -75,7 +102,7 @@ jobs:
                   try: ok=float(got)==float(want)
                   except: ok=False
                   if not ok: drift.append({"kind":"p1","roomId":rid,"date":k,"expected":want,"actual":got})
-              setup=call("getDailyPriceSetup",{"roomId":rid})[0]["dailyPrices"][0]
+              setup=daily_price_setup(call("getDailyPriceSetup",{"roomId":rid}),rid)
               if str(setup.get("minStay"))!="1": drift.append({"kind":"minStay","roomId":rid,"actual":setup.get("minStay")})
               for key in ("directEnable","bookingapiEnable","airbnbxmlEnable"):
                   if str(setup.get(key))!="1": drift.append({"kind":"channel-source","roomId":rid,"field":key,"actual":setup.get(key)})
