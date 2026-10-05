@@ -37,18 +37,6 @@ jobs:
           print(f"::add-mask::{api}"); print(f"::add-mask::{prop}")
           auth={"authentication":{"apiKey":api,"propKey":prop}}
 
-          def call(path,payload):
-              body=dict(payload); body.update(auth)
-              req=urllib.request.Request(f"https://api.beds24.com/json/{path}",data=json.dumps(body).encode(),
-                  headers={"Content-Type":"application/json","Accept":"application/json","User-Agent":"AUMARA-rate-guard-v2/1.0"},method="POST")
-              try:
-                  with urllib.request.urlopen(req,timeout=90) as r: raw=r.read(); st=int(r.status)
-              except urllib.error.HTTPError as e: raw=e.read(); st=int(e.code)
-              data=json.loads(raw.decode("utf-8","replace")) if raw else {}
-              time.sleep(2.2)
-              if not 200 <= st < 300: raise RuntimeError(f"{path} HTTP {st}: {data}")
-              return data
-
           def response_shape(value):
               if isinstance(value, dict):
                   return {"type": "object", "fields": {
@@ -58,6 +46,50 @@ jobs:
                   return {"type": "list", "length": len(value),
                           "first": response_shape(value[0]) if value else None}
               return {"type": type(value).__name__}
+
+          retry_budget = 2
+
+          def api_error(data):
+              if not isinstance(data, dict) or not ("error" in data or "errorCode" in data):
+                  return None
+              code = str(data.get("errorCode", ""))
+              return code if len(code) == 4 and code.startswith("10") and code.isascii() and code.isdigit() else "unknown"
+
+          def unverifiable(path, data, detail):
+              code = api_error(data)
+              suffix = f"; apiErrorCode={code}" if code is not None else ""
+              raise SystemExit(
+                  f"UNVERIFIABLE: {path}; {detail}{suffix}; shape="
+                  + json.dumps(response_shape(data), ensure_ascii=True)
+              )
+
+          def call(path,payload):
+              global retry_budget
+              body=dict(payload); body.update(auth)
+              req=urllib.request.Request(f"https://api.beds24.com/json/{path}",data=json.dumps(body).encode(),
+                  headers={"Content-Type":"application/json","Accept":"application/json","User-Agent":"AUMARA-rate-guard-v2/1.0"},method="POST")
+              while True:
+                  try:
+                      with urllib.request.urlopen(req,timeout=90) as r: raw=r.read(); st=int(r.status)
+                  except urllib.error.HTTPError as e: raw=e.read(); st=int(e.code)
+                  except (urllib.error.URLError, TimeoutError):
+                      raise SystemExit(f"UNVERIFIABLE: {path}; transport failure")
+                  try:
+                      data=json.loads(raw.decode("utf-8","replace")) if raw else {}
+                  except (ValueError, UnicodeError):
+                      raise SystemExit(f"UNVERIFIABLE: {path}; HTTP {st}; non-JSON response")
+                  time.sleep(5)
+                  code=api_error(data)
+                  # Beds24 documents 1016/1020 as a five-minute usage limit.
+                  # Bound total extra calls and wait time across the entire run.
+                  if code in ("1016", "1020") and retry_budget:
+                      retry_budget -= 1
+                      print(f"API_LIMIT: {path}; code={code}; retry in 310s", flush=True)
+                      time.sleep(310)
+                      continue
+                  if not 200 <= st < 300 or code is not None:
+                      unverifiable(path, data, f"HTTP {st}")
+                  return data
 
           def daily_price_setup(payload, rid):
               # Legacy replies wrap one room in a list; current replies are objects.
@@ -69,24 +101,6 @@ jobs:
                       if all(key in rows[0] for key in required):
                           return rows[0]
               shape = {"response": response_shape(payload)}
-              if isinstance(room, dict) and ("error" in room or "errorCode" in room):
-                  # Only standardized codes and static categories; never echo error text.
-                  code = str(room.get("errorCode", ""))
-                  if len(code) == 4 and code.startswith("10") and code.isascii() and code.isdigit():
-                      shape["apiErrorCode"] = code
-                  message = str(room.get("error", "")).lower()
-                  categories = {
-                      "limit": ("limit", "too many", "excessive"),
-                      "access": ("not allowed", "permission", "access", "role"),
-                      "authentication": ("authentication", "api key", "apikey", "propkey", "prop key"),
-                      "request": ("invalid", "missing", "required", "unknown"),
-                      "credit": ("credit",),
-                      "whitelist": ("whitelist",),
-                  }
-                  shape["apiErrorCategories"] = [
-                      name for name, terms in categories.items()
-                      if any(term in message for term in terms)
-                  ]
               if isinstance(room, dict) and "dailyPrices" in room:
                   shape["dailyPrices"] = response_shape(room["dailyPrices"])
               raise SystemExit(
@@ -115,6 +129,8 @@ jobs:
           for rid in expected:
               keys=sorted(expected[rid])
               live=call("getRoomDates",{"roomId":rid,"from":keys[0],"to":keys[-1]})
+              if not isinstance(live, dict) or any(not isinstance(live.get(k), dict) for k in expected[rid]):
+                  unverifiable("getRoomDates", live, f"room {rid}; missing date records")
               for k,want in expected[rid].items():
                   got=(live.get(k) or {}).get("p1")
                   try: ok=float(got)==float(want)
@@ -125,7 +141,10 @@ jobs:
               for key in ("directEnable","bookingapiEnable","airbnbxmlEnable"):
                   if str(setup.get(key))!="1": drift.append({"kind":"channel-source","roomId":rid,"field":key,"actual":setup.get(key)})
 
-          rates=call("getRates",{}); byid={str(x.get("rateId")):x for x in rates if isinstance(x,dict)}
+          rates=call("getRates",{})
+          if not isinstance(rates, list) or any(not isinstance(x, dict) or "rateId" not in x for x in rates):
+              unverifiable("getRates", rates, "invalid rate records")
+          byid={str(x.get("rateId")):x for x in rates}
           for rate_id in cfg["policy"].get("legacyFlatRateIds",[]):
               got=byid.get(str(rate_id),{}).get("roomPriceEnable")
               if str(got)!="0": drift.append({"kind":"legacy-flat-rate","rateId":rate_id,"actual":got})
