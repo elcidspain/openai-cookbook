@@ -144,9 +144,13 @@ if not any(item.get("type") == "header" and item.get("key", "").lower() == "acce
     fail("Markdown route does not negotiate Accept: text/markdown")
 if not markdown_route.get("headers", {}).get("Content-Type", "").startswith("text/markdown"):
     fail("Markdown route does not declare text/markdown")
-redirects = vercel.get("redirects", [])
-if not any(item.get("source") in ("/aumara", "/aumara/") and item.get("destination") == "https://www.aumara.me/" for item in redirects):
+if "redirects" in vercel:
+    fail("top-level redirects cannot be combined with routes; keep the /aumara 308 in routes")
+if not any(item.get("src") == "^/aumara(/.*)?$" and item.get("status") == 308 and item.get("headers", {}).get("Location") == "https://www.aumara.me/" for item in routes):
     fail("AUMARA canonical redirect missing")
+staff_route = next((item for item in routes if item.get("src") == "^/staff/?$"), None)
+if not staff_route or "noindex" not in staff_route.get("headers", {}).get("X-Robots-Tag", ""):
+    fail("/staff must send X-Robots-Tag noindex")
 if not any(item.get("src") == "^/.*$" and item.get("status") == 404 for item in routes):
     fail("production routing does not fail closed for unrelated repository files")
 if "trailingSlash" in vercel:
@@ -168,6 +172,8 @@ if not (ROOT / "gone.txt").is_file():
 
 def first_route(path):
     for item in routes:
+        if item.get("continue"):
+            continue  # header-only pass-through routes (e.g. staff host noindex)
         if re.search(item.get("src", ""), path):
             return item
     return None
