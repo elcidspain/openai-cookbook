@@ -91,10 +91,10 @@ if not any("booking.com/hotel/es/el-cid-country-club" in x for x in p.links):
     fail("missing EL CID Booking CTA")
 if any("beds24" in x.lower() for x in p.links):
     fail("unverified EL CID Beds24 CTA present")
-if "wa.me/" not in js:
+if "https://wa.me/34622914323?text=" not in html:
     fail("WhatsApp CTA missing")
-if "34622914323" not in js or "34622914323" not in html:
-    fail("verified WhatsApp number is not explicit")
+if "34622914323" not in html or "tel:" in html:
+    fail("verified WhatsApp number is not explicit (and tel: links are not allowed)")
 if "data-open-booking" not in html or "booking-drawer" not in css:
     fail("booking drawer trigger or styling missing")
 
@@ -108,10 +108,60 @@ for asset_id in studio_assets:
     if asset_id not in html:
         fail(f"verified studio asset missing: {asset_id}")
 
-keys = set(re.findall(r'data-i18n="([^"]+)"', html))
-for key in keys:
-    if not re.search(rf"\b{re.escape(key)}\s*:", js):
-        fail(f"translation key absent: {key}")
+# Multilingual pages: generated from i18n/template.html + i18n/<lang>.json.
+# Language comes only from the URL path; never from navigator.language or storage.
+import subprocess
+build = subprocess.run([sys.executable, str(ROOT / "build_i18n.py"), "--check"], capture_output=True, text=True)
+if build.returncode != 0:
+    fail("i18n build stale or broken: " + (build.stdout + build.stderr).strip())
+LANGS = ["es", "en", "de", "fr", "nl", "ru", "it"]
+if re.search(r"navigator\.languages?\b|localStorage\.(getItem|setItem)|elcid-language'\)\|\|", js):
+    fail("site.js must not choose language from the browser or stored preferences")
+if "data-i18n" in html or "languageToggle" in js:
+    fail("runtime language switching remains")
+sitemap_xml = (ROOT / "sitemap.xml").read_text(encoding="utf-8")
+for lang in LANGS:
+    page_file = ROOT / "index.html" if lang == "es" else ROOT / lang / "index.html"
+    if not page_file.exists():
+        fail(f"missing language page: {lang}")
+    page = page_file.read_text(encoding="utf-8")
+    url = "https://www.elcidspain.com/" if lang == "es" else f"https://www.elcidspain.com/{lang}"
+    if f'<html lang="{lang}"' not in page:
+        fail(f"{lang}: html lang mismatch")
+    if f'<link rel="canonical" href="{url}">' not in page:
+        fail(f"{lang}: self-canonical missing")
+    hreflangs = re.findall(r'<link rel="alternate" hreflang="([^"]+)" href="([^"]+)">', page)
+    if sorted(h for h, _ in hreflangs) != sorted(LANGS + ["x-default"]):
+        fail(f"{lang}: hreflang set incomplete: {hreflangs}")
+    if dict(hreflangs).get("x-default") != "https://www.elcidspain.com/":
+        fail(f"{lang}: x-default must point to the Spanish root")
+    if f'"inLanguage":"{lang}"' not in page:
+        fail(f"{lang}: JSON-LD inLanguage missing")
+    if 'id="languageMenu"' not in page or page.count('hreflang="') < 2 * len(LANGS) + 1:
+        fail(f"{lang}: language switcher missing")
+    if "https://wa.me/34622914323?text=" not in page or "tel:" in page:
+        fail(f"{lang}: WhatsApp link missing or tel: link present")
+    if "booking.com/hotel/es/el-cid-country-club" not in page or "official-logo" not in page:
+        fail(f"{lang}: Booking CTA or logo missing")
+    if "CV H01453 A" not in page:
+        fail(f"{lang}: published registration line changed")
+    if f"<loc>{url}</loc>" not in sitemap_xml:
+        fail(f"sitemap missing {url}")
+    lp = Audit()
+    lp.feed(page)
+    for path in lp.links + lp.scripts + lp.styles:
+        if path.startswith(("http://", "https://", "mailto:", "#", "/")):
+            continue
+        if not (page_file.parent / path).resolve().exists():
+            fail(f"{lang}: missing local target {path}")
+    for href in lp.links:
+        if href.startswith("#") and href != "#" and href[1:] not in lp.ids:
+            fail(f"{lang}: broken anchor {href}")
+    for required in ("stay", "restaurant", "place", "events", "contact", "bookingDrawer", "whatsappBooking"):
+        if required not in lp.ids:
+            fail(f"{lang}: missing #{required}")
+if sitemap_xml.count("<url>") != len(LANGS) + 3 or 'xmlns:xhtml="http://www.w3.org/1999/xhtml"' not in sitemap_xml:
+    fail("sitemap must list 7 language pages with xhtml alternates plus 3 policy pages")
 
 for required_file in ("robots.txt", "sitemap.xml", "llms.txt", "index.md", "legal.html", "privacy.html", "cookies.html"):
     if not (ROOT / required_file).exists():
@@ -242,8 +292,17 @@ kept_paths = {
     "/legal/": 308,
     "/privacy.html/": 308,
     "/aumara/": 308,
-    "/en": 404,
+    "/en": 200,
+    "/de": 200,
+    "/fr": 200,
+    "/nl": 200,
+    "/ru": 200,
+    "/it": 200,
     "/en/": 308,
+    "/ru/": 308,
+    "/en/index.html": 404,
+    "/pt": 404,
+    "/es": 404,
     "/privacy": 404,
     "/privacy-policy": 404,
     "/contact": 404,
@@ -295,5 +354,6 @@ print("conversion=booking drawer + Booking.com + verified WhatsApp")
 print("studio=verified kitchen + living area + bedroom + bathroom")
 print("discovery=robots + sitemap + llms + Markdown negotiation + Agent Skills + WebMCP + Link headers")
 print("policies=legal + privacy + cookies")
+print("languages=/ (es) + /en /de /fr /nl /ru /it, path-only, hreflang x-default=/")
 print("routes=/->EL CID HTML/Markdown, /aumara/->www.aumara.me, stale WordPress paths->410")
 print("EL CID production static site checks: PASS")
