@@ -80,6 +80,15 @@
       "dest": "/elcid-site/index.html"
     },
     {
+      "src": "^/(en|de|fr|nl|ru|it)$",
+      "headers": {
+        "Content-Language": "$1",
+        "Content-Signal": "ai-train=no, search=yes, ai-input=yes",
+        "Link": "</sitemap.xml>; rel=\"sitemap\"; type=\"application/xml\", </llms.txt>; rel=\"describedby\"; type=\"text/plain\""
+      },
+      "dest": "/elcid-site/$1/index.html"
+    },
+    {
       "src": "^/mcp$",
       "dest": "/api/elcid-mcp"
     },

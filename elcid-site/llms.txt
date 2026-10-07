@@ -4,6 +4,8 @@
 
 ## Canonical site
 - https://www.elcidspain.com/
+- Language versions (chosen only by URL path): Spanish (default) https://www.elcidspain.com/, English https://www.elcidspain.com/en, German https://www.elcidspain.com/de, French https://www.elcidspain.com/fr, Dutch https://www.elcidspain.com/nl, Russian https://www.elcidspain.com/ru, Italian https://www.elcidspain.com/it
+- Legal, privacy and cookies pages are published in Spanish only.
 
 ## Identity and disambiguation
 - EL CID Country Club here means the hospitality property in Benidoleig, Alicante, Spain.
