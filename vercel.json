@@ -125,6 +125,13 @@
       "dest": "/api/elcid-api-catalog"
     },
     {
+      "src": "^/(google13769a27c43ffe0b\\.html)$",
+      "headers": {
+        "X-Robots-Tag": "noindex"
+      },
+      "dest": "/elcid-site/$1"
+    },
+    {
       "src": "^/(styles\\.css|site\\.js|official-logo\\.svg|legal\\.html|privacy\\.html|cookies\\.html|robots\\.txt|sitemap\\.xml|llms\\.txt|auth\\.md|88ac8299a121242d68bce3a6dc125683\\.txt)$",
       "dest": "/elcid-site/$1"
     },
