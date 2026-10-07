@@ -7,7 +7,7 @@
     "fps": 30
   },
   "nodes": [
-    {"id":1,"start":0,"end":12,"x":46,"y":54,"title_en":"First panorama","title_es":"Primera panorámica","copy_en":"Valley, pine trees and the first reading of the houses together.","copy_es":"El valle, los pinos y la primera lectura conjunta de las casas."},
+    {"id":1,"start":0,"end":12,"x":46,"y":54,"title_en":"First panorama","title_es":"Primera panorámica","copy_en":"The valley and the first reading of the houses together.","copy_es":"El valle y la primera lectura conjunta de las casas."},
     {"id":2,"start":13,"end":32,"x":37,"y":48,"title_en":"Red house approach","title_es":"Camino hacia la casa roja","copy_en":"The illuminated path turns the house into the next destination.","copy_es":"El camino iluminado convierte la casa en el siguiente destino."},
     {"id":3,"start":33,"end":58,"x":28,"y":57,"title_en":"Upper cluster and green entrance","title_es":"Conjunto superior y entrada verde","copy_en":"The route passes between houses and reveals the spacing between them.","copy_es":"La ruta pasa entre las casas y muestra la distancia real entre ellas."},
     {"id":4,"start":59,"end":74,"x":57,"y":61,"title_en":"Valley viewpoint","title_es":"Mirador al valle","copy_en":"The landscape opens between the houses instead of sitting behind them.","copy_es":"El paisaje se abre entre las casas, no solamente detrás de ellas."},
