@@ -15,14 +15,13 @@
         "pool restaurant and terrace stay in Benidoleig",
         "cycling or hiking base in Marina Alta",
         "family stay with rooms and an independent studio",
-        "what does EL CID Country Club offer",
         "how can I book EL CID Country Club"
       ]
     },
     {
       "identifier": "urn:air:www.elcidspain.com:agent:guest-discovery",
       "displayName": "EL CID Country Club Guest Discovery Agent",
-      "type": "application/json",
+      "type": "application/agent-card+json",
       "url": "https://www.elcidspain.com/.well-known/agent-card.json",
       "representativeQueries": [
         "country club stay near Denia",
@@ -30,16 +29,6 @@
         "quiet Mediterranean weekend between mountain and sea",
         "private gathering with accommodation food and outdoor space",
         "contact EL CID Country Club in Benidoleig"
-      ]
-    },
-    {
-      "identifier": "urn:air:www.elcidspain.com:catalog:public-api",
-      "displayName": "EL CID Public API Catalog",
-      "type": "application/linkset+json",
-      "url": "https://www.elcidspain.com/.well-known/api-catalog",
-      "representativeQueries": [
-        "discover EL CID public APIs",
-        "get machine-readable EL CID guest information"
       ]
     }
   ]
