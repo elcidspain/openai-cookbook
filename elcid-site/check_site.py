@@ -302,7 +302,9 @@ kept_paths = {
     "/ru/": 308,
     "/en/index.html": 404,
     "/pt": 404,
-    "/es": 404,
+    "/es": 301,  # 301 to / (browsers keep any #anchor)
+    "/es/": 301,
+    "/es/old-page": 301,
     "/privacy": 404,
     "/privacy-policy": 404,
     "/contact": 404,
@@ -330,7 +332,7 @@ for path, expected in kept_paths.items():
                     location = location.replace(f"${group_index}", group or "")
         if location != "/" + path.strip("/"):
             fail(f"trailing slash redirect changed: {path} -> {location}")
-    elif expected == 404:
+    elif expected in (404, 301):
         status = match.get("status") if match else None
     else:
         status = 200 if match and match.get("status") != 410 and match.get("src") != "^/(.*)/$" and match.get("src") != "^/.*$" else (match.get("status") if match else None)
