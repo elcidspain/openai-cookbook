@@ -1,6 +1,5 @@
 User-agent: *
 Allow: /
-Content-Signal: search=yes, ai-input=yes, ai-train=no
 
 User-agent: OAI-SearchBot
 Allow: /
@@ -36,4 +35,3 @@ User-agent: CCBot
 Disallow: /
 
 Sitemap: https://www.elcidspain.com/sitemap.xml
-Agentmap: https://www.elcidspain.com/.well-known/ai-catalog.json
