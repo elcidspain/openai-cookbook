@@ -347,6 +347,10 @@ header_route = next((item for item in routes if item.get("src") == "^/$" and ite
 if not header_route or "Content-Signal" not in header_route.get("headers", {}) or "Link" not in header_route.get("headers", {}):
     fail("production discovery headers missing")
 
+cs_route = next((item for item in routes if "privacy\\.html" in item.get("src", "") and item.get("continue")), None)
+if not cs_route or cs_route.get("headers", {}).get("Content-Signal") != "ai-train=no, search=yes, ai-input=yes":
+    fail("Content-Signal header missing on legal/privacy/cookies pages")
+
 hosts = sorted({urlparse(x).netloc for x in p.links if x.startswith("http")})
 print(f"ids={len(p.ids)} links={len(p.links)} images={len(p.images)} scripts={len(p.scripts)} styles={len(p.styles)}")
 print("external_hosts=" + ",".join(hosts))
