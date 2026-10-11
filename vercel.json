@@ -43,6 +43,13 @@
       "dest": "/elcid-site/gone.txt"
     },
     {
+      "src": "^/es(?:/.*)?$",
+      "status": 301,
+      "headers": {
+        "Location": "/"
+      }
+    },
+    {
       "src": "^/(.*)/$",
       "headers": {
         "Location": "/$1"
