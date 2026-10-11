@@ -125,6 +125,13 @@
       "dest": "/api/elcid-api-catalog"
     },
     {
+      "src": "^/(?:legal\\.html|privacy\\.html|cookies\\.html|google13769a27c43ffe0b\\.html)$",
+      "headers": {
+        "Content-Signal": "ai-train=no, search=yes, ai-input=yes"
+      },
+      "continue": true
+    },
+    {
       "src": "^/(google13769a27c43ffe0b\\.html)$",
       "headers": {
         "X-Robots-Tag": "noindex"
