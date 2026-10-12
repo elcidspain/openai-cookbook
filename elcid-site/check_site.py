@@ -87,9 +87,12 @@ for href in p.links:
     if href.startswith("#") and href != "#" and href[1:] not in p.ids:
         fail(f"broken anchor {href}")
 
+ELCID_DIRECT_BOOKING = "https://beds24.com/booking2.php?propid=324903"
 if not any("booking.com/hotel/es/el-cid-country-club" in x for x in p.links):
     fail("missing EL CID Booking CTA")
-if any("beds24" in x.lower() for x in p.links):
+if ELCID_DIRECT_BOOKING not in p.links:
+    fail("missing EL CID direct booking CTA")
+if any("beds24" in x.lower() and x != ELCID_DIRECT_BOOKING for x in p.links):
     fail("unverified EL CID Beds24 CTA present")
 if "https://wa.me/34622914323?text=" not in html:
     fail("WhatsApp CTA missing")
@@ -143,6 +146,8 @@ for lang in LANGS:
         fail(f"{lang}: WhatsApp link missing or tel: link present")
     if "booking.com/hotel/es/el-cid-country-club" not in page or "official-logo" not in page:
         fail(f"{lang}: Booking CTA or logo missing")
+    if ELCID_DIRECT_BOOKING not in page:
+        fail(f"{lang}: direct booking CTA missing")
     if "CV H01453 A" not in page:
         fail(f"{lang}: published registration line changed")
     if f"<loc>{url}</loc>" not in sitemap_xml:
@@ -157,6 +162,8 @@ for lang in LANGS:
     for href in lp.links:
         if href.startswith("#") and href != "#" and href[1:] not in lp.ids:
             fail(f"{lang}: broken anchor {href}")
+        if "beds24" in href.lower() and href != ELCID_DIRECT_BOOKING:
+            fail(f"{lang}: unverified EL CID Beds24 CTA present")
     for required in ("stay", "restaurant", "place", "events", "contact", "bookingDrawer", "whatsappBooking"):
         if required not in lp.ids:
             fail(f"{lang}: missing #{required}")
