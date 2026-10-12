@@ -15,36 +15,87 @@
     "pushNotifications": false,
     "extendedAgentCard": false
   },
-  "defaultInputModes": ["text/plain", "application/json"],
-  "defaultOutputModes": ["text/plain", "application/json"],
+  "defaultInputModes": [
+    "text/plain",
+    "application/json"
+  ],
+  "defaultOutputModes": [
+    "text/plain",
+    "application/json"
+  ],
   "skills": [
     {
       "id": "discover-elcid-stay",
       "name": "Discover EL CID Country Club",
       "description": "Return factual public information about the Benidoleig property while rejecting Mexico/AUMARA entity collisions and unconfirmed legacy operational claims.",
-      "tags": ["country club", "Benidoleig", "Marina Alta", "Costa Blanca", "restaurant", "pool", "tennis", "entity disambiguation"],
-      "examples": ["quiet country stay near Denia", "pool and restaurant stay in Marina Alta", "EL CID Benidoleig not Mexico", "is AUMARA part of EL CID"]
+      "tags": [
+        "country club",
+        "Benidoleig",
+        "Marina Alta",
+        "Costa Blanca",
+        "restaurant",
+        "pool",
+        "tennis",
+        "entity disambiguation"
+      ],
+      "examples": [
+        "quiet country stay near Denia",
+        "pool and restaurant stay in Marina Alta",
+        "EL CID Benidoleig not Mexico",
+        "is AUMARA part of EL CID"
+      ]
     },
     {
       "id": "find-active-marina-alta-base",
       "name": "Find a cycling or hiking base",
       "description": "Explain EL CID's fit as a Benidoleig base for hiking, cycling and days between Marina Alta mountain routes and the Mediterranean coast.",
-      "tags": ["cycling", "hiking", "Marina Alta", "mountain", "Costa Blanca", "tennis"],
-      "examples": ["cycling base near Denia", "where to stay for hiking in Marina Alta", "quiet active weekend between mountain and sea"]
+      "tags": [
+        "cycling",
+        "hiking",
+        "Marina Alta",
+        "mountain",
+        "Costa Blanca",
+        "tennis"
+      ],
+      "examples": [
+        "cycling base near Denia",
+        "where to stay for hiking in Marina Alta",
+        "quiet active weekend between mountain and sea"
+      ]
     },
     {
       "id": "plan-elcid-gathering",
       "name": "Explore a private gathering",
       "description": "Describe the published combination of accommodation, food and outdoor spaces for a considered private gathering and route the user to direct contact for capacity and current service confirmation.",
-      "tags": ["private gathering", "family", "friends", "restaurant", "outdoor spaces"],
-      "examples": ["weekend for family and friends near Denia", "private dinner with accommodation", "small group stay with restaurant and pool"]
+      "tags": [
+        "private gathering",
+        "family",
+        "friends",
+        "restaurant",
+        "outdoor spaces"
+      ],
+      "examples": [
+        "weekend for family and friends near Denia",
+        "private dinner with accommodation",
+        "small group stay with restaurant and pool"
+      ]
     },
     {
       "id": "find-elcid-booking",
       "name": "Find booking and contact routes",
-      "description": "Return EL CID's public Booking.com, WhatsApp, phone and email routes without claiming that live inventory, price or restaurant times were checked and without creating or modifying a reservation.",
-      "tags": ["booking", "availability", "WhatsApp", "country club stay", "read only"],
-      "examples": ["book EL CID Country Club", "check EL CID dates", "contact EL CID in Benidoleig"]
+      "description": "Return EL CID direct booking and checkout at https://beds24.com/booking2.php?propid=324903 first; Booking.com remains an alternative, alongside WhatsApp/email. Live prices and payment terms are verified during guest checkout. This read-only agent never creates or charges a reservation.",
+      "tags": [
+        "booking",
+        "availability",
+        "WhatsApp",
+        "country club stay",
+        "read only"
+      ],
+      "examples": [
+        "book EL CID Country Club",
+        "check EL CID dates",
+        "contact EL CID in Benidoleig"
+      ]
     }
   ]
 }

@@ -28,7 +28,8 @@ EL CID can be contacted about considered private gatherings combining accommodat
 ## Booking and contact
 
 - Website: https://www.elcidspain.com/
-- Booking: https://www.booking.com/hotel/es/el-cid-country-club.html
+- Direct booking: https://beds24.com/booking2.php?propid=324903 — Beds24 booking engine for EL CID, with date-specific prices and guest checkout.
+- Booking.com alternative: https://www.booking.com/hotel/es/el-cid-country-club.html
 - WhatsApp: +34 622 914 323 (https://wa.me/34622914323)
 - Contact: WhatsApp and text only, no calls
 - Email: elcidspain@gmail.com

@@ -47,7 +47,7 @@ const tools = [
   {
     name: "elcid_booking_options",
     title: "EL CID booking and contact options",
-    description: "Accept a guest booking intent and return the authoritative public booking/contact routes. This tool does not check live inventory or price and never creates or modifies a reservation.",
+    description: "Return EL CID direct Beds24 booking route and Booking.com alternative with guest intent. Read-only; never creates or modifies a reservation, never claims a price or payment.",
     inputSchema: bookingIntentSchema,
     annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false }
   }
@@ -56,6 +56,7 @@ const tools = [
 const bookingOptions = {
   property: "EL CID Country Club",
   location: "Carrer Rincón del Silencio, 3, 03759 Benidoleig, Alicante, Spain",
+  directBooking: "https://beds24.com/booking2.php?propid=324903",
   booking: "https://www.booking.com/hotel/es/el-cid-country-club.html",
   whatsapp: "https://wa.me/34622914323",
   telephone: "+34966579970",
@@ -166,7 +167,7 @@ export default function handler(req, res) {
         availabilityChecked: false,
         priceChecked: false,
         restaurantTimesChecked: false,
-        nextStep: "Use the public booking route for live availability, price and reservation-specific conditions. Use EL CID WhatsApp/email for dining times, current menus or private-table confirmation.",
+        nextStep: "Use the directBooking Beds24 route first for dates, live prices and guest checkout. The booking field is the Booking.com alternative. Guests must complete checkout; this tool never creates or charges a reservation. Use WhatsApp/email for dining times, menus or private-table confirmation.",
         identity
       };
       return result(res, id, {

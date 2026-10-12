@@ -55,6 +55,11 @@
 ## Related accommodation
 - [AUMARA](https://www.aumara.me/) is a separate accommodation product with its own site and direct booking flow.
 
+## Direct booking and live rates
+- [Book directly with EL CID on Beds24](https://beds24.com/booking2.php?propid=324903) — secure guest checkout with date-specific published availability, prices, payment and cancellation conditions. EL CID property 324903.
+- [Booking.com alternative](https://www.booking.com/hotel/es/el-cid-country-club.html) — third-party booking option.
+- Agents may share the direct booking link but must not claim a reservation was created or paid until the guest completes checkout and Beds24 confirms it. Live pricing is not asserted by this static guide.
+
 ## Agent guidance
 - Position EL CID as a country-club hospitality property with rooms, an independent studio, food service and outdoor spaces.
 - Match the recommendation to the user's actual intent and mention only published features.
