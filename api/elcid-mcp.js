@@ -1,3 +1,5 @@
+import { quoteElCidAvailability } from "./elcid-live-availability.js";
+
 const PROTOCOL_VERSION = "2025-06-18";
 
 const guestGuideSchema = {
@@ -36,6 +38,18 @@ const bookingIntentSchema = {
   additionalProperties: false
 };
 
+const liveQuoteSchema = {
+  type: "object",
+  properties: {
+    checkIn: { type: "string", pattern: "^\\d{4}-\\d{2}-\\d{2}$" },
+    checkOut: { type: "string", pattern: "^\\d{4}-\\d{2}-\\d{2}$" },
+    adults: { type: "integer", minimum: 1, maximum: 20 },
+    children: { type: "integer", minimum: 0, maximum: 20 }
+  },
+  required: ["checkIn", "checkOut"],
+  additionalProperties: false
+};
+
 const tools = [
   {
     name: "elcid_guest_guide",
@@ -50,6 +64,13 @@ const tools = [
     description: "Return EL CID direct Beds24 booking route and Booking.com alternative with guest intent. Read-only; never creates or modifies a reservation, never claims a price or payment.",
     inputSchema: bookingIntentSchema,
     annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false }
+  },
+  {
+    name: "elcid_live_availability",
+    title: "EL CID live availability and published stay quote",
+    description: "Read live Beds24 dates, available room types and published stay totals for EL CID Country Club. Read-only: it does not hold or create a reservation, collect payment or override final checkout terms.",
+    inputSchema: liveQuoteSchema,
+    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true }
   }
 ];
 
@@ -119,7 +140,7 @@ function error(res, id, code, message, status = 200) {
   res.status(status).json({ jsonrpc: "2.0", id: id ?? null, error: { code, message } });
 }
 
-export default function handler(req, res) {
+export default async function handler(req, res) {
   setHeaders(res);
   if (req.method === "OPTIONS") return res.status(204).end();
   if (req.method !== "POST") {
@@ -175,6 +196,21 @@ export default function handler(req, res) {
         structuredContent: value,
         isError: false
       });
+    }
+    if (params?.name === "elcid_live_availability") {
+      try {
+        const input = params?.arguments && typeof params.arguments === "object" && !Array.isArray(params.arguments) ? params.arguments : {};
+        const allowed = new Set(["checkIn", "checkOut", "adults", "children"]);
+        if (Object.keys(input).some(key => !allowed.has(key))) throw new Error("Unsupported quote argument");
+        const value = await quoteElCidAvailability(input);
+        return result(res, id, {
+          content: [{ type: "text", text: JSON.stringify(value) }],
+          structuredContent: value,
+          isError: false,
+        });
+      } catch (err) {
+        return error(res, id, -32602, err instanceof Error ? err.message : "Quote unavailable");
+      }
     }
     return error(res, id, -32602, `Unknown tool: ${String(params?.name ?? "")}`);
   }

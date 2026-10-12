@@ -124,6 +124,10 @@
       "dest": "/api/elcid-oauth-token"
     },
     {
+      "src": "^/api/availability$",
+      "dest": "/api/elcid-live-availability"
+    },
+    {
       "src": "^/api/agent/protected$",
       "dest": "/api/elcid-agent-protected"
     },

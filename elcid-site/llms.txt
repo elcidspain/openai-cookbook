@@ -56,6 +56,7 @@
 - [AUMARA](https://www.aumara.me/) is a separate accommodation product with its own site and direct booking flow.
 
 ## Direct booking and live rates
+- [Live EL CID quote API](https://www.elcidspain.com/api/availability?checkIn=2026-10-24&checkOut=2026-10-25&adults=2&children=0) — substitute requested ISO dates and guest counts; returns read-only Beds24 available room types, stay totals and date-aware direct-booking links. No reservation or payment is created.
 - [Book directly with EL CID on Beds24](https://beds24.com/booking2.php?propid=324903) — secure guest checkout with date-specific published availability, prices, payment and cancellation conditions. EL CID property 324903.
 - [Booking.com alternative](https://www.booking.com/hotel/es/el-cid-country-club.html) — third-party booking option.
 - Agents may share the direct booking link but must not claim a reservation was created or paid until the guest completes checkout and Beds24 confirms it. Live pricing is not asserted by this static guide.
