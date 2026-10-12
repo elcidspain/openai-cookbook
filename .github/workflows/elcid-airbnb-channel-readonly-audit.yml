@@ -1,0 +1,125 @@
+name: EL CID Airbnb Channel Readonly Audit
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/elcid-airbnb-channel-readonly-audit.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    environment: Production
+    timeout-minutes: 8
+    env:
+      BEDS24_REFRESH_CREDENTIAL: ${{ secrets.BEDS24_REFRESH_CREDENTIAL }}
+    steps:
+      - name: Read EL CID Airbnb binding metadata without changing bookings
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import datetime as dt
+          import json
+          import os
+          import pathlib
+          import time
+          import urllib.error
+          import urllib.parse
+          import urllib.request
+
+          TARGET_PROPERTY = 324903
+          TARGET_LISTING = "666085874940480238"
+          receipt = {
+              "schema": "elcid.airbnb-channel-readonly-audit.v1",
+              "time_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
+              "property_id": TARGET_PROPERTY,
+              "listing_id": TARGET_LISTING,
+              "operations": "Beds24 GET only; no booking/rate/channel writes",
+              "status": "NOT_VERIFIED",
+          }
+          def api_get(path, header, credential):
+              url = "https://api.beds24.com/v2" + path
+              req = urllib.request.Request(url, headers={"Accept": "application/json", header: credential, "User-Agent": "ELCID-readonly-sync-check/1.0"}, method="GET")
+              try:
+                  with urllib.request.urlopen(req, timeout=35) as response:
+                      status, raw = int(response.status), response.read()
+              except urllib.error.HTTPError as error:
+                  status, raw = int(error.code), error.read()
+              try:
+                  data = json.loads(raw.decode("utf-8", "replace"))
+              except Exception:
+                  data = {}
+              return status, data
+
+          try:
+              secret = (os.environ.get("BEDS24_REFRESH_CREDENTIAL") or "").strip()
+              if not secret:
+                  receipt["status"] = "CREDENTIAL_ABSENT"
+              else:
+                  print("::add-mask::" + secret)
+                  auth_status, auth_details = api_get("/authentication/details", "token", secret)
+                  receipt["auth_check_http"] = auth_status
+                  token = secret if auth_status == 200 and isinstance(auth_details, dict) and auth_details.get("validToken") is True else ""
+                  if not token:
+                      exchange_status, body = api_get("/authentication/token", "refreshToken", secret)
+                      receipt["exchange_http"] = exchange_status
+                      token = str(body.get("token") or "") if exchange_status == 200 and isinstance(body, dict) else ""
+                  if not token:
+                      receipt["status"] = "AUTH_UNAVAILABLE"
+                  else:
+                      print("::add-mask::" + token)
+                      path = "/channels/settings?propertyId=324903&channel%5B%5D=airbnb"
+                      status, payload = api_get(path, "token", token)
+                      receipt["channel_settings_http"] = status
+                      receipt["response_shape"] = {
+                          "type": type(payload).__name__,
+                          "keys": sorted(payload.keys())[:12] if isinstance(payload, dict) else [],
+                      }
+                      mapped = []
+                      matches = 0
+                      data = payload.get("data", []) if isinstance(payload, dict) else []
+                      for channel in data if isinstance(data, list) else []:
+                          if not isinstance(channel, dict):
+                              continue
+                          for prop in channel.get("properties", []):
+                              if not isinstance(prop, dict):
+                                  continue
+                              if str(prop.get("id") or prop.get("propertyId") or "") != str(TARGET_PROPERTY):
+                                  continue
+                              matches += 1
+                              for room in prop.get("roomTypes", []):
+                                  if isinstance(room, dict) and str(room.get("airbnbListingId") or "") == TARGET_LISTING:
+                                      mapped.append({"room_id": room.get("id") or room.get("roomId"), "listing_id": TARGET_LISTING, "airbnb_user_connected": bool(prop.get("airbnbUserId"))})
+                      receipt["matching_property_groups"] = matches
+                      receipt["target_listing_mappings"] = mapped
+                      time.sleep(2.2)
+                      user_status, users = api_get("/channels/airbnb/users", "token", token)
+                      receipt["connected_users_http"] = user_status
+                      receipt["connected_user_count"] = len(users.get("data", [])) if isinstance(users, dict) and isinstance(users.get("data"), list) else None
+                      if status in (401, 403) or user_status in (401, 403):
+                          receipt["status"] = "CHANNEL_SCOPE_MISSING"
+                      elif status == 200 and mapped:
+                          receipt["status"] = "MAPPING_FOUND_SYNC_NOT_TIMED"
+                      elif status == 200:
+                          receipt["status"] = "TARGET_LISTING_NOT_MAPPED_IN_RESPONSE"
+                      else:
+                          receipt["status"] = "CHANNEL_SETTINGS_UNVERIFIED"
+          except Exception as error:
+              receipt["status"] = "PROBE_FAILED"
+              receipt["error_class"] = type(error).__name__
+          finally:
+              output = pathlib.Path(os.environ["RUNNER_TEMP"]) / "elcid-airbnb-channel-readonly.json"
+              output.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+              print(json.dumps(receipt, sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: elcid-airbnb-channel-readonly
+          path: ${{ runner.temp }}/elcid-airbnb-channel-readonly.json
+          if-no-files-found: warn
+          retention-days: 7
