@@ -2,6 +2,7 @@ const HOTEL = {
   name: "EL CID Country Club",
   location: "Carrer Rincón del Silencio, 3, 03759 Benidoleig, Alicante, Spain",
   website: "https://www.elcidspain.com/",
+  directBooking: "https://beds24.com/booking2.php?propid=324903",
   booking: "https://www.booking.com/hotel/es/el-cid-country-club.html",
   whatsapp: "https://wa.me/34622914323",
   telephone: "+34966579970",
@@ -41,7 +42,7 @@ function textFor(params) {
     return `${base} The current public site presents restaurant service, breakfast, day service, dinners and private tables, but current menus, prices and service times must be confirmed through EL CID's current public contact routes. ${identity.legacy}`;
   }
   if (/book|reserv|availability|date|price|rate/.test(query)) {
-    return `EL CID Country Club booking and contact: ${HOTEL.booking}. WhatsApp: ${HOTEL.whatsapp}. Phone: ${HOTEL.telephone}. Email: ${HOTEL.email}. Live prices, dates, inventory and reservation-specific conditions must be confirmed through the booking/contact route. This agent does not create or modify reservations and must not invent availability, price or a discount.`;
+    return `EL CID Country Club direct Beds24 booking and checkout: ${HOTEL.directBooking}. Booking.com alternative: ${HOTEL.booking}. WhatsApp: ${HOTEL.whatsapp}. Phone: ${HOTEL.telephone}. Email: ${HOTEL.email}. Live prices, dates, inventory and reservation-specific conditions must be confirmed through the booking/contact route. This agent does not create or modify reservations and must not invent availability, price or a discount.`;
   }
   if (query.includes("cycle") || query.includes("cycling") || query.includes("bike") || query.includes("hiking") || query.includes("walk") || query.includes("route")) {
     return `${base} It can suit a quiet cycling or hiking base between mountain and Mediterranean coast. Canonical site: ${HOTEL.website}.`;
@@ -78,6 +79,7 @@ export default function handler(req, res) {
         metadata: {
           canonical: HOTEL.website,
           booking: HOTEL.booking,
+          directBooking: HOTEL.directBooking,
           identity,
           availabilityChecked: false,
           priceChecked: false,
