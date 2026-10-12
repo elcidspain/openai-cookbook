@@ -35,6 +35,14 @@ function checkoutUrl(roomId, checkIn, checkOut) {
   return u.toString();
 }
 
+function beds24Failure(raw) {
+  for (const key of ["error", "errorCode", "errorcode"]) {
+    const value = raw[key];
+    if (value !== undefined && value !== null && String(value).trim() !== "") return true;
+  }
+  return false;
+}
+
 export async function quoteElCidAvailability(input = {}) {
   const arrival = isoDate(input.checkIn, "checkIn");
   const departure = isoDate(input.checkOut, "checkOut");
@@ -59,16 +67,17 @@ export async function quoteElCidAvailability(input = {}) {
   if (!response.ok) throw new Error("Beds24 availability source returned HTTP " + response.status);
   const raw = await response.json();
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error("Unexpected Beds24 response structure");
+  if (beds24Failure(raw)) throw new Error("Beds24 availability source returned an error");
   const inventory = ROOMS.map(([roomId, name]) => {
     const entry = raw[roomId] ?? {};
     const count = Number(entry.roomsavail);
-    const total = typeof entry.price === "number" && Number.isFinite(entry.price) ? entry.price : null;
-    const bookable = total !== null && total >= 0 && Number.isFinite(count) && count > 0;
+    const availableUnits = Number.isFinite(count) && count > 0 ? Math.floor(count) : 0;
+    const stayTotal = typeof entry.price === "number" && Number.isFinite(entry.price) && entry.price >= 0 ? entry.price : null;
+    const bookable = availableUnits > 0;
     return {
-      roomId, name, bookable,
-      availableUnits: bookable ? Math.floor(count) : 0,
-      stayTotal: bookable ? total : null,
-      nightlyEquivalent: bookable ? Math.round((total / nights) * 100) / 100 : null,
+      roomId, name, bookable, availableUnits,
+      stayTotal: bookable ? stayTotal : null,
+      nightlyEquivalent: bookable && stayTotal !== null ? Math.round((stayTotal / nights) * 100) / 100 : null,
       currency: entry.currency || raw.currency || null,
       checkoutUrl: bookable ? checkoutUrl(roomId, input.checkIn, input.checkOut) : null,
     };

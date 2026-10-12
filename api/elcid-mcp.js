@@ -209,7 +209,9 @@ export default async function handler(req, res) {
           isError: false,
         });
       } catch (err) {
-        return error(res, id, -32602, err instanceof Error ? err.message : "Quote unavailable");
+        const message = err instanceof Error ? err.message : "Quote unavailable";
+        const inputError = /must be|valid date|stay must be|Unsupported quote argument/.test(message);
+        return error(res, id, inputError ? -32602 : -32603, inputError ? message : "Live availability temporarily unavailable");
       }
     }
     return error(res, id, -32602, `Unknown tool: ${String(params?.name ?? "")}`);
