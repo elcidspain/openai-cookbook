@@ -47,3 +47,19 @@
   font: 700 11px/1.15 Arial,sans-serif;
   letter-spacing: .14em;
 }
+
+
+/* Guest-facing, read-only date and party quote inside the existing booking drawer. */
+.elcid-live-search{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:24px 0;padding:18px;background:rgba(23,69,43,.045);border:1px solid var(--line);border-radius:16px}
+.elcid-live-search h3{grid-column:1/-1;margin:0 0 2px;color:var(--green);font:600 1.06rem/1.35 Arial,sans-serif}
+.elcid-live-field{display:flex;flex-direction:column;gap:5px;min-width:0;color:var(--ink);font-size:.78rem;font-weight:700}
+.elcid-live-field input{box-sizing:border-box;width:100%;min-width:0;padding:10px 8px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);font:inherit;font-size:.85rem}
+.elcid-live-field input:focus-visible,.elcid-live-submit:focus-visible,.elcid-quote-link:focus-visible{outline:2px solid var(--green2);outline-offset:2px}
+.elcid-live-submit{grid-column:1/-1;min-height:44px;cursor:pointer}
+.elcid-live-submit:disabled{opacity:.6;cursor:wait}
+.elcid-live-result{grid-column:1/-1;display:grid;gap:10px;font-size:.84rem;line-height:1.5}
+.elcid-quote-row{display:grid;gap:2px;padding:12px;background:#fff;border:1px solid var(--line);border-radius:10px}
+.elcid-quote-row strong{color:var(--green)}
+.elcid-quote-link{display:inline-block;margin-top:4px;color:var(--green2);font-weight:800;text-decoration:underline;text-underline-offset:3px}
+.elcid-live-result small{display:block;color:var(--ink);opacity:.8}
+@media(max-width:400px){.elcid-live-search{grid-template-columns:1fr;padding:12px}.elcid-live-field{grid-column:1/-1}}
