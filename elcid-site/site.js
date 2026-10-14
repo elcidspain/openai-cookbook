@@ -98,6 +98,13 @@ document.documentElement.classList.add('reveal-ready');const observer=new Inters
   result.className = 'elcid-live-result';
   result.setAttribute('role', 'status');
   result.setAttribute('aria-live', 'polite');
+  const stayKey = () => [arrival.value, departure.value, adults.value, children.value].join('|');
+  const formatDay = iso => new Intl.DateTimeFormat(locale, {day:'numeric', month:'short', year:'numeric', timeZone:'UTC'}).format(new Date(iso+'T00:00:00Z'));
+  const clearQuotes = () => result.replaceChildren();
+  [arrival, departure, adults, children].forEach(input => {
+    input.addEventListener('input', clearQuotes);
+    input.addEventListener('change', clearQuotes);
+  });
   form.append(submit, result);
   drawer.insertBefore(form, direct);
   form.addEventListener('submit', async event => {
@@ -114,15 +121,19 @@ document.documentElement.classList.add('reveal-ready');const observer=new Inters
       children: children.value
     });
     const requestedIn = arrival.value, requestedOut = departure.value;
+    const requestedAdults = Number(adults.value), requestedChildren = Number(children.value);
+    const requestedStay = stayKey();
     submit.disabled = true;
     result.replaceChildren(document.createTextNode(t[6]));
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 15000);
     try {
       const response = await fetch('/api/availability?' + params, {cache:'no-store', signal:controller.signal});
+      if (stayKey() !== requestedStay) return;
       if (!response.ok) throw new Error('Quote HTTP ' + response.status);
       const quote = await response.json();
-      if (quote.checkIn !== requestedIn || quote.checkOut !== requestedOut || !Array.isArray(quote.inventory)) throw new Error('Invalid quote');
+      if (stayKey() !== requestedStay) return;
+      if (quote.checkIn !== requestedIn || quote.checkOut !== requestedOut || quote.adults !== requestedAdults || quote.children !== requestedChildren || !Array.isArray(quote.inventory)) throw new Error('Invalid quote');
       const choices = quote.inventory.filter(room =>
         room.bookable === true && room.availableUnits > 0 && Number.isFinite(room.stayTotal) &&
         typeof room.checkoutUrl === 'string'
@@ -136,6 +147,7 @@ document.documentElement.classList.add('reveal-ready');const observer=new Inters
         let checkout;
         try { checkout = new URL(room.checkoutUrl); } catch { continue; }
         if (checkout.protocol !== 'https:' || checkout.hostname !== 'beds24.com') continue;
+        if (checkout.searchParams.get('checkin') !== requestedIn || checkout.searchParams.get('checkout') !== requestedOut) continue;
         const article = document.createElement('div');
         article.className = 'elcid-quote-row';
         const label = document.createElement('strong');
@@ -154,11 +166,16 @@ document.documentElement.classList.add('reveal-ready');const observer=new Inters
       }
       if (!result.childElementCount) result.textContent = t[7];
       else {
+        const stay = document.createElement('span');
+        stay.className = 'elcid-quote-dates';
+        stay.textContent = t[1] + ' ' + formatDay(requestedIn) + ' · ' + t[2] + ' ' + formatDay(requestedOut);
+        result.prepend(stay);
         const notice = document.createElement('small');
         notice.textContent = t[11];
         result.appendChild(notice);
       }
     } catch {
+      if (stayKey() !== requestedStay) return;
       result.textContent = t[8];
     } finally {
       clearTimeout(timeout);
