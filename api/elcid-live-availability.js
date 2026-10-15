@@ -25,11 +25,13 @@ function guestCount(value, field, fallback, min) {
   return count;
 }
 
-function checkoutUrl(roomId, checkIn, checkOut) {
+function checkoutUrl(roomId, checkIn, checkOut, adults, children) {
   const u = new URL("https://beds24.com/booking2.php");
   u.searchParams.set("propid", PROPERTY_ID);
   u.searchParams.set("checkin", checkIn);
   u.searchParams.set("checkout", checkOut);
+  u.searchParams.set("numadult", String(adults));
+  u.searchParams.set("numchild", String(children));
   if (roomId) u.searchParams.set("roomid", roomId);
   u.searchParams.set("referer", "ELCID_AI_AGENT");
   return u.toString();
@@ -70,7 +72,7 @@ export async function quoteElCidAvailability(input = {}) {
       stayTotal: bookable ? total : null,
       nightlyEquivalent: bookable ? Math.round((total / nights) * 100) / 100 : null,
       currency: entry.currency || raw.currency || null,
-      checkoutUrl: bookable ? checkoutUrl(roomId, input.checkIn, input.checkOut) : null,
+      checkoutUrl: bookable ? checkoutUrl(roomId, input.checkIn, input.checkOut, adults, children) : null,
     };
   });
   return {
@@ -83,7 +85,7 @@ export async function quoteElCidAvailability(input = {}) {
     adults,
     children,
     inventory,
-    allAvailabilityUrl: checkoutUrl(null, input.checkIn, input.checkOut),
+    allAvailabilityUrl: checkoutUrl(null, input.checkIn, input.checkOut, adults, children),
     source: "Beds24 public live availability",
     generatedAt: new Date().toISOString(),
     reservationCreated: false,

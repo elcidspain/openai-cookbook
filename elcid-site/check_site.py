@@ -89,8 +89,11 @@ for href in p.links:
 
 if not any("booking.com/hotel/es/el-cid-country-club" in x for x in p.links):
     fail("missing EL CID Booking CTA")
-if any("beds24" in x.lower() for x in p.links):
-    fail("unverified EL CID Beds24 CTA present")
+# The EL CID Beds24 direct route is verified for property 324903.
+# Reject unapproved property IDs and duplicate/third-party checkout links.
+verified_beds24_cta = "https://beds24.com/booking2.php?propid=324903"
+if [href for href in p.links if "beds24" in href.lower()] != [verified_beds24_cta]:
+    fail("EL CID Beds24 direct CTA must use verified property 324903")
 if "https://wa.me/34622914323?text=" not in html:
     fail("WhatsApp CTA missing")
 if "34622914323" not in html or "tel:" in html:
@@ -149,6 +152,8 @@ for lang in LANGS:
         fail(f"sitemap missing {url}")
     lp = Audit()
     lp.feed(page)
+    if [href for href in lp.links if "beds24" in href.lower()] != [verified_beds24_cta]:
+        fail(f"{lang}: Beds24 direct CTA must use verified property 324903")
     for path in lp.links + lp.scripts + lp.styles:
         if path.startswith(("http://", "https://", "mailto:", "#", "/")):
             continue
@@ -356,7 +361,7 @@ if not cs_route or cs_route.get("headers", {}).get("Content-Signal") != "ai-trai
 hosts = sorted({urlparse(x).netloc for x in p.links if x.startswith("http")})
 print(f"ids={len(p.ids)} links={len(p.links)} images={len(p.images)} scripts={len(p.scripts)} styles={len(p.styles)}")
 print("external_hosts=" + ",".join(hosts))
-print("conversion=booking drawer + Booking.com + verified WhatsApp")
+print("conversion=booking drawer + verified Beds24 direct + Booking.com + WhatsApp")
 print("studio=verified kitchen + living area + bedroom + bathroom")
 print("discovery=robots + sitemap + llms + Markdown negotiation + Agent Skills + WebMCP + Link headers")
 print("policies=legal + privacy + cookies")
