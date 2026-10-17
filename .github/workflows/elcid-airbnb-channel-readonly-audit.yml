@@ -3,7 +3,7 @@ name: EL CID Airbnb Channel Readonly Audit
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, audit/elcid-airbnb-sync-20261017]
     paths:
       - '.github/workflows/elcid-airbnb-channel-readonly-audit.yml'
 
