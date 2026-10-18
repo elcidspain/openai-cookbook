@@ -5,7 +5,7 @@ on:
   push:
     paths:
       - "aumara/jobs/aumara-rate-canon-20260922.json"
-      - "aumara/config/rate-canonical.json"
+      # Policy-only edits must not apply monetary prices automatically.
 
 permissions:
   contents: write
