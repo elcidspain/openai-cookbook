@@ -1,0 +1,44 @@
+name: Beds24 Q3 2026 bookings export (read-only, encrypted)
+on:
+  workflow_dispatch:
+  push:
+    branches: [agent/beds24-q3-export-readonly]
+permissions:
+  contents: read
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      BEDS24_REFRESH_TOKEN: ${{ secrets.BEDS24_REFRESH_CREDENTIAL }}
+      OUT_DIR: /tmp/b24out
+    steps:
+      - uses: actions/checkout@v4
+      - name: GET-only Beds24 export
+        run: python aumara-control-tower/scripts/beds24_q3_export_readonly.py
+      - name: Encrypt (repo is public; only the box holds the private key)
+        run: |
+          cd "$OUT_DIR"
+          cat > pub.pem <<'KEY'
+          -----BEGIN PUBLIC KEY-----
+          MIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEA3RZMQxi/c0TWSPSd7smC
+          4aMmrn+bD97lSIjuovWtm9nam2gLQ+knHD1UdnmvFBwC84cICf19ESLZpgFX8R4f
+          uWRNep2yUANvZhpw4jNnjg9h5l8bjucVr+wwQAwrVYVAhyr8fu+5IAL9J9qFBeST
+          bPlzEHyUqltUHJb1k/C5vEPv55GHHv7wWqlEBbSZzpKzYhbRExut2A6oGqQyLxaq
+          sZfDCzmlapL5hJBx/u7kw05FStWNFMxYvTPRIcqadWjrYqqHE3gkyvK+twiSYX5L
+          85ilXsNb5KFo7v/qmQtjOB8EXqce8XcHdvlTyyQFu7VCV+sEjilgPxvF+34QLOXF
+          p4HNpvmhtx88m8LEb88qkWUn8VaTR6z9L0pMWwxPMS1bGAxbZ+uSA+ERm6QECro/
+          MZ/C2cXvp6i8nHXJdDchxXPQfXqbFzHt1Q0Y/08/OK+rFM+JqjRvYn6W56kYPOmy
+          ncS7/B+BYLH/qbMLilIr7r04XsnKfo120rQT4x+CfjbjAgMBAAE=
+          -----END PUBLIC KEY-----
+          KEY
+          openssl rand -hex 32 > k.bin
+          gzip -9 beds24_q3_raw.json
+          openssl enc -aes-256-cbc -pbkdf2 -salt -in beds24_q3_raw.json.gz -out data.enc -pass file:k.bin
+          openssl pkeyutl -encrypt -pubin -inkey pub.pem -pkeyopt rsa_padding_mode:oaep -in k.bin -out k.enc
+          mkdir enc && mv data.enc k.enc enc/ && rm -f k.bin beds24_q3_raw.json.gz
+      - uses: actions/upload-artifact@v4
+        with:
+          name: beds24-q3-encrypted
+          path: /tmp/b24out/enc
+          retention-days: 1
