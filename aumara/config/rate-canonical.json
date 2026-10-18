@@ -22,18 +22,14 @@
   "policy": {
     "channelSource": "Beds24 Daily Prices",
     "baseDailyPriceNumber": 1,
-    "baseMinStay": 2,
-    "oneNightDailyPriceNumber": 2,
-    "oneNightMinStay": 1,
-    "oneNightMaxStay": 1,
-    "oneNightPremiumEur": 20,
-    "oneNightQuotaUnits": {
-      "674465": 2,
-      "674466": 1
+    "baseMinStay": 1,
+    "minimumStayPolicy": {
+      "authorizedOn": "2026-10-18",
+      "nights": 1,
+      "scope": "all four Chalet and both Superior Chalet units, on every connected channel",
+      "preservePublishedMonetaryPrices": true,
+      "supersedesSelectiveOneNightQuota": true
     },
-    "oneNightChannels": [
-      "Direct"
-    ],
     "superiorDeltaEur": 80,
     "weekendDays": [
       "FRI",
@@ -56,6 +52,15 @@
       "6967588"
     ],
     "automaticRevenueApply": false
+  },
+  "supersededOneNightPlan": {
+    "status": "superseded by owner on 2026-10-18; historical record only, not an active price or availability rule",
+    "oneNightDailyPriceNumber": 2,
+    "oneNightMinStay": 1,
+    "oneNightMaxStay": 1,
+    "oneNightPremiumEur": 20,
+    "oneNightQuotaUnits": {"674465": 2, "674466": 1},
+    "oneNightChannels": ["Direct"]
   },
   "periods": [
     {
@@ -120,8 +125,9 @@
     "Superior Chalet nightly price is Chalet nightly price plus EUR 80.",
     "Friday and Saturday use approximately +10%, rounded to whole EUR.",
     "Official Comunitat Valenciana holidays use +20%, except the New Year specialFlat period which remains flat.",
-    "Exact one-night unit quotas require inventory segmentation; Daily Price rows share room-type inventory.",
-    "2026 regional holiday overlay applies 9 Oct, 12 Oct, 8 Dec and 25 Dec; New Year flat still has precedence from 25 Dec."
+    "One-night stays now use the ordinary published base rate for every unit; the prior selective-unit plan is historical only.",
+    "2026 regional holiday overlay applies 9 Oct, 12 Oct, 8 Dec and 25 Dec; New Year flat still has precedence from 25 Dec.",
+    "2026-10-18: property booking page Minimum Number of Nights and Default Number of Nights changed from 2 to 1; room and Daily Price minimums were already 1. No published monetary prices were changed."
   ],
   "holidays2026": [
     "2026-10-09",
