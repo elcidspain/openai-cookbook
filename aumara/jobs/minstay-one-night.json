@@ -1,0 +1,10 @@
+{
+  "requestedAt": "2026-10-18",
+  "mode": "inspect",
+  "propertyId": 324882,
+  "minimumStayNights": 1,
+  "roomTypes": {"674465": 4, "674466": 2},
+  "authorization": "Owner explicitly requested one-night minimum everywhere for all four Chalet and two Superior units, replacing the earlier partial-unit plan.",
+  "preserve": ["nightly monetary prices", "occupancy limits", "inventory", "existing reservations", "payment settings"],
+  "paymentAuthorized": false
+}
