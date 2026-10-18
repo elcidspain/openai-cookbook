@@ -43,10 +43,12 @@ test("quoted party is preserved in both room checkout and all-rooms checkout", a
   assert.equal(link.searchParams.get("checkout"), "2026-10-25");
   assert.equal(link.searchParams.get("numadult"), "3");
   assert.equal(link.searchParams.get("numchild"), "1");
+  assert.equal(link.searchParams.get("br1-674484"), "Book");
   const all = new URL(result.allAvailabilityUrl);
   assert.equal(all.searchParams.get("numadult"), "3");
   assert.equal(all.searchParams.get("numchild"), "1");
   assert.equal(all.searchParams.get("roomid"), null);
+  assert.ok(![...all.searchParams.keys()].some(key => /^br\d+-/.test(key)));
   for (const roomId of ["674485", "674486"]) {
     const room = result.inventory.find((x) => x.roomId === roomId);
     assert.equal(room.bookable, false);
@@ -66,6 +68,7 @@ test("default party is 2 adults and 0 children in checkout links", async (t) => 
   const url = new URL(result.inventory[0].checkoutUrl);
   assert.equal(url.searchParams.get("numadult"), "2");
   assert.equal(url.searchParams.get("numchild"), "0");
+  assert.equal(url.searchParams.get("br1-674484"), "Book");
   assert.equal(new URL(result.allAvailabilityUrl).searchParams.get("numadult"), "2");
 });
 
@@ -79,4 +82,21 @@ test("invalid party is rejected before querying Beds24", async (t) => {
     }),
     /adults must be an integer/
   );
+});
+
+test("each priced room selects only its configured public offer", async (t) => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () => new Response(JSON.stringify(Object.fromEntries(
+    ["674484", "674485", "674486"].map(roomId => [roomId, { roomsavail: 1, price: 123, currency: "EUR" }])
+  )), { status: 200 });
+  t.after(() => { globalThis.fetch = originalFetch; });
+  const result = await quoteElCidAvailability({ checkIn: "2026-10-23", checkOut: "2026-10-24", adults: "2", children: "0" });
+  for (const room of result.inventory) {
+    const url = new URL(room.checkoutUrl);
+    const selectors = [...url.searchParams.keys()].filter(key => /^br\d+-/.test(key));
+    assert.deepEqual(selectors, [`br1-${room.roomId}`]);
+    assert.equal(url.searchParams.get(selectors[0]), "Book");
+    assert.equal(url.searchParams.get("roomid"), room.roomId);
+    assert.equal(url.searchParams.get("numadult"), "2");
+  }
 });

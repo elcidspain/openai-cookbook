@@ -32,7 +32,12 @@ function checkoutUrl(roomId, checkIn, checkOut, adults, children) {
   u.searchParams.set("checkout", checkOut);
   u.searchParams.set("numadult", String(adults));
   u.searchParams.set("numchild", String(children));
-  if (roomId) u.searchParams.set("roomid", roomId);
+  if (roomId) {
+    u.searchParams.set("roomid", roomId);
+    // Enter the configured public offer's guest-details form without the
+    // multiroom selector resetting the quoted party. Confirmation stays manual.
+    u.searchParams.set(`br1-${roomId}`, "Book");
+  }
   u.searchParams.set("referer", "ELCID_AI_AGENT");
   return u.toString();
 }
