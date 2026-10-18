@@ -1,0 +1,83 @@
+name: AUMARA One Night Policy
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - aumara/jobs/minstay-one-night.json
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aumara-property-write-324882
+  cancel-in-progress: false
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    environment: Production
+    env:
+      BEDS24_API_KEY: ${{ secrets.BEDS24_API_KEY }}
+      BEDS24_PROP_KEY: ${{ secrets.BEDS24_PROP_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read current restrictions without changing prices or reservations
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import datetime as dt, json, os, pathlib, time, urllib.request, urllib.error
+          keys={k:(os.environ.get(k) or '').strip() for k in ('BEDS24_API_KEY','BEDS24_PROP_KEY')}
+          if not all(keys.values()): raise SystemExit('BLOCKED: missing existing Production Beds24 credentials')
+          for value in keys.values(): print('::add-mask::'+value)
+          auth={'apiKey':keys['BEDS24_API_KEY'],'propKey':keys['BEDS24_PROP_KEY']}
+          out={'checkedAtUtc':dt.datetime.now(dt.timezone.utc).isoformat(),'mode':'inspect','writes':0,'rooms':{}}
+          def call(endpoint,payload):
+              body=dict(payload,authentication=auth)
+              req=urllib.request.Request('https://api.beds24.com/json/'+endpoint,data=json.dumps(body).encode(),headers={'Content-Type':'application/json','Accept':'application/json'},method='POST')
+              try:
+                  with urllib.request.urlopen(req,timeout=60) as response: data=json.load(response)
+              except Exception as exc: raise RuntimeError(endpoint+': transport or decoding error '+type(exc).__name__) from None
+              time.sleep(4)
+              if isinstance(data,dict) and ('error' in data or 'errorCode' in data):
+                  code=str(data.get('errorCode','unknown'))
+                  raise RuntimeError(endpoint+': Beds24 API errorCode='+ (code if code.isdigit() else 'unknown'))
+              return data
+          try:
+              raw=call('getProperty',{'includeRooms':True,'includeRoomUnits':False,'includeAccountAccess':False})
+              props=raw.get('getProperty',[]) if isinstance(raw,dict) else []
+              if len(props)!=1 or str(props[0].get('propId'))!='324882': raise RuntimeError('Property scope validation failed')
+              prop=props[0]
+              out['property']={k:v for k,v in prop.items() if k in ('propId','name') or any(s in k.lower() for s in ('minstay','minnight','numnight'))}
+              rooms={str(r.get('roomId')):r for r in prop.get('roomTypes',[]) if str(r.get('roomId')) in ('674465','674466')}
+              if set(rooms)!= {'674465','674466'}: raise RuntimeError('Both authorized AUMARA room types must exist')
+              for rid,qty in [('674465',4),('674466',2)]:
+                  room=rooms[rid]
+                  if int(room.get('qty',0))!=qty: raise RuntimeError('Inventory scope validation failed for '+rid)
+                  safe=('roomId','name','qty','minStay','maxStay','dailyPriceCount','maxPeople','maxAdult','airbnbRoomCode','airbnbComEnableInventory','bookingComRoomCode','bookingComRateCode','bookingComEnableInventory')
+                  record={'room':{k:room.get(k) for k in safe}}
+                  setup=call('getDailyPriceSetup',{'roomId':rid})
+                  record['dailyPriceSetup']=setup
+                  start=dt.date.today(); end=start+dt.timedelta(days=10)
+                  record['calendar']=call('getRoomDates',{'roomId':rid,'from':start.strftime('%Y%m%d'),'to':end.strftime('%Y%m%d')})
+                  out['rooms'][rid]=record
+              rates=call('getRates',{})
+              if not isinstance(rates,list): raise RuntimeError('Unexpected rates structure')
+              safe=('rateId','roomId','offerId','name','firstNight','lastNight','minNights','maxNights','roomPriceEnable','1pPriceEnable','2pPriceEnable','channelManagement')
+              out['fixedRates']=[{k:r.get(k) for k in safe} for r in rates if str(r.get('roomId')) in rooms]
+              out['status']='INSPECTED'
+          except Exception as exc:
+              out['status']='BLOCKED';out['error']=str(exc)
+          finally:
+              pathlib.Path('one-night-evidence.json').write_text(json.dumps(out,ensure_ascii=False,indent=2),encoding='utf-8')
+              print(json.dumps(out,ensure_ascii=False,indent=2))
+          if out['status']=='BLOCKED': raise SystemExit(1)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aumara-one-night-inspection
+          path: one-night-evidence.json
+          retention-days: 14
