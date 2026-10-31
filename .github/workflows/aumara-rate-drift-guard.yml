@@ -1,9 +1,9 @@
-name: AUMARA Rate Drift Guard v2
+name: AUMARA Rate Drift Guard v3
 
 on:
   workflow_dispatch:
   workflow_run:
-    workflows: ["AUMARA Canonical Rates v2"]
+    workflows: ["AUMARA Canonical Rates v3"]
     types: [completed]
   schedule:
     - cron: "17 5 * * *"
@@ -31,6 +31,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import datetime as dt, json, os, pathlib, time, urllib.error, urllib.request
+          from aumara.rate_grid import future_expected
           cfg=json.loads(pathlib.Path("aumara/config/rate-canonical.json").read_text(encoding="utf-8"))
           api=(os.environ.get("BEDS24_API_KEY") or "").strip(); prop=(os.environ.get("BEDS24_PROP_KEY") or "").strip()
           if not (api and prop): raise SystemExit("Missing Beds24 credentials")
@@ -113,17 +114,8 @@ jobs:
               while d<=b:
                   yield d; d+=dt.timedelta(days=1)
 
-          expected={"674465":{},"674466":{}}
-          holidays=set((cfg.get("holidays2026") or []) + (cfg.get("holidays2027") or []))
-          delta=int(cfg["policy"]["superiorDeltaEur"])
-          for p in cfg["periods"]:
-              a=dt.date.fromisoformat(p["from"]); b=dt.date.fromisoformat(p["to"]); base=int(p["chalet"]); flat=bool(p.get("flat"))
-              for d in each(a,b):
-                  v=base
-                  if not flat:
-                      if d.isoformat() in holidays: v=int(base*1.20+0.5)
-                      elif d.weekday() in (4,5): v=int(base*1.10+0.5)
-                  k=d.strftime("%Y%m%d"); expected["674465"][k]=v; expected["674466"][k]=v+delta
+          expected=future_expected(cfg)
+          if not all(expected.values()): raise SystemExit("No future approved dates remain")
 
           drift=[]
           for rid in expected:
@@ -153,3 +145,4 @@ jobs:
           print(json.dumps({"status":"PASS" if not drift else "DRIFT","drift":drift[:100]},ensure_ascii=False,indent=2))
           if drift: raise SystemExit(f"AUMARA pricing drift detected: {len(drift)}")
           PY
+

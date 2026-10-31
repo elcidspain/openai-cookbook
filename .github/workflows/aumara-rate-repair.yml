@@ -3,6 +3,7 @@ name: AUMARA Rate Repair
 on:
   workflow_dispatch:
   push:
+    branches: [main]
     paths:
       - "aumara/jobs/aumara-rate-repair.json"
 
@@ -28,6 +29,8 @@ jobs:
         run: |
           python3 - <<'PY'
           import datetime as dt, json, os, pathlib, time, urllib.error, urllib.request
+
+          from aumara.rate_grid import future_expected
 
           cfg=json.loads(pathlib.Path("aumara/config/rate-canonical.json").read_text(encoding="utf-8"))
           active_path=pathlib.Path("aumara/config/revenue-active.json")
@@ -63,32 +66,19 @@ jobs:
           def weekend(base,d):
               return int(base*1.10+0.5) if d.weekday() in (4,5) else int(base)
 
-          expected={"674465":{},"674466":{}}
-          for row in cfg["monthlyBase"]:
-              y,m=int(row["year"]),int(row["month"])
-              start=dt.date(y,m,1)
-              if (y,m)==(2026,10): start=dt.date(2026,10,15)
-              end=month_end(y,m)
-              d=start
-              while d<=end:
-                  k=d.strftime("%Y%m%d")
-                  expected["674465"][k]=weekend(int(row["chalet"]),d)
-                  expected["674466"][k]=weekend(int(row["superior"]),d)
-                  d+=dt.timedelta(days=1)
+          expected=future_expected(cfg)
+          if not all(expected.values()): raise SystemExit("No future approved dates remain")
 
           # An APPLIED revenue overlay supersedes canonical p1 only for its explicit dates.
-          if active.get("status")=="APPLIED":
+          if cfg["policy"].get("automaticRevenueApply") and active.get("status")=="APPLIED":
               for rid,dates in (active.get("prices") or {}).items():
                   if rid not in expected: continue
                   for k,item in (dates or {}).items():
                       if k in expected[rid] and isinstance(item,dict) and item.get("p1") is not None:
                           expected[rid][k]=int(round(float(item["p1"])))
 
-          windows=[
-              (dt.date(2026,10,15),dt.date(2026,12,31)),
-              (dt.date(2027,1,1),dt.date(2027,12,31)),
-              (dt.date(2028,1,1),dt.date(2028,12,31)),
-          ]
+          keys=sorted(expected["674465"])
+          windows=[(dt.datetime.strptime(keys[0],"%Y%m%d").date(),dt.datetime.strptime(keys[-1],"%Y%m%d").date())]
 
           # Read current values and write only mismatched p1 dates.
           for rid in ("674465","674466"):
@@ -167,3 +157,4 @@ jobs:
           git diff --cached --quiet || git commit -m "Record AUMARA rate repair evidence"
           git pull --rebase origin main
           git push origin HEAD:main
+
