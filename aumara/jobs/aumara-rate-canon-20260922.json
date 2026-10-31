@@ -1,12 +1,11 @@
 {
-  "task": "AUMARA pricing v2 live apply",
+  "task": "Apply owner-approved AUMARA rates",
   "propertyId": 324882,
-  "effectiveFrom": "2026-09-25",
+  "effectiveFrom": "2026-11-01",
   "horizonThrough": "2027-12-31",
   "source": "aumara/config/rate-canonical.json",
-  "requestedBy": "Ilya",
-  "requestedAt": "2026-09-26",
-  "revision": 4,
-  "verify": "full p1 read-back + legacy flat rates disabled",
-  "reason": "Reapply canonical rates after 2026 holiday overlay and workflow trigger fix"
+  "revision": 5,
+  "gridSha256": "172572c2244e45c3c0d08cb863255e4aa107907b698ea96d70399fecedb2a51c",
+  "authorization": "Owner explicitly approved publication in the current conversation",
+  "verify": "Full p1 read-back, legacy override protection, source-channel audit and public quotes"
 }

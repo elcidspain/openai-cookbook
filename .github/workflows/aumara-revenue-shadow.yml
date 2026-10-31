@@ -32,6 +32,8 @@ jobs:
           import json, math, os, pathlib, time
           import urllib.error, urllib.request
 
+          from aumara.rate_grid import build_expected
+
           root=pathlib.Path(".")
           canon=json.loads((root/"aumara/config/rate-canonical.json").read_text(encoding="utf-8"))
           policy=json.loads((root/"aumara/config/revenue-policy.json").read_text(encoding="utf-8"))
@@ -73,20 +75,15 @@ jobs:
           canon_end=dt.date.fromisoformat(canon["horizonThrough"])
           end=min(end,canon_end)
 
-          base_by_month={}
-          for row in canon["monthlyBase"]:
-              base_by_month[(int(row["year"]),int(row["month"]))]=row
+          approved_grid=build_expected(canon)
 
           def round_eur(x):
               return int(math.floor(float(x)+0.5))
 
           def canonical_price(room_key,d):
-              row=base_by_month.get((d.year,d.month))
-              if not row: return None
-              base=int(row["chalet"] if room_key=="chalet" else row["superior"])
-              if d.strftime("%a").upper()[:3] in set(canon["policy"]["weekendDays"]):
-                  base=round_eur(base*(1+float(canon["policy"]["weekendUpliftPct"])/100))
-              return base
+              category="chalet" if room_key=="chalet" else "superiorChalet"
+              rid=str(canon["rooms"][category]["roomId"])
+              return approved_grid[rid].get(d.strftime("%Y%m%d"))
 
           def choose_rule(lead,occ_pct):
               for rule in policy["rules"]["adjustments"]:
@@ -199,3 +196,4 @@ jobs:
           git diff --cached --quiet || git commit -m "Record AUMARA revenue shadow recommendations"
           git pull --rebase origin main
           git push origin HEAD:main
+

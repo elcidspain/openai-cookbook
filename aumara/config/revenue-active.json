@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "status": "APPLIED",
+  "status": "SUPERSEDED",
   "sourceShadowGeneratedAtUtc": "2026-09-23T09:23:06.977054+00:00",
   "window": {
     "from": "2026-10-15",
@@ -449,5 +449,7 @@
       }
     }
   },
-  "guarded": []
+  "guarded": [],
+  "supersededBy": "owner-approved-rates-2026-11",
+  "supersededReason": "Explicit owner-approved canonical prices replace the historical applied overlay."
 }

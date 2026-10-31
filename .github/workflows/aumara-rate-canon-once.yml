@@ -1,11 +1,22 @@
-name: AUMARA Canonical Rates v2
+name: AUMARA Canonical Rates v3
 
 on:
   workflow_dispatch:
   push:
+    branches: [main]
     paths:
       - "aumara/jobs/aumara-rate-canon-20260922.json"
       # Policy-only edits must not apply monetary prices automatically.
+
+  pull_request:
+    paths:
+      - "aumara/config/rate-canonical.json"
+      - "aumara/rate_grid.py"
+      - "aumara/tests/test_rate_grid.py"
+      - ".github/workflows/aumara-rate-canon-once.yml"
+      - ".github/workflows/aumara-rate-drift-guard.yml"
+      - ".github/workflows/aumara-rate-repair.yml"
+      - ".github/workflows/aumara-revenue-shadow.yml"
 
 permissions:
   contents: write
@@ -15,7 +26,16 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate owner-approved rates
+        run: python3 -m unittest discover -s aumara/tests -v
+
   apply-rates:
+    if: github.event_name != 'pull_request'
+    needs: validate
     runs-on: ubuntu-latest
     timeout-minutes: 20
     environment: Production
@@ -24,11 +44,13 @@ jobs:
       BEDS24_PROP_KEY: ${{ secrets.BEDS24_PROP_KEY }}
     steps:
       - uses: actions/checkout@v4
-      - name: Apply AUMARA pricing v2 and verify
+      - name: Apply approved AUMARA pricing and verify
         shell: bash
         run: |
           python3 - <<'PY'
           import datetime as dt, json, os, pathlib, time, urllib.error, urllib.request
+
+          from aumara.rate_grid import build_expected, future_expected, daily_price_setup
 
           cfg=json.loads(pathlib.Path("aumara/config/rate-canonical.json").read_text(encoding="utf-8"))
           api=(os.environ.get("BEDS24_API_KEY") or "").strip()
@@ -37,8 +59,6 @@ jobs:
           print(f"::add-mask::{api}"); print(f"::add-mask::{prop}")
           auth={"authentication":{"apiKey":api,"propKey":prop}}
           rooms={"674465":"Chalet","674466":"Superior Chalet"}
-          delta=int(cfg["policy"]["superiorDeltaEur"])
-          holidays=set((cfg.get("holidays2026") or []) + (cfg.get("holidays2027") or []))
           legacy=[str(x) for x in cfg["policy"].get("legacyFlatRateIds",[])]
           evidence={"status":"RUNNING","generatedAtUtc":dt.datetime.now(dt.timezone.utc).isoformat(),
                     "configSchema":cfg.get("schemaVersion"),"before":{},"writes":{},"after":{},
@@ -60,7 +80,10 @@ jobs:
               try: data=json.loads(raw.decode("utf-8","replace")) if raw else {}
               except: data={"raw":raw.decode("utf-8","replace")[:1000]}
               time.sleep(2.2)
-              if not 200 <= st < 300: raise RuntimeError(f"{path} HTTP {st}: {data}")
+              if not 200 <= st < 300: raise RuntimeError(f"{path} HTTP {st}")
+              items=[data] if isinstance(data,dict) else data if isinstance(data,list) else []
+              errors=[item for item in items if isinstance(item,dict) and ("error" in item or "errorCode" in item)]
+              if errors: raise RuntimeError(f"{path} API error code {errors[0].get('errorCode','unknown')}")
               return data
 
           def dates(a,b):
@@ -69,26 +92,22 @@ jobs:
                   yield d
                   d+=dt.timedelta(days=1)
 
-          expected={"674465":{},"674466":{}}
-          for p in cfg["periods"]:
-              a=dt.date.fromisoformat(p["from"]); b=dt.date.fromisoformat(p["to"])
-              base=int(p["chalet"]); flat=bool(p.get("flat"))
-              for d in dates(a,b):
-                  chalet=base
-                  if not flat:
-                      if d.isoformat() in holidays:
-                          chalet=int(base*1.20+0.5)
-                      elif d.weekday() in (4,5):
-                          chalet=int(base*1.10+0.5)
-                  k=d.strftime("%Y%m%d")
-                  expected["674465"][k]=chalet
-                  expected["674466"][k]=chalet+delta
+          approved=build_expected(cfg)
+          job=json.loads(pathlib.Path("aumara/jobs/aumara-rate-canon-20260922.json").read_text())
+          if job.get("gridSha256") != cfg["approval"]["gridSha256"]:
+              raise SystemExit("Apply request does not match the owner-approved grid")
+          expected=future_expected(cfg)
+          if not all(expected.values()):
+              raise SystemExit("No future approved dates remain")
+          evidence["approvedGridSha256"]=cfg["approval"]["gridSha256"]
 
           # Safety: keep existing one-night Daily Price row as the channel source.
           for rid,name in rooms.items():
               setup=call("getDailyPriceSetup",{"roomId":rid})
               evidence["dailyPriceSetup"][rid]=setup
-              row=setup[0]["dailyPrices"][0]
+              row=daily_price_setup(setup,rid)
+              if str(row.get("linkRoomId") or "0") != "0":
+                  raise SystemExit(f"Daily Price 1 room {rid} is linked; direct write would be ignored")
               if str(row.get("minStay"))!="1":
                   evidence["mismatches"].append({"roomId":rid,"kind":"minStay","expected":"1","actual":row.get("minStay")})
               for key in ("directEnable","bookingapiEnable","airbnbxmlEnable"):
@@ -104,6 +123,11 @@ jobs:
               keys=sorted(expected[rid]); a=keys[0]; b=keys[-1]
               live=call("getRoomDates",{"roomId":rid,"from":a,"to":b})
               evidence["before"][rid]={k:(live.get(k) or {}).get("p1") for k in keys}
+
+          # Persist the recovery values before the first price mutation.
+          backup=pathlib.Path("aumara/evidence/aumara-rate-canon-v2.json")
+          backup.parent.mkdir(parents=True,exist_ok=True)
+          backup.write_text(json.dumps(evidence,indent=2,ensure_ascii=False)+"\n",encoding="utf-8")
 
           # Write only the Daily Price p1 grid.
           for rid in rooms:
@@ -140,7 +164,7 @@ jobs:
               if str(got)!="0":
                   evidence["mismatches"].append({"rateId":rate_id,"expected":"roomPriceEnable=0","actual":got})
 
-          sample_dates=["20260926","20261002","20261224","20261225","20270101","20270109","20270319","20270402","20270604","20270917","20271105","20271203"]
+          sample_dates=["20261102","20261106","20261225","20270101","20270319","20270326","20270401","20270802","20270903","20271105","20271225","20271231"]
           for k in sample_dates:
               evidence["samples"][k]={rid:evidence["after"][rid].get(k) for rid in rooms}
 
@@ -163,3 +187,4 @@ jobs:
           git diff --cached --quiet || git commit -m "Record AUMARA pricing v2 evidence"
           git pull --rebase origin main
           git push origin HEAD:main
+
