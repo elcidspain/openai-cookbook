@@ -65,6 +65,22 @@
       }
     },
     {
+      "src": "^/staff206/?$",
+      "dest": "/staff206/index.html",
+      "headers": {
+        "X-Robots-Tag": "noindex, nofollow",
+        "Cache-Control": "no-store"
+      }
+    },
+    {
+      "src": "^/staff206/(index\\.html|push\\.js|sw\\.js|manifest\\.webmanifest|icon\\.svg)$",
+      "dest": "/staff206/$1",
+      "headers": {
+        "X-Robots-Tag": "noindex, nofollow",
+        "Cache-Control": "no-cache"
+      }
+    },
+    {
       "src": "^/(.*)/$",
       "headers": {
         "Location": "/$1"
