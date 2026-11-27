@@ -18,5 +18,6 @@ await rm(publicDir, { recursive: true, force: true });
 await mkdir(publicDir, { recursive: true });
 await cp(resolve(root, "elcid-site"), resolve(publicDir, "elcid-site"), { recursive: true });
 await cp(resolve(root, "staff"), resolve(publicDir, "staff"), { recursive: true });
+await cp(resolve(root, "staff206"), resolve(publicDir, "staff206"), { recursive: true });
 
 console.log("Generated EL CID OAuth key outside /api and preserved static output in public/.");
