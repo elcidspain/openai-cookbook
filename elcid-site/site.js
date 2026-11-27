@@ -166,3 +166,113 @@ document.documentElement.classList.add('reveal-ready');const observer=new Inters
     }
   });
 })();
+
+
+// EL CID public storefront only. No vendor starts before specific consent.
+(() => {
+  'use strict';
+  const GA = ''; // Build-time configuration: EL CID's verified stream only.
+  const HOSTS = new Set(['elcidspain.com','www.elcidspain.com']);
+  const PUBLIC = new Set(['/','/en','/de','/fr','/nl','/ru','/it']);
+  const page = location.pathname.replace(/\/+$/,'') || '/';
+  if (!HOSTS.has(location.hostname) || !PUBLIC.has(page) || !GA) return;
+  const KEY = 'elcid-analytics-consent-v1', MAX_AGE = 180 * 86400000;
+  const allowedParams = new Set(['utm_source','utm_medium','utm_campaign','utm_content','utm_term']);
+  const params = new URLSearchParams(location.search);
+  const knownAnchor = /^#(?:top|main|intro|stay|restaurant|place|events|contact|aumara|tennis|pool|availability)$/;
+  if ([...params.keys()].some(k=>!allowedParams.has(k)) || (location.hash && !knownAnchor.test(location.hash))) return;
+  const campaign = new URLSearchParams();
+  for (const k of allowedParams) {
+    const v = params.get(k);
+    if (v && /^[a-z0-9_-]{1,80}$/i.test(v)) campaign.set(k,v);
+  }
+  const pageLocation = location.origin + page + (campaign.size ? '?' + campaign : '');
+  let referrer = '';
+  try { if (document.referrer) referrer = new URL(document.referrer).origin + '/'; } catch {}
+  const denyAds = {ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',personalization_storage:'denied'};
+  let accepted = false, started = false;
+  function preference() {
+    try {
+      const c = JSON.parse(localStorage.getItem(KEY) || 'null');
+      return c && typeof c.at==='number' && c.at<=Date.now() && Date.now()-c.at<MAX_AGE && typeof c.analytics==='boolean' ? c : null;
+    } catch { return null; }
+  }
+  function clearCookies() {
+    for (const pair of document.cookie.split(';')) {
+      const name = pair.split('=')[0].trim();
+      if (!/^_ga(?:_[A-Z0-9]+)?$/.test(name)) continue;
+      for (const domain of ['', '; Domain='+location.hostname,'; Domain=.elcidspain.com'])
+        document.cookie = name+'=; Max-Age=0; Path=/; Secure; SameSite=Lax'+domain;
+    }
+  }
+  function send(name) {
+    if (!accepted || !['booking_open','availability_search','booking_checkout_click','restaurant_contact_click','aumara_referral_click'].includes(name)) return;
+    if (typeof window.gtag==='function') window.gtag('event',name,{send_to:GA,page_location:pageLocation,page_referrer:referrer});
+  }
+  function enable() {
+    accepted = true;
+    if (started) return;
+    started = true;
+    window['ga-disable-'+GA] = false;
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function(){ window.dataLayer.push(arguments); };
+    window.gtag('consent','default',{...denyAds,analytics_storage:'denied',functionality_storage:'granted',security_storage:'granted'});
+    window.gtag('consent','update',{...denyAds,analytics_storage:'granted'});
+    window.gtag('set','ads_data_redaction',true);
+    window.gtag('set','url_passthrough',false);
+    window.gtag('js',new Date());
+    window.gtag('config',GA,{send_page_view:false,allow_google_signals:false,allow_ad_personalization_signals:false,cookie_expires:15552000,cookie_update:false,page_location:pageLocation,page_referrer:referrer});
+    const tag = document.createElement('script');
+    tag.async = true;tag.src = 'https://www.googletagmanager.com/gtag/js?id='+GA;
+    document.head.append(tag);
+    window.gtag('event','page_view',{send_to:GA,page_location:pageLocation,page_referrer:referrer});
+  }
+  function disable() {
+    accepted = false;window['ga-disable-'+GA] = true;clearCookies();
+    // Reload only if a vendor was running. A revoked tag must not stay active.
+    if(started){window.gtag=function(){};location.reload();}
+  }
+  const copy = {
+    es:['Preferencias de cookies','Usamos almacenamiento esencial para el sitio. Google Analytics mide las visitas y los clics de reserva solo con tu consentimiento. No se activa publicidad.','Aceptar analítica','Rechazar','Configurar cookies','Política de cookies'],
+    en:['Cookie preferences','Essential storage keeps the site working. Google Analytics measures public visits and booking clicks only with your consent. Advertising is disabled.','Accept analytics','Reject','Cookie settings','Cookie policy'],
+    ru:['Настройки cookies','Обязательное хранение обеспечивает работу сайта. Google Analytics измеряет посещения и переходы к бронированию только с вашего согласия. Реклама отключена.','Принять аналитику','Отклонить','Настроить cookies','Политика cookies'],
+    de:['Cookie-Einstellungen','Google Analytics misst Besuche und Buchungsklicks nur mit Ihrer Einwilligung. Werbung ist deaktiviert.','Analyse akzeptieren','Ablehnen','Cookie-Einstellungen','Cookie-Richtlinie'],
+    fr:['Préférences de cookies','Google Analytics mesure les visites et les clics de réservation uniquement avec votre accord. La publicité est désactivée.','Accepter les statistiques','Refuser','Paramètres des cookies','Politique de cookies'],
+    nl:['Cookievoorkeuren','Google Analytics meet bezoeken en boekingsklikken alleen met uw toestemming. Advertenties staan uit.','Analytics accepteren','Weigeren','Cookie-instellingen','Cookiebeleid'],
+    it:['Preferenze cookie','Google Analytics misura visite e clic di prenotazione solo con il tuo consenso. La pubblicità è disattivata.','Accetta analisi','Rifiuta','Impostazioni cookie','Informativa cookie']
+  };
+  const t = copy[(document.documentElement.lang || 'es').split('-')[0]] || copy.en;
+  const panel = document.createElement('section'); panel.className='elcid-consent';panel.setAttribute('aria-label',t[0]);
+  const title = document.createElement('strong');title.textContent=t[0];
+  const msg = document.createElement('p');msg.textContent=t[1];
+  const controls = document.createElement('div');controls.className='elcid-consent-actions';
+  const button = text=>{const el=document.createElement('button');el.type='button';el.textContent=text;return el;};
+  const yes=button(t[2]),no=button(t[3]),settings=button(t[4]),configure=button(t[4]);
+  const policy=document.createElement('a');policy.href='/cookie-policy';policy.textContent=t[5];
+  const footer=document.querySelector('footer nav') || document.body;
+  settings.className='elcid-consent-settings';footer.append(settings);
+  function openSettings() {panel.hidden=false;title.tabIndex=-1;title.focus();}
+  settings.addEventListener('click',openSettings);
+  configure.addEventListener('click',()=>{configure.hidden=true;msg.textContent=t[1];yes.focus();});
+  function choose(analytics) {
+    try {localStorage.setItem(KEY,JSON.stringify({analytics,at:Date.now()}));}
+    catch {if(analytics)return;}
+    panel.hidden=true;configure.hidden=false;
+    if(analytics)enable();else disable();
+  }
+  yes.addEventListener('click',()=>choose(true));no.addEventListener('click',()=>choose(false));
+  controls.append(yes,no,configure,policy);panel.append(title,msg,controls);document.body.append(panel);
+  const stored=preference();panel.hidden=!!stored;
+  if(stored?.analytics)enable();else disable();
+  window.addEventListener('storage',e=>{if(e.key===KEY||e.key===null){if(preference()?.analytics)enable();else disable();}});
+  document.addEventListener('click',e=>{
+    if(e.target?.closest?.('[data-open-booking]'))send('booking_open');
+    const a=e.target?.closest?.('a[href]');if(!a)return;
+    let u;try{u=new URL(a.href,location.href);}catch{return;}
+    if(u.protocol!=='https:')return;
+    if(u.hostname==='beds24.com'||u.hostname==='www.beds24.com'||u.hostname==='www.booking.com')send('booking_checkout_click');
+    else if(['aumara.me','www.aumara.me'].includes(u.hostname))send('aumara_referral_click');
+    else if(u.hostname==='wa.me'&&a.closest('#restaurant'))send('restaurant_contact_click');
+  },true);
+  document.addEventListener('submit',e=>{if(e.target?.classList?.contains('elcid-live-search'))send('availability_search');},true);
+})();

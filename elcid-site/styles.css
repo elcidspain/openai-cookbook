@@ -63,3 +63,6 @@
 .elcid-quote-link{display:inline-block;margin-top:4px;color:var(--green2);font-weight:800;text-decoration:underline;text-underline-offset:3px}
 .elcid-live-result small{display:block;color:var(--ink);opacity:.8}
 @media(max-width:400px){.elcid-live-search{grid-template-columns:1fr;padding:12px}.elcid-live-field{grid-column:1/-1}}
+
+/* Optional analytics consent, equal actions and no modal overlay. */
+.elcid-consent{position:fixed;left:12px;right:12px;bottom:12px;max-width:560px;margin-left:auto;z-index:90;background:#fffdf8;color:#1c2b22;border:1px solid #53675a;box-shadow:0 6px 25px #0002;border-radius:12px;padding:14px;font:14px/1.45 system-ui}.elcid-consent[hidden]{display:none!important}.elcid-consent p{margin:6px 0 10px}.elcid-consent-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.elcid-consent button,.elcid-consent-settings{font:inherit;background:#fffdf8;color:#17452b;border:1px solid #53675a;border-radius:6px;padding:8px 10px;cursor:pointer}.elcid-consent a{text-decoration:underline}.drawer-open .elcid-consent{display:none}

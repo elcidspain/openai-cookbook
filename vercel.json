@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "node scripts/generate-elcid-oauth-key.mjs",
+  "buildCommand": "node scripts/generate-elcid-oauth-key.mjs && node scripts/configure-elcid-analytics.mjs",
   "routes": [
     {
       "src": "^/.*$",
@@ -179,6 +179,10 @@
         "X-Robots-Tag": "noindex"
       },
       "dest": "/elcid-site/$1"
+    },
+    {
+      "src": "^/cookie-policy$",
+      "dest": "/elcid-site/cookies.html"
     },
     {
       "src": "^/(styles\\.css|site\\.js|official-logo\\.svg|legal\\.html|privacy\\.html|cookies\\.html|robots\\.txt|sitemap\\.xml|llms\\.txt|auth\\.md|88ac8299a121242d68bce3a6dc125683\\.txt)$",
