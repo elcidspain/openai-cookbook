@@ -27,7 +27,13 @@ test('accept starts only verified GA; advertising denied, sanitized event',()=>{
  const b=browser('https://www.elcidspain.com/en?utm_source=threads');b.choose('Accept analytics');
  assert.equal(b.scripts.length,1);assert.ok(b.scripts[0].endsWith('G-ELCIDTEST'));
  const u=b.events().find(e=>e[0]==='consent'&&e[1]==='update');assert.equal(u[2].ad_storage,'denied');
- const p=b.events().find(e=>e[0]==='event'&&e[1]==='page_view');assert.equal(p[2].page_referrer,'https://example.org/');assert.ok(p[2].page_location.includes('utm_source=threads'));
+ const configs=b.events().filter(e=>e[0]==='config');
+ assert.equal(configs.length,1);
+ assert.equal(configs[0][1],'G-ELCIDTEST');
+ assert.equal(configs[0][2].send_page_view,true);
+ assert.equal(configs[0][2].page_referrer,'https://example.org/');
+ assert.ok(configs[0][2].page_location.includes('utm_source=threads'));
+ assert.equal(b.events().some(e=>e[0]==='event'&&e[1]==='page_view'),false);
  assert.ok(!JSON.stringify(b.events()).includes('token=secret'));
 });
 test('private staff routes and unrecognized query never mount analytics',()=>{

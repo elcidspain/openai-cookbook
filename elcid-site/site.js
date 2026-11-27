@@ -224,11 +224,10 @@ document.documentElement.classList.add('reveal-ready');const observer=new Inters
     window.gtag('set','ads_data_redaction',true);
     window.gtag('set','url_passthrough',false);
     window.gtag('js',new Date());
-    window.gtag('config',GA,{send_page_view:false,allow_google_signals:false,allow_ad_personalization_signals:false,cookie_expires:15552000,cookie_update:false,page_location:pageLocation,page_referrer:referrer});
+    window.gtag('config',GA,{send_page_view:true,allow_google_signals:false,allow_ad_personalization_signals:false,cookie_expires:15552000,cookie_update:false,page_location:pageLocation,page_referrer:referrer});
     const tag = document.createElement('script');
     tag.async = true;tag.src = 'https://www.googletagmanager.com/gtag/js?id='+GA;
     document.head.append(tag);
-    window.gtag('event','page_view',{send_to:GA,page_location:pageLocation,page_referrer:referrer});
   }
   function disable() {
     accepted = false;window['ga-disable-'+GA] = true;clearCookies();
