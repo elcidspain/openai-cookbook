@@ -67,6 +67,17 @@
         <section id="sec-home" class="section">
           <div class="section-head"><h2>Сегодня</h2><span class="syncnote">локальный срез + фон</span></div>
           <div id="homeBody"></div>
+          <div id="bookingPushPanel" class="panel" style="margin-top:16px;scroll-margin-top:12px">
+            <div class="section-head"><h2>Новые бронирования</h2><button class="btn sm alt" type="button" id="bookingPushRefresh">Обновить</button></div>
+            <p class="muted small" id="bookingPushStatus" role="status">Подключение Staff…</p>
+            <div class="toolbar">
+              <button class="btn sm" type="button" id="bookingPushEnable" disabled>Включить push</button>
+              <button class="btn sm alt" type="button" id="bookingPushTest" disabled>Тест</button>
+              <button class="btn sm outline" type="button" id="bookingPushDisable" disabled>Выключить</button>
+            </div>
+            <div id="bookingPushList" aria-live="polite"></div>
+            <p class="small muted">События Beds24 с момента подключения, не полный календарь и не подтверждение оплаты.</p>
+          </div>
         </section>
 
         <section id="sec-team" class="section hidden">
@@ -112,15 +123,16 @@
     </div>
   </div>
 
-  <script src="/staff/app.js?v=231" defer></script>
+  <script src="/staff/app.js?v=233" defer></script>
   <script src="/staff/bootfix231.js?v=231" defer></script>
   <script src="/staff/patch.js?v=231" defer></script>
   <script src="/staff/legacy.js?v=231" defer></script>
   <script src="/staff/planner23-guard.js?v=232" defer></script>
   <script src="/staff/planner23.js?v=232" defer></script>
   <script src="/staff/planner23-unguard.js?v=232" defer></script>
+  <script src="/staff/booking-push.js?v=233" defer></script>
   <script>
-    if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('/staff/sw.js?v=232').catch(()=>{}));}
+    if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('/staff/sw.js?v=233').catch(()=>{}));}
   </script>
 </body>
 </html>
