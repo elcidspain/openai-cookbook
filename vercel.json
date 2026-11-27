@@ -50,6 +50,21 @@
       }
     },
     {
+      "src": "^/staff/?$",
+      "dest": "/staff/index.html",
+      "headers": {
+        "X-Robots-Tag": "noindex, nofollow"
+      }
+    },
+    {
+      "src": "^/staff/(index\\.html|styles\\.css|app\\.js|bootfix231\\.js|patch\\.js|legacy\\.js|planner23-guard\\.js|planner23\\.js|planner23-unguard\\.js|booking-push\\.js|sw\\.js|manifest\\.webmanifest|icon\\.svg|fix\\.html)$",
+      "dest": "/staff/$1",
+      "headers": {
+        "X-Robots-Tag": "noindex, nofollow",
+        "Cache-Control": "no-cache"
+      }
+    },
+    {
       "src": "^/(.*)/$",
       "headers": {
         "Location": "/$1"
@@ -162,13 +177,6 @@
       "status": 308,
       "headers": {
         "Location": "https://www.aumara.me/"
-      }
-    },
-    {
-      "src": "^/staff/?$",
-      "dest": "/staff/index.html",
-      "headers": {
-        "X-Robots-Tag": "noindex, nofollow"
       }
     },
     {
