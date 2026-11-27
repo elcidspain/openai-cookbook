@@ -60,7 +60,7 @@
       snapshot=data;
       reg=await getRegistration();if(g!==generation||!signedIn())return;
       sub=reg?await reg.pushManager.getSubscription():null;if(g!==generation||!signedIn())return;
-      if(sub&&snapshot.subscribed&&NotificationSafe()==="granted"&&sameKey(sub,snapshot.publicKey)&&Date.now()-renewed>3600000){
+      if(sub&&(snapshot.subscribed||get(pref)===true)&&NotificationSafe()==="granted"&&sameKey(sub,snapshot.publicKey)&&Date.now()-renewed>3600000){
         snapshot=await call("subscribe",{subscription:sub.toJSON()});renewed=Date.now();
       }else if(snapshot.subscribed&&(!sub||NotificationSafe()!=="granted"||!sameKey(sub,snapshot.publicKey))){
         snapshot=await call("unsubscribe");
