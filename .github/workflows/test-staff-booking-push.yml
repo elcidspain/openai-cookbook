@@ -1,0 +1,54 @@
+name: Test AUMARA Staff booking push
+on:
+  pull_request:
+    paths:
+      - 'staff/**'
+      - 'supabase/functions/aumara-staff-booking-push/**'
+      - '.github/workflows/test-staff-booking-push.yml'
+      - '.github/workflows/deploy-staff-nominalia.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: local_test_only
+          POSTGRES_DB: staff_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d staff_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Validate frontend and booking event parser
+        run: |
+          node --check staff/app.js
+          node --check staff/booking-push.js
+          node --check staff/sw.js
+          node --test staff/tests/booking-push-sw.test.cjs
+          node --experimental-strip-types --test supabase/functions/aumara-staff-booking-push/booking.test.ts
+      - name: Type-check Edge Function
+        run: deno check supabase/functions/aumara-staff-booking-push/index.ts
+      - name: Validate migration, deduplication, delivery leases and privileges
+        env:
+          PGPASSWORD: local_test_only
+          PGHOST: 127.0.0.1
+          PGUSER: postgres
+          PGDATABASE: staff_test
+        run: |
+          psql -v ON_ERROR_STOP=1 -c 'create role anon; create role authenticated; create role service_role;'
+          psql -v ON_ERROR_STOP=1 -f supabase/functions/aumara-staff-booking-push/schema.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/functions/aumara-staff-booking-push/schema.test.sql
