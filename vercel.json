@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "node scripts/generate-elcid-oauth-key.mjs && node scripts/configure-elcid-analytics.mjs",
+  "buildCommand": "node scripts/configure-elcid-analytics.mjs && node scripts/generate-elcid-oauth-key.mjs",
   "routes": [
     {
       "src": "^/.*$",
