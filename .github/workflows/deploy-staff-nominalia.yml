@@ -54,14 +54,17 @@ jobs:
           node --check staff/planner23.js
           node --check staff/planner23-unguard.js
           node --check staff/sw.js
+          node --check staff/booking-push.js
+          node --test staff/tests/booking-push-sw.test.cjs
           grep -Fq 'AUMARA Staff' staff/index.html
           grep -Fq 'PWA 2.3.1' staff/index.html
           grep -Fq '/staff/bootfix231.js?v=231' staff/index.html
           grep -Fq '/staff/planner23-guard.js?v=232' staff/index.html
           grep -Fq '/staff/planner23.js?v=232' staff/index.html
           grep -Fq '/staff/planner23-unguard.js?v=232' staff/index.html
-          grep -Fq '/staff/sw.js?v=232' staff/index.html
-          grep -Fq "aumara-staff-pwa-v2.3.1-hotfix2" staff/sw.js
+          grep -Fq '/staff/sw.js?v=233' staff/index.html
+          grep -Fq '/staff/booking-push.js?v=233' staff/index.html
+          grep -Fq "aumara-staff-pwa-v2.3.1-booking-push3" staff/sw.js
           grep -Fq '/staff/bootfix231.js?v=231' staff/sw.js
           grep -Fq '/staff/planner23-guard.js?v=232' staff/sw.js
           grep -Fq '/staff/planner23.js?v=232' staff/sw.js
@@ -169,7 +172,7 @@ jobs:
           grep -Fq '/staff/planner23-guard.js?v=232' /tmp/staff.html
           grep -Fq '/staff/planner23.js?v=232' /tmp/staff.html
           grep -Fq '/staff/planner23-unguard.js?v=232' /tmp/staff.html
-          grep -Fq '/staff/sw.js?v=232' /tmp/staff.html
+          grep -Fq '/staff/sw.js?v=233' /tmp/staff.html
           grep -Fq 'aumara-staff-api' /tmp/app.js
           grep -Fq 'BOOT_TIMEOUT_MS=12000' /tmp/bootfix231.js
           grep -Fq 'saveReview2' /tmp/patch.js
@@ -180,7 +183,7 @@ jobs:
           grep -Fq 'pointerdown' /tmp/planner23.js
           grep -Fq "rpc('createShiftsBatch'" /tmp/planner23.js
           grep -Fq "rpc('submitRequest'" /tmp/planner23.js
-          grep -Fq "aumara-staff-pwa-v2.3.1-hotfix2" /tmp/sw.js
+          grep -Fq "aumara-staff-pwa-v2.3.1-booking-push3" /tmp/sw.js
           grep -Fq "cache:'no-store'" /tmp/sw.js
           grep -Fq "startsWith('aumara-staff-pwa-')" /tmp/fix.html
           grep -Fq "location.replace('/staff/?fresh=232&t='" /tmp/fix.html
