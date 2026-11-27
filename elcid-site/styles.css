@@ -71,3 +71,6 @@
 footer:has(.elcid-consent-settings){padding-bottom:calc(112px + env(safe-area-inset-bottom,0px))}
 .elcid-consent-settings{scroll-margin-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
 .elcid-consent{bottom:calc(82px + env(safe-area-inset-bottom,0px));max-height:55vh;overflow-y:auto}
+
+/* Native hidden state must override the booking nudge's explicit grid display. */
+#bookingNudge[hidden],body:has(.elcid-consent:not([hidden])) #bookingNudge{display:none!important}
